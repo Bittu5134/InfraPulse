@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}User Registration - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold justify-center mb-2">
+                <i class="fa-solid fa-user-plus text-primary"></i> Create User Account
+            </h2>
+            <p class="text-xs text-center text-base-content/70 mb-6">
+                Register to easily manage tickets and receive resolution updates.
+            </p>
+
+            {% if error %}
+            <div class="alert alert-error text-sm mb-4">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/user/register" method="POST" class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
+                    <input type="text" name="name" placeholder="Rahul Sharma" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Email Address *</span></label>
+                    <input type="email" name="email" placeholder="rahul@example.com" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Phone Number</span></label>
+                    <input type="tel" name="phone" placeholder="+91 9876543210" class="input input-bordered w-full" />
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Password *</span></label>
+                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control mt-6">
+                    <button type="submit" class="btn btn-primary w-full gap-2">
+                        <i class="fa-solid fa-user-check"></i> Register Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="/user/login" class="text-xs link link-hover">Already have an account? Sign in</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

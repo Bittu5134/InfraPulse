@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Portal Login - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold justify-center mb-2">
+                <i class="fa-solid fa-lock text-secondary"></i> Maintenance Staff Portal
+            </h2>
+            <p class="text-xs text-center text-base-content/70 mb-6">
+                Protected area for maintenance department team members.
+            </p>
+
+            {% if error %}
+            <div class="alert alert-error text-sm mb-4">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/staff/login" method="POST" class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Staff Email Address</span></label>
+                    <input type="email" name="email" placeholder="staff@infrapulse.org" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Password</span></label>
+                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control mt-6">
+                    <button type="submit" class="btn btn-secondary w-full gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login to Staff Portal
+                    </button>
+                </div>
+            </form>
+
+            <div class="alert alert-info text-xs mt-6">
+                <i class="fa-solid fa-info-circle"></i>
+                <span>Default Demo Staff Accounts (Password: <code>staff123</code>):<br/>
+                • <code>structural@infrapulse.org</code> (Structural Domain)<br/>
+                • <code>functional@infrapulse.org</code> (Functional Domain)<br/>
+                • <code>performance@infrapulse.org</code> (Performance Domain)</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

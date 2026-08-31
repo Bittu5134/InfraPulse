@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}My Tickets - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-ticket text-primary"></i> My Submitted Tickets
+            </h2>
+            <p class="text-xs text-base-content/70">
+                Track resolution status and assigned maintenance staff for your tickets.
+            </p>
+        </div>
+        <a href="/user/submit" class="btn btn-primary btn-sm gap-2">
+            <i class="fa-solid fa-plus-circle"></i> Create New Ticket
+        </a>
+    </div>
+
+    {% if not complaints %}
+    <div class="card bg-base-100 shadow-md border border-base-300 p-12 text-center">
+        <i class="fa-solid fa-clipboard-list text-5xl text-base-content/30 mb-4"></i>
+        <h3 class="text-xl font-bold">No Tickets Found</h3>
+        <p class="text-sm text-base-content/60 mb-6">You haven't submitted any maintenance tickets yet.</p>
+        <div>
+            <a href="/user/submit" class="btn btn-primary">Submit First Ticket</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="grid grid-cols-1 gap-6">
+        {% for item in complaints %}
+        <div class="card bg-base-100 shadow-md border border-base-300 overflow-hidden">
+            <div class="bg-base-200 px-6 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <span class="font-mono font-bold text-lg">#INF-{{ item.id }}</span>
+                    <span class="text-xs text-base-content/60">{{ item.created_at.strftime('%b %d, %Y %H:%M') }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if item.status == "Submitted" %}
+                        <span class="badge badge-warning gap-1"><i class="fa-solid fa-clock text-xs"></i> Submitted</span>
+                    {% elif item.status == "Assigned" %}
+                        <span class="badge badge-info gap-1"><i class="fa-solid fa-user-check text-xs"></i> Assigned</span>
+                    {% elif item.status == "In Progress" %}
+                        <span class="badge badge-primary gap-1"><i class="fa-solid fa-spinner text-xs"></i> In Progress</span>
+                    {% elif item.status == "Resolved" %}
+                        <span class="badge badge-success gap-1"><i class="fa-solid fa-circle-check text-xs"></i> Resolved</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                    <!-- Photo -->
+                    <div class="w-full h-36 rounded-xl overflow-hidden border border-base-300 bg-base-300">
+                        <img src="{{ item.photo_path }}" alt="Photo" class="w-full h-full object-cover" />
+                    </div>
+
+                    <!-- Details -->
+                    <div class="md:col-span-2 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-neutral font-bold">{{ item.defect_name or "Pending Analysis" }}</span>
+                            {% if item.category %}
+                                <span class="badge badge-outline font-semibold">{{ item.category.value }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm font-semibold">{{ item.address }}</p>
+                        <p class="text-xs text-base-content/70 italic">"{{ item.description }}"</p>
+                        
+                        <!-- Assigned Staff Info -->
+                        <div class="pt-2 text-xs flex items-center gap-2">
+                            <span class="font-semibold text-base-content/60">Assigned Staff:</span>
+                            {% if item.assigned_staff_name %}
+                                <span class="badge badge-secondary badge-sm gap-1">
+                                    <i class="fa-solid fa-user-gear"></i> {{ item.assigned_staff_name }}
+                                </span>
+                            {% else %}
+                                <span class="text-base-content/50 italic">Unassigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Standing / Priority -->
+                    <div class="text-center md:text-right border-t md:border-t-0 md:border-l border-base-200 pt-4 md:pt-0 md:pl-6 space-y-2">
+                        <div class="text-xs text-base-content/60">Priority Score</div>
+                        <div class="text-2xl font-extrabold font-mono text-primary">{{ item.priority_score }}</div>
+                        <div class="text-xs text-base-content/60">
+                            {% if item.status == "Resolved" %}
+                                <span class="text-success font-bold">Resolved & Closed</span>
+                            {% elif item.queue_position %}
+                                Position <strong>#{{ item.queue_position }}</strong> in Category Queue
+                            {% else %}
+                                In Queue
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

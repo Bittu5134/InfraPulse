@@ -1,0 +1,107 @@
+<div class="card bg-base-100 shadow-xl border border-base-300 overflow-hidden">
+    <!-- Header banner -->
+    <div class="bg-base-200 px-6 py-4 border-b border-base-300 flex flex-wrap justify-between items-center gap-2">
+        <div>
+            <span class="text-xs uppercase font-bold text-base-content/60">Ticket Reference</span>
+            <h3 class="text-2xl font-mono font-bold">#INF-{{ complaint.id }}</h3>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if complaint.status == "Submitted" %}
+                <span class="badge badge-warning badge-lg gap-1"><i class="fa-solid fa-clock"></i> Submitted</span>
+            {% elif complaint.status == "Assigned" %}
+                <span class="badge badge-info badge-lg gap-1"><i class="fa-solid fa-user-check"></i> Assigned</span>
+            {% elif complaint.status == "In Progress" %}
+                <span class="badge badge-primary badge-lg gap-1"><i class="fa-solid fa-spinner fa-spin"></i> In Progress</span>
+            {% elif complaint.status == "Resolved" %}
+                <span class="badge badge-success badge-lg gap-1"><i class="fa-solid fa-circle-check"></i> Resolved</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card-body p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column: Photograph & Submitted Info -->
+            <div class="space-y-4">
+                <div class="rounded-2xl overflow-hidden border border-base-300 bg-base-300 flex items-center justify-center max-h-72">
+                    <img src="{{ complaint.photo_path }}" alt="Defect Photo" class="w-full h-full object-cover max-h-72" />
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg">{{ complaint.user_name }}</h4>
+                    <p class="text-sm text-base-content/70 flex items-center gap-1">
+                        <i class="fa-solid fa-location-dot text-error"></i> {{ complaint.address }}
+                    </p>
+                    <p class="mt-2 text-sm bg-base-200 p-3 rounded-lg border border-base-300 italic">
+                        "{{ complaint.description }}"
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column: System Automated Classification & Live Queue Position -->
+            <div class="space-y-6">
+                <!-- System Automated Category & Defect Label -->
+                <div class="bg-base-200 p-5 rounded-2xl border border-base-300 space-y-3">
+                    <h4 class="text-xs uppercase font-extrabold tracking-wider text-base-content/60 flex items-center gap-1">
+                        <i class="fa-solid fa-robot text-primary"></i> Automated Defect Detection & Classification
+                    </h4>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm font-semibold">Detected Defect:</span>
+                        <span class="badge badge-lg badge-neutral font-bold">{{ complaint.defect_name or "Pending Analysis" }}</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm font-semibold">Category Queue:</span>
+                        {% if complaint.category == "Structural" %}
+                            <span class="badge badge-lg badge-error font-bold"><i class="fa-solid fa-building"></i> Structural</span>
+                        {% elif complaint.category == "Functional" %}
+                            <span class="badge badge-lg badge-warning font-bold"><i class="fa-solid fa-droplet"></i> Functional</span>
+                        {% elif complaint.category == "Performance" %}
+                            <span class="badge badge-lg badge-info font-bold"><i class="fa-solid fa-paint-roller"></i> Performance</span>
+                        {% else %}
+                            <span class="badge badge-lg badge-ghost">Unclassified</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-base-300 text-base-content/70">
+                        <div>Severity: <strong>{{ complaint.severity }}/10</strong></div>
+                        <div>Extent: <strong>{{ complaint.extent }}%</strong></div>
+                        <div>Priority Score: <strong class="text-primary font-mono text-sm">{{ complaint.priority_score }}</strong></div>
+                    </div>
+                </div>
+
+                <!-- Live Queue Standing Indicator -->
+                <div class="card bg-primary/5 border border-primary/20">
+                    <div class="card-body p-4 text-center">
+                        <h4 class="text-xs uppercase font-extrabold tracking-wider text-primary">Current Live Queue Standing</h4>
+                        {% if complaint.status == "Resolved" %}
+                            <div class="py-2 text-success font-bold text-lg flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-circle-check text-2xl"></i> Complaint Resolved! (Removed from active queue)
+                            </div>
+                        {% elif queue_position %}
+                            <div class="text-4xl font-extrabold font-mono text-primary my-1">
+                                Position #{{ queue_position }}
+                            </div>
+                            <p class="text-xs text-base-content/70">Ranked dynamically in <strong>{{ complaint.category }} Queue</strong> based on severity & defect priority logic.</p>
+                        {% else %}
+                            <div class="py-2 text-warning font-semibold text-sm">
+                                Processing priority queue standing...
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Model API trigger shortcut for demo/testing -->
+                <div class="border border-dashed border-base-300 rounded-xl p-3 bg-base-100 text-xs text-base-content/70">
+                    <div class="flex items-center justify-between">
+                        <span><i class="fa-solid fa-code text-primary"></i> External ML Integration endpoint available:</span>
+                        <button hx-post="/api/v1/complaints/{{ complaint.id }}/mock-classify" 
+                                hx-target="#complaint-card-container" 
+                                class="btn btn-xs btn-outline btn-primary">
+                            Run Mock Classifier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

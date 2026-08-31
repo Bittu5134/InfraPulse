@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}InfraPulse - Infrastructure Ticketing Tool{% endblock %}
+
+{% block content %}
+<div class="hero py-12 bg-base-100 rounded-3xl shadow-lg border border-base-300 mb-8">
+    <div class="hero-content text-center">
+        <div class="max-w-3xl">
+            <h1 class="text-5xl font-extrabold tracking-tight mb-4">
+                Smart Defect <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Ticketing</span>
+            </h1>
+            <p class="py-4 text-base text-base-content/80">
+                Report infrastructure defects (spalling, stagnant water, cracked tiles, paint peeling). The priority engine automatically classifies defects and routes tickets to dedicated staff queues.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mt-4">
+                <a href="/user/submit" class="btn btn-primary btn-lg shadow-md gap-2">
+                    <i class="fa-solid fa-ticket"></i> Create Ticket
+                </a>
+                {% if current_user %}
+                    <a href="/user/dashboard" class="btn btn-outline btn-lg gap-2">
+                        <i class="fa-solid fa-list-check"></i> My Submitted Tickets
+                    </a>
+                {% else %}
+                    <a href="/user/login" class="btn btn-outline btn-lg gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> User Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-2xl bg-error/10 text-error flex items-center justify-center mb-2">
+                <i class="fa-solid fa-building text-2xl"></i>
+            </div>
+            <h2 class="card-title text-error">Structural Department</h2>
+            <p class="text-xs text-base-content/70">Structural defects such as <strong>Spalling</strong> and concrete peeling. Highest priority category.</p>
+            <div class="card-actions justify-end mt-4">
+                <a href="/staff/login" class="btn btn-error btn-outline btn-sm">Staff Login</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-2xl bg-warning/10 text-warning flex items-center justify-center mb-2">
+                <i class="fa-solid fa-droplet text-2xl"></i>
+            </div>
+            <h2 class="card-title text-warning">Functional Department</h2>
+            <p class="text-xs text-base-content/70">Functional hazards such as <strong>Stagnant Water</strong> accumulation and drainage issues.</p>
+            <div class="card-actions justify-end mt-4">
+                <a href="/staff/login" class="btn btn-warning btn-outline btn-sm">Staff Login</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-2xl bg-info/10 text-info flex items-center justify-center mb-2">
+                <i class="fa-solid fa-paint-roller text-2xl"></i>
+            </div>
+            <h2 class="card-title text-info">Performance Department</h2>
+            <p class="text-xs text-base-content/70">Surface wear such as <strong>Cracked Tiles</strong> and <strong>Paint Peeling</strong> (Cracked tiles prioritized over paint peeling).</p>
+            <div class="card-actions justify-end mt-4">
+                <a href="/staff/login" class="btn btn-info btn-outline btn-sm">Staff Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

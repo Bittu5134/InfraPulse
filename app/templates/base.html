@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InfraPulse - Defect Priority Maintenance & Ticketing Tool{% endblock %}</title>
+    
+    <!-- DaisyUI & Tailwind CSS via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+        initTheme();
+    </script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-base-200 text-base-content flex flex-col font-sans">
+
+    <!-- Header Navbar -->
+    <div class="navbar bg-base-100 shadow-sm border-b border-base-300 px-4 md:px-8">
+        <div class="flex-1">
+            <a href="/" class="btn btn-ghost text-xl font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-ticket-simple text-primary text-2xl"></i>
+                <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">InfraPulse</span>
+            </a>
+        </div>
+        
+        <div class="flex-none flex items-center gap-2 sm:gap-3">
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" class="btn btn-ghost btn-circle" title="Toggle Theme">
+                <i class="fa-solid fa-moon text-lg hidden [html[data-theme=light]_&]:block"></i>
+                <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
+            </button>
+
+            <!-- User Portal Button -->
+            <a href="{% if current_user %}/user/dashboard{% else %}/user/submit{% endif %}" class="btn btn-primary btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-ticket"></i>
+                <span>User Portal</span>
+            </a>
+
+            <!-- Staff Portal Button -->
+            <a href="/staff" class="btn btn-secondary btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Staff Portal</span>
+            </a>
+
+            <!-- Admin Portal Button -->
+            <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <span class="hidden sm:inline">Admin</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-300 mt-auto">
+        <aside>
+            <p>© 2026 InfraPulse - Infrastructure Defect Priority Maintenance & Ticketing Tool</p>
+        </aside>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Track Complaint Status - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body text-center">
+            <h2 class="card-title text-2xl font-bold justify-center mb-2">
+                <i class="fa-solid fa-magnifying-glass-location text-primary"></i> Track Complaint Status
+            </h2>
+            <p class="text-sm text-base-content/70 mb-6">
+                Enter your Complaint Ticket ID to check real-time defect classification, category queue placement, and status updates.
+            </p>
+
+            {% if error %}
+            <div class="alert alert-error mb-4">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/user/track" method="GET" class="flex gap-2">
+                <input type="number" name="id" placeholder="Enter Complaint ID (e.g. 1)" class="input input-bordered w-full text-center text-lg font-mono" required />
+                <button type="submit" class="btn btn-primary">
+                    Track
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

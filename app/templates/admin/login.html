@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold justify-center mb-2">
+                <i class="fa-solid fa-screwdriver-wrench text-neutral"></i> System Admin Portal
+            </h2>
+            <p class="text-xs text-center text-base-content/70 mb-6">
+                Administrative access for staff management, system metrics, and ticket oversight.
+            </p>
+
+            {% if error %}
+            <div class="alert alert-error text-sm mb-4">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/admin/login" method="POST" class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Admin Email</span></label>
+                    <input type="email" name="email" placeholder="admin@infrapulse.org" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Password</span></label>
+                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                </div>
+
+                <div class="form-control mt-6">
+                    <button type="submit" class="btn btn-neutral w-full gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login to Admin Dashboard
+                    </button>
+                </div>
+            </form>
+
+            <div class="alert alert-info text-xs mt-6">
+                <i class="fa-solid fa-info-circle"></i>
+                <span>Default Admin Account (Password: <code>admin123</code>):<br/>
+                • <code>admin@infrapulse.org</code></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

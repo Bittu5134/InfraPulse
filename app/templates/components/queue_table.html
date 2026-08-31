@@ -1,0 +1,131 @@
+<div class="overflow-x-auto">
+    {% if not complaints %}
+    <div class="text-center py-12 bg-base-100 rounded-2xl border border-dashed border-base-300">
+        <i class="fa-solid fa-clipboard-check text-5xl text-success/40 mb-3"></i>
+        <h3 class="text-xl font-bold">Queue is Clear!</h3>
+        <p class="text-sm text-base-content/60">No pending tickets in this queue.</p>
+    </div>
+    {% else %}
+    <table class="table table-zebra w-full bg-base-100 shadow-md rounded-2xl overflow-hidden border border-base-300">
+        <thead class="bg-base-200 text-base-content">
+            <tr>
+                <th class="w-16 text-center">Rank</th>
+                <th>Photo</th>
+                <th>Category & Defect</th>
+                <th>Requester Contact</th>
+                <th class="text-center">Priority</th>
+                <th>Assigned Staff</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in complaints %}
+            <tr class="hover">
+                <td class="font-mono font-bold text-center">
+                    <span class="badge badge-lg {% if loop.index == 1 %}badge-primary{% elif loop.index <= 3 %}badge-secondary{% else %}badge-neutral{% endif %} font-mono">
+                        #{{ loop.index }}
+                    </span>
+                </td>
+                <td>
+                    <div class="avatar">
+                        <div class="w-16 h-16 rounded-xl border border-base-300 overflow-hidden">
+                            <a href="{{ item.photo_path }}" target="_blank">
+                                <img src="{{ item.photo_path }}" alt="Photo" class="object-cover w-full h-full" />
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="flex items-center gap-2 mb-1">
+                        {% if item.category == "Structural" %}
+                            <span class="badge badge-error badge-sm font-bold"><i class="fa-solid fa-building text-[10px] mr-1"></i> Structural</span>
+                        {% elif item.category == "Functional" %}
+                            <span class="badge badge-warning badge-sm font-bold"><i class="fa-solid fa-droplet text-[10px] mr-1"></i> Functional</span>
+                        {% elif item.category == "Performance" %}
+                            <span class="badge badge-info badge-sm font-bold"><i class="fa-solid fa-paint-roller text-[10px] mr-1"></i> Performance</span>
+                        {% else %}
+                            <span class="badge badge-ghost badge-sm">Unclassified</span>
+                        {% endif %}
+                        <span class="font-bold text-sm">{{ item.defect_name or "Pending Analysis" }}</span>
+                    </div>
+                    <div class="text-xs text-base-content/70 italic max-w-xs truncate">"{{ item.description }}"</div>
+                    <div class="text-[11px] text-base-content/50 mt-1">
+                        Severity: {{ item.severity }}/10 | Extent: {{ item.extent }}%
+                    </div>
+                </td>
+                <td>
+                    <div class="font-semibold text-sm">{{ item.user_name }}</div>
+                    <div class="text-xs text-base-content/70"><i class="fa-solid fa-envelope text-xs"></i> {{ item.user_email }}</div>
+                    {% if item.user_phone %}
+                        <div class="text-xs text-base-content/70"><i class="fa-solid fa-phone text-xs"></i> {{ item.user_phone }}</div>
+                    {% endif %}
+                    <div class="text-xs text-base-content/70"><i class="fa-solid fa-location-dot text-error text-xs"></i> {{ item.address }}</div>
+                </td>
+                <td class="text-center">
+                    <div class="font-mono text-lg font-extrabold text-primary">
+                        {{ item.priority_score }}
+                    </div>
+                </td>
+                <td>
+                    {% if item.assigned_staff_name %}
+                        <span class="badge badge-secondary badge-sm gap-1">
+                            <i class="fa-solid fa-user-check"></i> {{ item.assigned_staff_name }}
+                        </span>
+                    {% else %}
+                        <span class="text-xs text-base-content/50 italic">Unassigned</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.status == "Submitted" %}
+                        <span class="badge badge-warning badge-sm"><i class="fa-solid fa-clock text-xs mr-1"></i> Submitted</span>
+                    {% elif item.status == "Assigned" %}
+                        <span class="badge badge-info badge-sm"><i class="fa-solid fa-user-check text-xs mr-1"></i> Assigned</span>
+                    {% elif item.status == "In Progress" %}
+                        <span class="badge badge-primary badge-sm"><i class="fa-solid fa-spinner text-xs mr-1"></i> In Progress</span>
+                    {% elif item.status == "Resolved" %}
+                        <span class="badge badge-success badge-sm"><i class="fa-solid fa-check text-xs mr-1"></i> Resolved</span>
+                    {% endif %}
+                </td>
+                <td class="text-right space-y-1">
+                    {% if current_staff and item.assigned_staff_id != current_staff.id %}
+                        <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
+                            <button type="submit" class="btn btn-xs btn-outline btn-primary gap-1">
+                                <i class="fa-solid fa-hand"></i> Assign to Me
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    <div class="dropdown dropdown-left dropdown-end inline-block">
+                        <div tabindex="0" role="button" class="btn btn-xs btn-outline gap-1">
+                            Status <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </div>
+                        <ul tabindex="0" class="dropdown-content z-[20] menu p-2 shadow bg-base-100 rounded-box w-48 border border-base-300 text-xs">
+                            <li class="menu-title">Update Status</li>
+                            <li>
+                                <form action="/staff/status/{{ item.id }}" method="POST">
+                                    <input type="hidden" name="status" value="Assigned" />
+                                    <button type="submit" class="w-full text-left text-info">Mark Assigned</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="/staff/status/{{ item.id }}" method="POST">
+                                    <input type="hidden" name="status" value="In Progress" />
+                                    <button type="submit" class="w-full text-left text-primary">Mark In Progress</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="/staff/status/{{ item.id }}" method="POST">
+                                    <input type="hidden" name="status" value="Resolved" />
+                                    <button type="submit" class="w-full text-left text-success font-bold">Mark Resolved</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
