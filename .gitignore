@@ -26,6 +26,9 @@ app/static/uploads/*
 .coverage
 htmlcov/
 
+# Untracked Internal Specifications and Plans
+docs/
+
 # IDE / Editor files
 .vscode/
 .idea/
