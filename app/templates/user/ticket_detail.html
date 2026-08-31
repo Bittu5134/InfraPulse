@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket #{{ complaint.id }} Details - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="javascript:history.back()" class="btn btn-outline btn-sm gap-1">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+        <span class="badge badge-outline text-xs">Ticket Details Reference</span>
+    </div>
+
+    <!-- Ticket Detail Card -->
+    <div class="card bg-base-100 shadow-xl border border-base-300 overflow-hidden">
+        <!-- Header -->
+        <div class="bg-base-200 px-6 py-4 border-b border-base-300 flex flex-wrap justify-between items-center gap-2">
+            <div>
+                <span class="text-xs uppercase font-bold text-base-content/60">Ticket Reference ID</span>
+                <h3 class="text-3xl font-mono font-extrabold text-primary">#{{ complaint.id }}</h3>
+            </div>
+            <div>
+                {% if complaint.status == "Submitted" %}
+                    <span class="badge badge-warning badge-lg gap-1"><i class="fa-solid fa-clock"></i> Submitted</span>
+                {% elif complaint.status == "Assigned" %}
+                    <span class="badge badge-info badge-lg gap-1"><i class="fa-solid fa-user-check"></i> Assigned</span>
+                {% elif complaint.status == "In Progress" %}
+                    <span class="badge badge-primary badge-lg gap-1"><i class="fa-solid fa-spinner fa-spin"></i> In Progress</span>
+                {% elif complaint.status == "Resolved" %}
+                    <span class="badge badge-success badge-lg gap-1"><i class="fa-solid fa-circle-check"></i> Resolved</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left: Photograph & Description -->
+                <div class="space-y-4">
+                    <div class="rounded-2xl overflow-hidden border border-base-300 bg-base-300 flex items-center justify-center max-h-80 shadow-inner">
+                        <img src="{{ complaint.photo_path }}" alt="Defect Photo" class="w-full h-full object-cover max-h-80" />
+                    </div>
+
+                    <div class="bg-base-200 p-4 rounded-xl border border-base-300 space-y-2">
+                        <h4 class="font-bold text-sm text-base-content/70">Defect Description & Location</h4>
+                        <p class="text-sm font-semibold"><i class="fa-solid fa-location-dot text-error mr-1"></i> {{ complaint.address }}</p>
+                        <p class="text-xs text-base-content/80 italic">"{{ complaint.description }}"</p>
+                    </div>
+
+                    <div class="text-xs text-base-content/60 space-y-1">
+                        <div>Submitted By: <strong>{{ complaint.user_name }}</strong> ({{ complaint.user_email }})</div>
+                        <div>Date: {{ complaint.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                    </div>
+                </div>
+
+                <!-- Right: Automated ML Assessment & Status Standing -->
+                <div class="space-y-6">
+                    <div class="bg-base-200 p-5 rounded-2xl border border-base-300 space-y-4">
+                        <h4 class="text-xs uppercase font-extrabold tracking-wider text-base-content/60 flex items-center gap-1">
+                            <i class="fa-solid fa-robot text-primary"></i> Automated AI Defect Classification
+                        </h4>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold">Detected Defect:</span>
+                            <span class="badge badge-lg badge-neutral font-bold">{{ complaint.defect_name or "Pending Analysis" }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold">Category Domain:</span>
+                            {% if complaint.category == "Structural" %}
+                                <span class="badge badge-lg badge-error font-bold"><i class="fa-solid fa-building mr-1"></i> Structural</span>
+                            {% elif complaint.category == "Functional" %}
+                                <span class="badge badge-lg badge-warning font-bold"><i class="fa-solid fa-droplet mr-1"></i> Functional</span>
+                            {% elif complaint.category == "Performance" %}
+                                <span class="badge badge-lg badge-info font-bold"><i class="fa-solid fa-paint-roller mr-1"></i> Performance</span>
+                            {% else %}
+                                <span class="badge badge-lg badge-ghost">Unclassified</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs pt-3 border-t border-base-300">
+                            <div>Severity Score: <strong class="text-base font-mono">{{ complaint.severity }}/10</strong></div>
+                            <div>Defect Extent: <strong class="text-base font-mono">{{ complaint.extent }}%</strong></div>
+                        </div>
+
+                        <div class="pt-2 border-t border-base-300 flex justify-between items-center">
+                            <span class="text-xs font-semibold">Calculated Priority Score:</span>
+                            <span class="text-2xl font-extrabold font-mono text-primary">{{ complaint.priority_score }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Staff Assignment & Queue Position Card -->
+                    <div class="card bg-primary/5 border border-primary/20">
+                        <div class="card-body p-4 space-y-2">
+                            <div class="text-xs uppercase font-extrabold text-primary text-center">Assigned Maintenance Staff</div>
+                            <div class="text-center font-bold text-base">
+                                {% if complaint.assigned_staff_name %}
+                                    <span class="badge badge-secondary badge-lg gap-1">
+                                        <i class="fa-solid fa-user-gear"></i> {{ complaint.assigned_staff_name }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-base-content/50 italic text-sm">Unassigned (Pending Dispatch)</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-center pt-2 border-t border-primary/10">
+                                {% if complaint.status == "Resolved" %}
+                                    <div class="text-success font-bold text-sm">
+                                        <i class="fa-solid fa-circle-check"></i> Ticket Marked Resolved
+                                    </div>
+                                {% elif queue_position %}
+                                    <div class="text-xs text-base-content/70">Current Priority Standing</div>
+                                    <div class="text-3xl font-extrabold font-mono text-primary my-1">
+                                        Rank #{{ queue_position }}
+                                    </div>
+                                {% else %}
+                                    <div class="text-xs text-base-content/60">Priority Queue Standing</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

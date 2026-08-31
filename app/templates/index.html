@@ -1,45 +1,44 @@
 {% extends "base.html" %}
 
-{% block title %}InfraPulse - Public Infrastructure Defect & Maintenance Portal{% endblock %}
+{% block title %}InfraPulse - Defect Detection & Priority Maintenance System{% endblock %}
 
 {% block content %}
 <div class="space-y-12">
-    <!-- Hero Banner -->
-    <div class="hero py-12 px-6 bg-base-100 rounded-3xl shadow-md border border-base-300 relative overflow-hidden">
-        <div class="hero-content text-center max-w-4xl">
+    <!-- Hero Section -->
+    <div class="hero py-16 px-6 bg-base-100 rounded-3xl shadow-md border border-base-300 relative overflow-hidden">
+        <div class="hero-content text-center max-w-3xl">
             <div class="space-y-6">
                 <div class="badge badge-outline badge-primary font-semibold py-3 px-4 gap-2">
-                    <i class="fa-solid fa-building-circle-check"></i> Official Public Infrastructure Maintenance System
+                    <i class="fa-solid fa-camera"></i> Photo-Based Defect Priority System
                 </div>
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                    Public Defect Reporting & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Maintenance</span>
+                    Smart Defect Detection & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Maintenance</span>
                 </h1>
-                <p class="text-base text-base-content/80 max-w-2xl mx-auto leading-relaxed">
-                    Report infrastructure defects such as structural spalling, stagnant water hazards, cracked tiles, or paint peeling. Our automated priority queue engine ranks issues based on risk and dispatches dedicated maintenance squads.
+                <p class="text-base text-base-content/80 max-w-xl mx-auto leading-relaxed">
+                    Submit photos of infrastructure defects (spalling, stagnant water, cracked tiles, paint peeling). The priority engine automatically classifies severity and ranks tickets for maintenance teams.
                 </p>
-                <div class="flex flex-wrap justify-center gap-4 pt-2">
-                    <a href="/user/submit" class="btn btn-primary btn-lg shadow-lg gap-2 px-8">
-                        <i class="fa-solid fa-plus-circle text-xl"></i> Create Defect Ticket
+                <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2 max-w-lg mx-auto">
+                    <a href="/user/submit" class="btn btn-primary btn-lg shadow-md gap-2 flex-1">
+                        <i class="fa-solid fa-plus-circle text-xl"></i> Create Ticket
                     </a>
-                    {% if current_user %}
-                        <a href="/user/dashboard" class="btn btn-outline btn-lg gap-2">
-                            <i class="fa-solid fa-ticket text-xl"></i> View My Tickets
-                        </a>
-                    {% else %}
-                        <a href="/user/login" class="btn btn-outline btn-lg gap-2">
-                            <i class="fa-solid fa-right-to-bracket text-xl"></i> Track Submitted Tickets
-                        </a>
-                    {% endif %}
+                </div>
+
+                <!-- Quick Track by 10-digit ID -->
+                <div class="pt-4 max-w-md mx-auto">
+                    <form action="/user/dashboard" method="GET" class="flex gap-2">
+                        <input type="text" name="search" placeholder="Enter 10-digit Ticket ID (e.g. 8492019482)" class="input input-bordered input-sm w-full text-center font-mono" />
+                        <button type="submit" class="btn btn-sm btn-outline">Track</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3-Step Process Guidance Cards -->
+    <!-- 3 Step Guide -->
     <div class="space-y-4">
         <div class="text-center space-y-1">
-            <h2 class="text-2xl font-bold tracking-tight">How Maintenance Tickets Are Processed</h2>
-            <p class="text-xs text-base-content/70">Simple, transparent 3-step public resolution process</p>
+            <h2 class="text-2xl font-bold tracking-tight">System Workflow</h2>
+            <p class="text-xs text-base-content/70">Automated classification & priority queueing process</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -50,7 +49,7 @@
                     </div>
                     <h3 class="font-bold text-lg">Report Defect</h3>
                     <p class="text-xs text-base-content/70">
-                        Upload a photo of the defect, describe the issue, and specify your location.
+                        Upload a photo of the defect, describe the issue, and provide your location.
                     </p>
                 </div>
             </div>
@@ -62,7 +61,7 @@
                     </div>
                     <h3 class="font-bold text-lg">AI Priority Queueing</h3>
                     <p class="text-xs text-base-content/70">
-                        Defects are automatically classified into Structural, Functional, or Performance categories and ranked by severity score.
+                        Defects are automatically categorized into Structural, Functional, or Performance queues and ranked by priority score.
                     </p>
                 </div>
             </div>
@@ -74,19 +73,10 @@
                     </div>
                     <h3 class="font-bold text-lg">Staff Resolution</h3>
                     <p class="text-xs text-base-content/70">
-                        Assigned maintenance teams claim tickets, update progress, and resolve the defect.
+                        Maintenance staff self-assign tickets, update status, and resolve defects.
                     </p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Emergency Contact Note -->
-    <div class="alert alert-warning shadow-sm border border-warning/30">
-        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-        <div>
-            <h4 class="font-bold text-sm">Immediate Safety Hazards</h4>
-            <div class="text-xs">For severe structural collapses or immediate life-safety emergencies, please contact emergency services or call the helpline directly at <strong>1800-INFRA-PULSE</strong>.</div>
         </div>
     </div>
 </div>

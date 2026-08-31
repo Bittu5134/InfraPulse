@@ -10,7 +10,7 @@
                 <i class="fa-solid fa-user-plus text-primary"></i> Create Account
             </h2>
             <p class="text-xs text-center text-base-content/70 mb-4">
-                Register a public user account to submit & track maintenance tickets.
+                Register a user account to create & track maintenance tickets.
             </p>
 
             {% if error %}
@@ -27,22 +27,22 @@
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
-                    <input type="text" name="name" placeholder="Rahul Sharma" class="input input-bordered w-full" required />
+                    <input type="text" name="name" placeholder="e.g. Rahul Sharma" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Email Address *</span></label>
-                    <input type="email" name="email" placeholder="rahul@example.com" class="input input-bordered w-full" required />
+                    <input type="email" name="email" placeholder="e.g. rahul@example.com" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Phone Number</span></label>
-                    <input type="tel" name="phone" placeholder="+91 9876543210" class="input input-bordered w-full" />
+                    <input type="tel" name="phone" placeholder="e.g. 9876543210" class="input input-bordered w-full text-sm" />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password *</span></label>
-                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                    <input type="password" name="password" placeholder="e.g. password" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control mt-6">

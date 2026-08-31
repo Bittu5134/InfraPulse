@@ -10,13 +10,13 @@
                 <i class="fa-solid fa-right-to-bracket text-primary"></i> User Sign In
             </h2>
             <p class="text-xs text-center text-base-content/70 mb-4">
-                Please sign in to submit a new defect ticket or track your existing tickets.
+                Please sign in to submit a defect ticket or view your ticket dashboard.
             </p>
 
             {% if next == '/user/submit' %}
             <div class="alert alert-info text-xs mb-4">
                 <i class="fa-solid fa-info-circle"></i>
-                <span>Please sign in or create an account to create a defect ticket.</span>
+                <span>Please sign in or create an account to submit a ticket.</span>
             </div>
             {% endif %}
 
@@ -34,12 +34,12 @@
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Email Address</span></label>
-                    <input type="email" name="email" placeholder="user@example.com" class="input input-bordered w-full" required />
+                    <input type="email" name="email" placeholder="e.g. user@example.com" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                    <input type="password" name="password" placeholder="e.g. password" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control mt-6">

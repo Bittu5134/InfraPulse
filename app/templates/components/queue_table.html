@@ -3,14 +3,14 @@
     <div class="text-center py-12 bg-base-100 rounded-2xl border border-dashed border-base-300">
         <i class="fa-solid fa-clipboard-check text-5xl text-success/40 mb-3"></i>
         <h3 class="text-xl font-bold">Queue is Clear!</h3>
-        <p class="text-sm text-base-content/60">No pending tickets in this queue.</p>
+        <p class="text-sm text-base-content/60">No pending tickets matching criteria.</p>
     </div>
     {% else %}
     <table class="table table-zebra w-full bg-base-100 shadow-md rounded-2xl overflow-hidden border border-base-300">
         <thead class="bg-base-200 text-base-content">
             <tr>
                 <th class="w-16 text-center">Rank</th>
-                <th>Photo</th>
+                <th>Ticket & Photo</th>
                 <th>Category & Defect</th>
                 <th>Requester Contact</th>
                 <th class="text-center">Priority</th>
@@ -28,11 +28,16 @@
                     </span>
                 </td>
                 <td>
-                    <div class="avatar">
-                        <div class="w-16 h-16 rounded-xl border border-base-300 overflow-hidden">
-                            <a href="{{ item.photo_path }}" target="_blank">
-                                <img src="{{ item.photo_path }}" alt="Photo" class="object-cover w-full h-full" />
-                            </a>
+                    <div class="space-y-1">
+                        <a href="/ticket/{{ item.id }}" class="font-mono text-xs font-bold text-primary hover:underline block">
+                            #{{ item.id }}
+                        </a>
+                        <div class="avatar">
+                            <div class="w-14 h-14 rounded-xl border border-base-300 overflow-hidden">
+                                <a href="/ticket/{{ item.id }}">
+                                    <img src="{{ item.photo_path }}" alt="Photo" class="object-cover w-full h-full" />
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -47,7 +52,7 @@
                         {% else %}
                             <span class="badge badge-ghost badge-sm">Unclassified</span>
                         {% endif %}
-                        <span class="font-bold text-sm">{{ item.defect_name or "Pending Analysis" }}</span>
+                        <a href="/ticket/{{ item.id }}" class="font-bold text-sm hover:text-primary">{{ item.defect_name or "Pending Analysis" }}</a>
                     </div>
                     <div class="text-xs text-base-content/70 italic max-w-xs truncate">"{{ item.description }}"</div>
                     <div class="text-[11px] text-base-content/50 mt-1">

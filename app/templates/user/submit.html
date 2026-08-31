@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Submit Ticket - InfraPulse{% endblock %}
+{% block title %}Create Ticket - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
@@ -10,11 +10,11 @@
                 <i class="fa-solid fa-file-circle-plus text-primary"></i> Create Maintenance Ticket
             </h2>
             <p class="text-xs text-base-content/70 mb-6">
-                Fill in your contact details and upload a photo of the defect. The priority engine will automatically classify and route your ticket.
+                Fill in the details below and upload a photo of the defect. The AI priority engine will automatically analyze the image, classify the defect category, and rank your ticket.
             </p>
 
             {% if error %}
-            <div class="alert alert-error text-sm mb-4">
+            <div class="alert alert-error text-xs mb-4">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span>{{ error }}</span>
             </div>
@@ -24,40 +24,40 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
-                        <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="Rahul Sharma" class="input input-bordered w-full" required />
+                        <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="e.g. Rahul Sharma" class="input input-bordered w-full text-sm" required />
                     </div>
 
                     <div class="form-control">
                         <label class="label"><span class="label-text font-semibold">Email Address *</span></label>
-                        <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="rahul@example.com" class="input input-bordered w-full" required />
+                        <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. rahul@example.com" class="input input-bordered w-full text-sm" required />
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label"><span class="label-text font-semibold">Phone Number</span></label>
-                        <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="+91 9876543210" class="input input-bordered w-full" />
+                        <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="e.g. 9876543210" class="input input-bordered w-full text-sm" />
                     </div>
 
                     <div class="form-control">
                         <label class="label"><span class="label-text font-semibold">Location / Address *</span></label>
-                        <input type="text" name="address" placeholder="Hall 4, Room 208, IIT Kanpur" class="input input-bordered w-full" required />
+                        <input type="text" name="address" placeholder="e.g. Hall 4, Room 208" class="input input-bordered w-full text-sm" required />
                     </div>
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Defect Description *</span></label>
-                    <textarea name="description" placeholder="Describe the defect in detail (e.g. spalling concrete on ceiling, water accumulation near corridor, cracked floor tiles)..." class="textarea textarea-bordered h-28 w-full" required></textarea>
+                    <textarea name="description" placeholder="e.g. Concrete spalling on ceiling beam, puddle near corridor, cracked floor tiles..." class="textarea textarea-bordered h-28 w-full text-sm" required></textarea>
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Defect Photograph *</span></label>
-                    <input type="file" name="photo" accept="image/*" class="file-input file-input-bordered file-input-primary w-full" required />
+                    <input type="file" name="photo" accept="image/*" class="file-input file-input-bordered file-input-primary w-full text-sm" required />
                     <label class="label"><span class="label-text-alt text-base-content/60">Supported formats: JPG, PNG, WEBP.</span></label>
                 </div>
 
                 <div class="card-actions justify-end mt-6">
-                    <a href="/" class="btn btn-ghost">Cancel</a>
+                    <a href="/" class="btn btn-ghost btn-sm">Cancel</a>
                     <button type="submit" class="btn btn-primary gap-2">
                         <i class="fa-solid fa-paper-plane"></i> Submit Ticket
                     </button>

@@ -3,10 +3,11 @@ import pytest_asyncio
 from io import BytesIO
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy import select
 
 from app.main import app
 from app.database import Base, get_db
-from app.models import Staff, Admin, CategoryEnum
+from app.models import User, Staff, Admin, Complaint, CategoryEnum, StatusEnum
 from app.auth import hash_password
 from app.priority_queue import compute_priority_score
 
@@ -125,8 +126,13 @@ async def test_staff_login_and_self_assignment():
         assert login_resp.status_code == 200
         assert "Master Staff Control Panel" in login_resp.text
 
-        # Assign ticket #1 to self
-        assign_resp = await client.post("/staff/assign/1", follow_redirects=True)
+        # Assign ticket to self using its 10-digit ID
+        async with TestingSessionLocal() as session:
+            stmt = select(Complaint).where(Complaint.user_email == "charlie@example.com")
+            res = await session.execute(stmt)
+            created_ticket = res.scalar_one()
+
+        assign_resp = await client.post(f"/staff/assign/{created_ticket.id}", follow_redirects=True)
         assert assign_resp.status_code == 200
         assert "Alice Structural" in assign_resp.text
 
