@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Defect Priority Maintenance System{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Infrastructure Maintenance Portal{% endblock %}</title>
     
     <!-- DaisyUI & Tailwind CSS via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -14,7 +14,7 @@
     
     <script>
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
         }
         function toggleTheme() {
@@ -34,10 +34,7 @@
         <div class="flex-1">
             <a href="/" class="btn btn-ghost text-xl font-extrabold flex items-center gap-2">
                 <i class="fa-solid fa-shield-halved text-primary text-2xl"></i>
-                <div class="text-left leading-none">
-                    <div class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold text-2xl">InfraPulse</div>
-                    <div class="text-[9px] text-base-content/60 font-semibold tracking-wider uppercase">Takneek PS</div>
-                </div>
+                <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold text-2xl tracking-tight">InfraPulse</span>
             </a>
         </div>
         
@@ -48,16 +45,18 @@
                 <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
             </button>
 
-            <!-- Create Ticket / Dashboard -->
-            <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2">
-                <i class="fa-solid fa-plus-circle"></i>
-                <span>Create Ticket</span>
-            </a>
+            <!-- Create Ticket button on navbar only when NOT on home page -->
+            {% if request.url.path != '/' %}
+                <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Create Ticket</span>
+                </a>
+            {% endif %}
 
             {% if current_user %}
                 <a href="/user/dashboard" class="btn btn-outline btn-primary btn-sm sm:btn-md gap-2">
                     <i class="fa-solid fa-ticket"></i>
-                    <span class="hidden sm:inline">My Tickets</span>
+                    <span class="hidden sm:inline">Dashboard</span>
                 </a>
                 <a href="/user/logout" class="btn btn-ghost btn-sm text-error" title="Logout User">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -65,19 +64,19 @@
             {% else %}
                 <a href="/user/login" class="btn btn-ghost btn-sm sm:btn-md gap-1">
                     <i class="fa-solid fa-user"></i>
-                    <span class="hidden sm:inline">User Sign In</span>
+                    <span class="hidden sm:inline">User Login</span>
                 </a>
             {% endif %}
 
             <div class="divider divider-horizontal my-2 mx-0"></div>
 
-            <!-- Staff Login / Staff Portal Button -->
+            <!-- Staff Portal -->
             <a href="/staff" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
                 <i class="fa-solid fa-user-shield"></i>
                 <span>{% if current_staff %}Staff Dashboard{% else %}Staff Login{% endif %}</span>
             </a>
 
-            <!-- Admin Login / Admin Portal Button -->
+            <!-- Admin Portal -->
             <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
                 <i class="fa-solid fa-screwdriver-wrench"></i>
                 <span>{% if current_admin %}Admin Dashboard{% else %}Admin Login{% endif %}</span>
@@ -92,11 +91,11 @@
 
     <!-- Footer -->
     <footer class="footer footer-center p-6 bg-base-100 text-base-content border-t border-base-300 mt-auto">
-        <aside class="space-y-2">
-            <div class="flex items-center justify-center gap-2 font-bold text-lg">
-                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Defect Priority Maintenance
+        <aside class="space-y-1">
+            <div class="flex items-center justify-center gap-2 font-bold text-base">
+                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Defect Maintenance Tool
             </div>
-            <p class="text-xs text-base-content/60">Takneek Competition Project</p>
+            <p class="text-xs text-base-content/50">© 2026 InfraPulse</p>
         </aside>
     </footer>
 
