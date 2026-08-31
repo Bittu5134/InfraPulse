@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Infrastructure Defect Priority System{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Defect Priority Maintenance System{% endblock %}</title>
     
     <!-- DaisyUI & Tailwind CSS via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -41,35 +41,47 @@
             </a>
         </div>
         
-        <div class="flex-none flex items-center gap-3">
+        <div class="flex-none flex items-center gap-2 sm:gap-3">
             <!-- Theme Toggle Button -->
             <button onclick="toggleTheme()" class="btn btn-ghost btn-circle" title="Toggle Theme">
                 <i class="fa-solid fa-moon text-lg hidden [html[data-theme=light]_&]:block"></i>
                 <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
             </button>
 
-            <!-- Sign In / Dashboard Single Button -->
+            <!-- Create Ticket / Dashboard -->
+            <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Create Ticket</span>
+            </a>
+
             {% if current_user %}
-                <a href="/user/dashboard" class="btn btn-primary btn-sm sm:btn-md gap-2">
+                <a href="/user/dashboard" class="btn btn-outline btn-primary btn-sm sm:btn-md gap-2">
                     <i class="fa-solid fa-ticket"></i>
-                    <span>Dashboard</span>
+                    <span class="hidden sm:inline">My Tickets</span>
                 </a>
-            {% elif current_staff %}
-                <a href="/staff/queue" class="btn btn-secondary btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    <span>Staff Dashboard</span>
-                </a>
-            {% elif current_admin %}
-                <a href="/admin" class="btn btn-neutral btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Admin Dashboard</span>
+                <a href="/user/logout" class="btn btn-ghost btn-sm text-error" title="Logout User">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </a>
             {% else %}
-                <a href="/user/login" class="btn btn-primary btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    <span>Sign In</span>
+                <a href="/user/login" class="btn btn-ghost btn-sm sm:btn-md gap-1">
+                    <i class="fa-solid fa-user"></i>
+                    <span class="hidden sm:inline">User Sign In</span>
                 </a>
             {% endif %}
+
+            <div class="divider divider-horizontal my-2 mx-0"></div>
+
+            <!-- Staff Login / Staff Portal Button -->
+            <a href="/staff" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>{% if current_staff %}Staff Dashboard{% else %}Staff Login{% endif %}</span>
+            </a>
+
+            <!-- Admin Login / Admin Portal Button -->
+            <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <span>{% if current_admin %}Admin Dashboard{% else %}Admin Login{% endif %}</span>
+            </a>
         </div>
     </div>
 
