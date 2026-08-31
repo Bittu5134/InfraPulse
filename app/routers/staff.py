@@ -132,6 +132,17 @@ async def assign_complaint_to_self(
     if complaint.status == StatusEnum.SUBMITTED:
         complaint.status = StatusEnum.ASSIGNED
         
+    # Trigger notification for user
+    if complaint.user_id:
+        from app.models import Notification
+        notif = Notification(
+            user_id=complaint.user_id,
+            title=f"Staff Assigned: #{complaint.id}",
+            message=f"{staff.name} has claimed your maintenance ticket #{complaint.id}.",
+            link_url=f"/ticket/{complaint.id}"
+        )
+        db.add(notif)
+
     await db.commit()
     await db.refresh(complaint)
     
@@ -158,6 +169,17 @@ async def update_complaint_status(
     if not complaint.assigned_staff_id:
         complaint.assigned_staff_id = staff.id
         complaint.assigned_staff_name = staff.name
+
+    # Trigger notification for user
+    if complaint.user_id:
+        from app.models import Notification
+        notif = Notification(
+            user_id=complaint.user_id,
+            title=f"Ticket #{complaint.id} Status Updated: {new_status.value}",
+            message=f"Your ticket #{complaint.id} has been marked as '{new_status.value}'.",
+            link_url=f"/ticket/{complaint.id}"
+        )
+        db.add(notif)
         
     await db.commit()
     await db.refresh(complaint)

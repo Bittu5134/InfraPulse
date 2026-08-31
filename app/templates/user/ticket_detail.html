@@ -157,17 +157,22 @@
         </div>
     </div>
 
-    <!-- Ticket Chat & Activity Section -->
+    <!-- Ticket Chat & Live Activity Section -->
     <div class="card bg-base-100 shadow-xl border border-base-300">
         <div class="card-body p-6 space-y-6">
-            <h3 class="card-title text-xl font-bold flex items-center gap-2">
-                <i class="fa-solid fa-comments text-primary"></i> Ticket Activity & Chat
-            </h3>
+            <div class="flex justify-between items-center">
+                <h3 class="card-title text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-comments text-primary"></i> Ticket Activity & Live Chat
+                </h3>
+                <span class="badge badge-sm badge-success gap-1">
+                    <span class="w-2 h-2 rounded-full bg-success-content animate-ping"></span> Live Polling
+                </span>
+            </div>
 
             <!-- Comments Timeline -->
-            <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+            <div id="chat-timeline-container" class="space-y-4 max-h-96 overflow-y-auto pr-2">
                 {% if not comments %}
-                    <div class="text-center py-8 text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-xl">
+                    <div id="no-comments-msg" class="text-center py-8 text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-xl">
                         No chat messages yet. Post a comment below to communicate about this ticket.
                     </div>
                 {% else %}
@@ -203,4 +208,77 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Web Audio API synthesized Pop Sound (Zero external audio file dependency!)
+    function playPopSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const audioCtx = new AudioContext();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.09);
+            
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.09);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.09);
+        } catch(e) {
+            console.log("Audio pop sound playback exception:", e);
+        }
+    }
+
+    let currentCommentCount = {{ comments|length }};
+    const ticketId = {{ complaint.id }};
+    const chatContainer = document.getElementById('chat-timeline-container');
+
+    async function pollComments() {
+        try {
+            const res = await fetch(`/api/v1/tickets/${ticketId}/comments`);
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            if (data.length > currentCommentCount) {
+                // Play pop sound on new comment!
+                playPopSound();
+                currentCommentCount = data.length;
+                
+                // Update chat container dynamically
+                chatContainer.innerHTML = data.map(c => {
+                    const isEnd = (c.sender_role === 'Staff' || c.sender_role === 'Admin');
+                    const roleBadgeClass = c.sender_role === 'Staff' ? 'badge-secondary' : (c.sender_role === 'Admin' ? 'badge-neutral' : 'badge-primary');
+                    const bubbleClass = c.sender_role === 'Staff' ? 'chat-bubble-secondary' : (c.sender_role === 'Admin' ? 'chat-bubble-neutral' : 'chat-bubble-primary');
+                    return `
+                        <div class="chat ${isEnd ? 'chat-end' : 'chat-start'}">
+                            <div class="chat-header text-xs mb-1">
+                                <strong>${c.sender_name}</strong>
+                                <span class="badge badge-xs ${roleBadgeClass} ml-1">${c.sender_role}</span>
+                                <time class="text-[10px] opacity-50 ml-2">${c.created_at}</time>
+                            </div>
+                            <div class="chat-bubble text-sm ${bubbleClass}">
+                                ${c.message}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        } catch(e) {}
+    }
+
+    // Poll every 3 seconds for live chat messages
+    setInterval(pollComments, 3000);
+</script>
 {% endblock %}

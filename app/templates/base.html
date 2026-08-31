@@ -45,6 +45,29 @@
                 <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
             </button>
 
+            <!-- Notification Center (For Logged In Users / Staff / Admins) -->
+            {% if current_user or current_staff or current_admin %}
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle relative" title="Notification Center">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    <span id="notif-count-badge" class="badge badge-sm badge-error absolute -top-1 -right-1 hidden">0</span>
+                </div>
+                <div tabindex="0" class="dropdown-content z-[30] card card-compact w-80 p-2 shadow-2xl bg-base-100 border border-base-300">
+                    <div class="card-body">
+                        <div class="flex justify-between items-center border-b border-base-200 pb-2">
+                            <h3 class="font-bold text-sm flex items-center gap-1">
+                                <i class="fa-solid fa-bell text-primary"></i> Notifications
+                            </h3>
+                            <button onclick="markAllNotificationsRead()" class="btn btn-xs btn-ghost text-xs">Mark all read</button>
+                        </div>
+                        <div id="notif-list-container" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+                            <div class="text-center py-4 text-base-content/50 italic">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Create Ticket button on navbar only when NOT on home page -->
             {% if request.url.path != '/' %}
                 <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2">
@@ -98,6 +121,51 @@
             <p class="text-xs text-base-content/50">© 2026 InfraPulse</p>
         </aside>
     </footer>
+
+    {% if current_user or current_staff or current_admin %}
+    <script>
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/v1/notifications');
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                const badge = document.getElementById('notif-count-badge');
+                const container = document.getElementById('notif-list-container');
+                
+                if (data.unread_count > 0) {
+                    badge.innerText = data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+                
+                if (data.notifications.length === 0) {
+                    container.innerHTML = `<div class="text-center py-4 text-base-content/50 italic">No notifications</div>`;
+                    return;
+                }
+                
+                container.innerHTML = data.notifications.map(n => `
+                    <a href="${n.link_url || '#'}" class="block p-2 rounded-lg ${n.is_read ? 'bg-base-200/50' : 'bg-primary/10 border border-primary/20'} hover:bg-base-200 transition space-y-1">
+                        <div class="font-bold text-xs ${n.is_read ? 'text-base-content/80' : 'text-primary'}">${n.title}</div>
+                        <div class="text-base-content/70">${n.message}</div>
+                        <div class="text-[10px] text-base-content/50 text-right">${n.created_at}</div>
+                    </a>
+                `).join('');
+            } catch(e) {}
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                await fetch('/api/v1/notifications/mark-read', { method: 'POST' });
+                fetchNotifications();
+            } catch(e) {}
+        }
+
+        fetchNotifications();
+        setInterval(fetchNotifications, 5000);
+    </script>
+    {% endif %}
 
     {% block extra_scripts %}{% endblock %}
 </body>

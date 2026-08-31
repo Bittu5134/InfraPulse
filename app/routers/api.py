@@ -2,12 +2,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 
 from app.config import BASE_DIR
 from app.database import get_db
-from app.models import Complaint, CategoryEnum
+from app.models import Complaint, CategoryEnum, TicketComment, Notification
 from app.schemas import ClassificationPayload, ComplaintResponse
+from app.auth import get_current_user, get_current_staff, get_current_admin
 from app.priority_queue import (
     compute_priority_score,
     get_category_live_queue,
@@ -25,9 +26,6 @@ async def classify_complaint_from_model(
     payload: ClassificationPayload,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    REST API endpoint for external ML defect detection models to post classification results.
-    """
     complaint = await db.get(Complaint, complaint_id)
     if not complaint:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Complaint ID {complaint_id} not found")
@@ -62,9 +60,6 @@ async def trigger_mock_classification(
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Interactive test helper endpoint to simulate ML model inference output.
-    """
     complaint = await db.get(Complaint, complaint_id)
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found")
@@ -118,3 +113,81 @@ async def get_category_queue_api(category: str, db: AsyncSession = Depends(get_d
         resp.queue_position = idx
         result.append(resp)
     return result
+
+@router.get("/tickets/{ticket_id}/comments")
+async def get_ticket_comments_api(ticket_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Polling endpoint for live ticket comments & chat.
+    """
+    stmt = select(TicketComment).where(TicketComment.ticket_id == ticket_id).order_by(TicketComment.created_at.asc())
+    res = await db.execute(stmt)
+    comments = res.scalars().all()
+    return [
+        {
+            "id": c.id,
+            "sender_name": c.sender_name,
+            "sender_role": c.sender_role,
+            "message": c.message,
+            "created_at": c.created_at.strftime('%b %d, %H:%M')
+        }
+        for c in comments
+    ]
+
+@router.get("/notifications")
+async def get_notifications_api(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Returns live notifications for the logged-in user or staff.
+    """
+    user = await get_current_user(request, db)
+    staff = await get_current_staff(request, db)
+    admin = await get_current_admin(request, db)
+    
+    if not (user or staff or admin):
+        return {"unread_count": 0, "notifications": []}
+
+    stmt = select(Notification)
+    if user:
+        stmt = stmt.where(Notification.user_id == user.id)
+    elif staff:
+        stmt = stmt.where(Notification.staff_id == staff.id)
+
+    stmt = stmt.order_by(Notification.created_at.desc()).limit(15)
+    res = await db.execute(stmt)
+    notifications = res.scalars().all()
+
+    unread_count = sum(1 for n in notifications if not n.is_read)
+
+    return {
+        "unread_count": unread_count,
+        "notifications": [
+            {
+                "id": n.id,
+                "title": n.title,
+                "message": n.message,
+                "link_url": n.link_url,
+                "is_read": n.is_read,
+                "created_at": n.created_at.strftime('%b %d %H:%M')
+            }
+            for n in notifications
+        ]
+    }
+
+@router.post("/notifications/mark-read")
+async def mark_notifications_read(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    staff = await get_current_staff(request, db)
+
+    if user:
+        stmt = select(Notification).where(Notification.user_id == user.id, Notification.is_read == False)
+    elif staff:
+        stmt = select(Notification).where(Notification.staff_id == staff.id, Notification.is_read == False)
+    else:
+        return {"status": "ok"}
+
+    res = await db.execute(stmt)
+    unread_notifs = res.scalars().all()
+    for n in unread_notifs:
+        n.is_read = True
+
+    await db.commit()
+    return {"status": "ok", "marked": len(unread_notifs)}

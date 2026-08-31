@@ -257,7 +257,6 @@ async def post_ticket_comment(
         sender_name = user.name
         sender_role = "User"
     else:
-        # Require login to post chat comments
         return RedirectResponse(url=f"/user/login?next=/ticket/{ticket_id}", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
         
     comment = TicketComment(
@@ -267,6 +266,26 @@ async def post_ticket_comment(
         message=message.strip()
     )
     db.add(comment)
+
+    # Trigger notification
+    from app.models import Notification
+    if (staff or admin) and complaint.user_id:
+        notif = Notification(
+            user_id=complaint.user_id,
+            title=f"New Message on Ticket #{complaint.id}",
+            message=f"{sender_name} ({sender_role}): {message.strip()[:60]}...",
+            link_url=f"/ticket/{complaint.id}"
+        )
+        db.add(notif)
+    elif user and complaint.assigned_staff_id:
+        notif = Notification(
+            staff_id=complaint.assigned_staff_id,
+            title=f"User Reply on Ticket #{complaint.id}",
+            message=f"{sender_name}: {message.strip()[:60]}...",
+            link_url=f"/ticket/{complaint.id}"
+        )
+        db.add(notif)
+
     await db.commit()
     
     return RedirectResponse(url=f"/ticket/{ticket_id}", status_code=status.HTTP_303_SEE_OTHER)

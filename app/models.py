@@ -1,7 +1,7 @@
 import enum
 import random
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, BigInteger, String, Float, Enum, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, BigInteger, String, Float, Enum, DateTime, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -30,6 +30,7 @@ class User(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     complaints = relationship("Complaint", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
 
 class Staff(Base):
     __tablename__ = "staff_members"
@@ -42,6 +43,7 @@ class Staff(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     assigned_complaints = relationship("Complaint", back_populates="assigned_staff")
+    notifications = relationship("Notification", back_populates="staff", cascade="all, delete-orphan")
 
 class Admin(Base):
     __tablename__ = "admins"
@@ -93,3 +95,18 @@ class TicketComment(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     ticket = relationship("Complaint", back_populates="comments")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    staff_id = Column(Integer, ForeignKey("staff_members.id"), nullable=True)
+    title = Column(String(150), nullable=False)
+    message = Column(Text, nullable=False)
+    link_url = Column(String(255), nullable=True)
+    is_read = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = relationship("User", back_populates="notifications")
+    staff = relationship("Staff", back_populates="notifications")
