@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from app.config import UPLOAD_DIR, BASE_DIR, SECRET_KEY
 from app.database import init_db, AsyncSessionLocal
-from app.models import Staff, Admin, CategoryEnum
+from app.models import User, Staff, Admin, CategoryEnum
 from app.auth import hash_password, get_current_user, get_current_staff, get_current_admin
 from app.routers import user, staff, admin, api, live
 
@@ -44,6 +44,18 @@ async def seed_demo_accounts():
                     domain=domain
                 )
                 session.add(staff_member)
+
+        # Seed Demo Testing User Account
+        user_stmt = select(User).where(User.email == "user@infrapulse.org")
+        if not (await session.execute(user_stmt)).scalar_one_or_none():
+            demo_user = User(
+                name="Demo User",
+                email="user@infrapulse.org",
+                phone="9876543210",
+                password_hash=hash_password("user123")
+            )
+            session.add(demo_user)
+
         await session.commit()
 
 @asynccontextmanager
@@ -54,9 +66,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="InfraPulse - Defect Priority Maintenance & Ticketing Tool",
+    title="InfraPulse - Defect Priority Maintenance System",
     description="Automated defect priority detection and ticketing tool.",
-    version="2.1.0",
+    version="3.0.0",
     lifespan=lifespan
 )
 

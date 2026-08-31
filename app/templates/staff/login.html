@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Staff Portal Login - InfraPulse{% endblock %}
+{% block title %}Staff Login - InfraPulse{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto">
+<div class="max-w-md mx-auto space-y-6">
     <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body">
-            <h2 class="card-title text-2xl font-bold justify-center mb-2">
-                <i class="fa-solid fa-lock text-secondary"></i> Maintenance Staff Portal
+        <div class="card-body p-6">
+            <h2 class="card-title text-2xl font-bold justify-center mb-1">
+                <i class="fa-solid fa-lock text-secondary"></i> Staff Portal Login
             </h2>
             <p class="text-xs text-center text-base-content/70 mb-6">
-                Protected area for maintenance department team members.
+                Sign in to access your staff maintenance control panel.
             </p>
 
             {% if error %}
-            <div class="alert alert-error text-sm mb-4">
+            <div class="alert alert-error text-xs mb-4">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span>{{ error }}</span>
             </div>
@@ -23,12 +23,12 @@
             <form action="/staff/login" method="POST" class="space-y-4">
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Staff Email Address</span></label>
-                    <input type="email" name="email" placeholder="staff@infrapulse.org" class="input input-bordered w-full" required />
+                    <input type="email" name="email" placeholder="e.g., structural@infrapulse.org" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                    <input type="password" name="password" placeholder="e.g., staff123" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control mt-6">
@@ -37,14 +37,41 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
 
-            <div class="alert alert-info text-xs mt-6">
-                <i class="fa-solid fa-info-circle"></i>
-                <span>Default Demo Staff Accounts (Password: <code>staff123</code>):<br/>
-                • <code>structural@infrapulse.org</code> (Structural Domain)<br/>
-                • <code>functional@infrapulse.org</code> (Functional Domain)<br/>
-                • <code>performance@infrapulse.org</code> (Performance Domain)</span>
-            </div>
+    <!-- Clean Formatted Demo Accounts Hint Box -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
+        <h4 class="text-xs font-bold text-base-content/70 uppercase tracking-wider mb-2 flex items-center gap-1">
+            <i class="fa-solid fa-key text-secondary"></i> Demo Staff Accounts
+        </h4>
+        <div class="overflow-x-auto">
+            <table class="table table-xs w-full text-xs">
+                <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono">
+                    <tr>
+                        <td class="font-sans font-semibold text-error">Structural</td>
+                        <td>structural@infrapulse.org</td>
+                        <td>staff123</td>
+                    </tr>
+                    <tr>
+                        <td class="font-sans font-semibold text-warning">Functional</td>
+                        <td>functional@infrapulse.org</td>
+                        <td>staff123</td>
+                    </tr>
+                    <tr>
+                        <td class="font-sans font-semibold text-info">Performance</td>
+                        <td>performance@infrapulse.org</td>
+                        <td>staff123</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

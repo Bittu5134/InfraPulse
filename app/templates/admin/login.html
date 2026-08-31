@@ -3,18 +3,18 @@
 {% block title %}Admin Login - InfraPulse{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto">
+<div class="max-w-md mx-auto space-y-6">
     <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body">
-            <h2 class="card-title text-2xl font-bold justify-center mb-2">
-                <i class="fa-solid fa-screwdriver-wrench text-neutral"></i> System Admin Portal
+        <div class="card-body p-6">
+            <h2 class="card-title text-2xl font-bold justify-center mb-1">
+                <i class="fa-solid fa-screwdriver-wrench text-neutral"></i> Admin Portal Login
             </h2>
             <p class="text-xs text-center text-base-content/70 mb-6">
-                Administrative access for staff management, system metrics, and ticket oversight.
+                Administrative access for staff management and system oversight.
             </p>
 
             {% if error %}
-            <div class="alert alert-error text-sm mb-4">
+            <div class="alert alert-error text-xs mb-4">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span>{{ error }}</span>
             </div>
@@ -23,12 +23,12 @@
             <form action="/admin/login" method="POST" class="space-y-4">
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Admin Email</span></label>
-                    <input type="email" name="email" placeholder="admin@infrapulse.org" class="input input-bordered w-full" required />
+                    <input type="email" name="email" placeholder="e.g., admin@infrapulse.org" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                    <input type="password" name="password" placeholder="e.g., admin123" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control mt-6">
@@ -37,12 +37,31 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
 
-            <div class="alert alert-info text-xs mt-6">
-                <i class="fa-solid fa-info-circle"></i>
-                <span>Default Admin Account (Password: <code>admin123</code>):<br/>
-                • <code>admin@infrapulse.org</code></span>
-            </div>
+    <!-- Formatted Demo Admin Credentials Hint Box -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
+        <h4 class="text-xs font-bold text-base-content/70 uppercase tracking-wider mb-2 flex items-center gap-1">
+            <i class="fa-solid fa-key text-warning"></i> Demo Admin Account
+        </h4>
+        <div class="overflow-x-auto">
+            <table class="table table-xs w-full text-xs">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono">
+                    <tr>
+                        <td class="font-sans font-semibold">Administrator</td>
+                        <td>admin@infrapulse.org</td>
+                        <td>admin123</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

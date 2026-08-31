@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 from io import BytesIO
+from PIL import Image
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import select
@@ -21,6 +22,13 @@ async def override_get_db():
         yield session
 
 app.dependency_overrides[get_db] = override_get_db
+
+def create_test_png():
+    buf = BytesIO()
+    img = Image.new("RGB", (20, 20), color="blue")
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
 
 @pytest_asyncio.fixture(autouse=True)
 async def init_test_db():
@@ -60,7 +68,6 @@ async def test_priority_score_computation():
 async def test_user_registration_login_and_ticket_submission():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
-        # Register user
         reg_resp = await client.post(
             "/user/register",
             data={
@@ -73,8 +80,7 @@ async def test_user_registration_login_and_ticket_submission():
         )
         assert reg_resp.status_code == 200
 
-        # Submit ticket
-        fake_file = BytesIO(b"fake image")
+        fake_file = create_test_png()
         sub_resp = await client.post(
             "/user/submit",
             data={
@@ -84,24 +90,23 @@ async def test_user_registration_login_and_ticket_submission():
                 "address": "Block 5, Flat 12",
                 "description": "Concrete spalling on main beam"
             },
-            files={"photo": ("spalling.jpg", fake_file, "image/jpeg")},
+            files={"photo": ("spalling.png", fake_file, "image/png")},
             follow_redirects=True
         )
         assert sub_resp.status_code == 200
-        assert "INF-1" in sub_resp.text or "Bob Builder" in sub_resp.text
+        assert "Bob Builder" in sub_resp.text or "Spalling" in sub_resp.text
 
 @pytest.mark.asyncio
 async def test_staff_login_and_self_assignment():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
-        # Register and login user to create ticket
         await client.post(
             "/user/register",
             data={"name": "Charlie", "email": "charlie@example.com", "password": "pass"},
             follow_redirects=True
         )
-        fake_file = BytesIO(b"img")
-        await client.post(
+        fake_file = create_test_png()
+        sub_resp = await client.post(
             "/user/submit",
             data={
                 "user_name": "Charlie",
@@ -109,15 +114,14 @@ async def test_staff_login_and_self_assignment():
                 "address": "Hall 3",
                 "description": "Concrete spalling structural issue"
             },
-            files={"photo": ("photo.jpg", fake_file, "image/jpeg")},
+            files={"photo": ("photo.png", fake_file, "image/png")},
             follow_redirects=True
         )
+        assert sub_resp.status_code == 200
         
-        # Access staff queue unauthenticated -> redirected to login
         unauth_resp = await client.get("/staff/queue", follow_redirects=False)
         assert unauth_resp.status_code in [303, 307]
 
-        # Login as staff
         login_resp = await client.post(
             "/staff/login",
             data={"email": "alice@infrapulse.org", "password": "staff123"},
@@ -126,7 +130,6 @@ async def test_staff_login_and_self_assignment():
         assert login_resp.status_code == 200
         assert "Master Staff Control Panel" in login_resp.text
 
-        # Assign ticket to self using its 10-digit ID
         async with TestingSessionLocal() as session:
             stmt = select(Complaint).where(Complaint.user_email == "charlie@example.com")
             res = await session.execute(stmt)

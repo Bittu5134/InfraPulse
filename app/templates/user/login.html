@@ -3,9 +3,9 @@
 {% block title %}Sign In - InfraPulse{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto">
+<div class="max-w-md mx-auto space-y-6">
     <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body">
+        <div class="card-body p-6">
             <h2 class="card-title text-2xl font-bold justify-center mb-1">
                 <i class="fa-solid fa-right-to-bracket text-primary"></i> User Sign In
             </h2>
@@ -34,12 +34,12 @@
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Email Address</span></label>
-                    <input type="email" name="email" placeholder="e.g. user@example.com" class="input input-bordered w-full text-sm" required />
+                    <input type="email" name="email" placeholder="e.g., user@infrapulse.org" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" placeholder="e.g. password" class="input input-bordered w-full text-sm" required />
+                    <input type="password" name="password" placeholder="e.g., user123" class="input input-bordered w-full text-sm" required />
                 </div>
 
                 <div class="form-control mt-6">
@@ -56,6 +56,31 @@
                     Create New Account
                 </a>
             </div>
+        </div>
+    </div>
+
+    <!-- Formatted Demo User Account Hint Box -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
+        <h4 class="text-xs font-bold text-base-content/70 uppercase tracking-wider mb-2 flex items-center gap-1">
+            <i class="fa-solid fa-user-check text-primary"></i> Demo User Account
+        </h4>
+        <div class="overflow-x-auto">
+            <table class="table table-xs w-full text-xs">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono">
+                    <tr>
+                        <td class="font-sans font-semibold">Test User</td>
+                        <td>user@infrapulse.org</td>
+                        <td>user123</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

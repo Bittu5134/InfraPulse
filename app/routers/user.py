@@ -137,23 +137,31 @@ async def handle_complaint_submit(
     if not user:
         return RedirectResponse(url="/user/login?next=/user/submit", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
-    ext = Path(photo.filename).suffix.lower()
-    if ext not in ALLOWED_EXTENSIONS:
+    try:
+        from PIL import Image
+        import io
+
+        content = await photo.read()
+        image = Image.open(io.BytesIO(content))
+        
+        # Convert any format (JPEG, WEBP, BMP, GIF, etc.) to RGB and save as PNG
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGBA")
+        else:
+            image = image.convert("RGB")
+            
+        unique_filename = f"{uuid.uuid4().hex}.png"
+        file_path = UPLOAD_DIR / unique_filename
+        image.save(file_path, format="PNG")
+        
+        relative_photo_url = f"/static/uploads/{unique_filename}"
+    except Exception as e:
         return templates.TemplateResponse(
             request=request,
             name="user/submit.html",
-            context={"current_user": user, "error": f"Invalid image format '{ext}'. Supported: JPG, PNG, WEBP."}
+            context={"current_user": user, "error": f"Invalid image file. Could not process image: {str(e)}"}
         )
-        
-    unique_filename = f"{uuid.uuid4().hex}{ext}"
-    file_path = UPLOAD_DIR / unique_filename
-    
-    content = await photo.read()
-    with open(file_path, "wb") as f:
-        f.write(content)
-        
-    relative_photo_url = f"/static/uploads/{unique_filename}"
-    
+
     auto_class = mock_classify_defect(description, photo.filename)
     defect_name = auto_class["defect_name"]
     category = auto_class["category"]
