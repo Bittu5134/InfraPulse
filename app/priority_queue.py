@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import select
+from sqlalchemy import select, or_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import CATEGORY_WEIGHTS, DEFECT_PRIORITY_BOOST
 from app.models import Complaint, CategoryEnum, StatusEnum
@@ -23,19 +23,82 @@ def compute_priority_score(category: Optional[CategoryEnum], defect_name: Option
     total_score = (severity_component + extent_component + defect_boost) * cat_weight
     return round(total_score, 2)
 
-async def get_all_active_queue(db: AsyncSession, category_filter: Optional[CategoryEnum] = None) -> List[Complaint]:
+async def get_staff_tickets_filtered(
+    db: AsyncSession,
+    status_filter: Optional[str] = None,
+    category_filter: Optional[str] = None,
+    min_severity: Optional[float] = None,
+    search_query: Optional[str] = None,
+    sort_by: str = "priority_desc",
+    include_resolved: bool = True
+) -> List[Complaint]:
     """
-    Fetches active complaints ordered by priority_score descending, then created_at ascending.
-    Resolved complaints are automatically excluded.
-    Can filter by category if specified.
+    Fetches staff tickets with full dynamic filtering:
+    - Include resolved or active only
+    - Filter by Status (Submitted, Assigned, In Progress, Resolved)
+    - Filter by Category (Structural, Functional, Performance)
+    - Minimum severity threshold
+    - Search by ID, User Name, Email, Address, or Description
+    - Sort options: priority_desc, date_desc, date_asc, severity_desc
     """
-    stmt = select(Complaint).where(Complaint.status != StatusEnum.RESOLVED)
-    if category_filter:
-        stmt = stmt.where(Complaint.category == category_filter)
+    stmt = select(Complaint)
+    
+    if not include_resolved:
+        stmt = stmt.where(Complaint.status != StatusEnum.RESOLVED)
         
-    stmt = stmt.order_by(Complaint.priority_score.desc(), Complaint.created_at.asc())
+    if status_filter and status_filter.lower() != "all":
+        try:
+            st_enum = StatusEnum(status_filter)
+            stmt = stmt.where(Complaint.status == st_enum)
+        except ValueError:
+            pass
+
+    if category_filter and category_filter.lower() != "all":
+        try:
+            cat_enum = CategoryEnum(category_filter.capitalize())
+            stmt = stmt.where(Complaint.category == cat_enum)
+        except ValueError:
+            pass
+
+    if min_severity is not None and min_severity > 0:
+        stmt = stmt.where(Complaint.severity >= min_severity)
+
+    if search_query and search_query.strip():
+        q = f"%{search_query.strip().lower()}%"
+        # If numeric search, match ID directly
+        if search_query.strip().isdigit():
+            target_id = int(search_query.strip())
+            stmt = stmt.where(or_(Complaint.id == target_id, Complaint.user_name.ilike(q), Complaint.address.ilike(q)))
+        else:
+            stmt = stmt.where(
+                or_(
+                    Complaint.user_name.ilike(q),
+                    Complaint.user_email.ilike(q),
+                    Complaint.address.ilike(q),
+                    Complaint.description.ilike(q),
+                    Complaint.defect_name.ilike(q)
+                )
+            )
+
+    # Sorting
+    if sort_by == "date_desc":
+        stmt = stmt.order_by(Complaint.created_at.desc())
+    elif sort_by == "date_asc":
+        stmt = stmt.order_by(Complaint.created_at.asc())
+    elif sort_by == "severity_desc":
+        stmt = stmt.order_by(Complaint.severity.desc(), Complaint.priority_score.desc())
+    else:  # default priority_desc
+        stmt = stmt.order_by(Complaint.priority_score.desc(), Complaint.created_at.asc())
+
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+async def get_all_active_queue(db: AsyncSession, category_filter: Optional[CategoryEnum] = None) -> List[Complaint]:
+    return await get_staff_tickets_filtered(
+        db,
+        category_filter=category_filter.value if (category_filter and hasattr(category_filter, 'value')) else (str(category_filter) if category_filter else None),
+        include_resolved=False
+    )
 
 async def get_category_live_queue(db: AsyncSession, category: CategoryEnum) -> List[Complaint]:
     return await get_all_active_queue(db, category_filter=category)

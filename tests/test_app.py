@@ -3,11 +3,10 @@ import pytest_asyncio
 from io import BytesIO
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy import select
 
-from app.main import app, seed_demo_accounts
+from app.main import app
 from app.database import Base, get_db
-from app.models import User, Staff, Admin, Complaint, CategoryEnum, StatusEnum
+from app.models import Staff, Admin, CategoryEnum
 from app.auth import hash_password
 from app.priority_queue import compute_priority_score
 
@@ -60,6 +59,7 @@ async def test_priority_score_computation():
 async def test_user_registration_login_and_ticket_submission():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+        # Register user
         reg_resp = await client.post(
             "/user/register",
             data={
@@ -72,6 +72,7 @@ async def test_user_registration_login_and_ticket_submission():
         )
         assert reg_resp.status_code == 200
 
+        # Submit ticket
         fake_file = BytesIO(b"fake image")
         sub_resp = await client.post(
             "/user/submit",
@@ -92,6 +93,12 @@ async def test_user_registration_login_and_ticket_submission():
 async def test_staff_login_and_self_assignment():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+        # Register and login user to create ticket
+        await client.post(
+            "/user/register",
+            data={"name": "Charlie", "email": "charlie@example.com", "password": "pass"},
+            follow_redirects=True
+        )
         fake_file = BytesIO(b"img")
         await client.post(
             "/user/submit",
@@ -101,20 +108,24 @@ async def test_staff_login_and_self_assignment():
                 "address": "Hall 3",
                 "description": "Concrete spalling structural issue"
             },
-            files={"photo": ("photo.jpg", fake_file, "image/jpeg")}
+            files={"photo": ("photo.jpg", fake_file, "image/jpeg")},
+            follow_redirects=True
         )
         
+        # Access staff queue unauthenticated -> redirected to login
         unauth_resp = await client.get("/staff/queue", follow_redirects=False)
         assert unauth_resp.status_code in [303, 307]
 
+        # Login as staff
         login_resp = await client.post(
             "/staff/login",
             data={"email": "alice@infrapulse.org", "password": "staff123"},
             follow_redirects=True
         )
         assert login_resp.status_code == 200
-        assert "Master Priority Queue" in login_resp.text
+        assert "Master Staff Control Panel" in login_resp.text
 
+        # Assign ticket #1 to self
         assign_resp = await client.post("/staff/assign/1", follow_redirects=True)
         assert assign_resp.status_code == 200
         assert "Alice Structural" in assign_resp.text

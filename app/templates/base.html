@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Defect Priority Maintenance & Ticketing Tool{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Infrastructure Maintenance & Defect Portal{% endblock %}</title>
     
     <!-- DaisyUI & Tailwind CSS via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -29,12 +29,21 @@
 </head>
 <body class="min-h-screen bg-base-200 text-base-content flex flex-col font-sans">
 
-    <!-- Header Navbar -->
+    <!-- Official Top Bar / Banner -->
+    <div class="bg-primary text-primary-content text-[11px] py-1 px-4 text-center font-medium flex justify-between items-center">
+        <span><i class="fa-solid fa-building-columns mr-1"></i> Public Works Infrastructure & Maintenance System</span>
+        <span class="hidden sm:inline">24x7 Helpline: 1800-INFRA-PULSE</span>
+    </div>
+
+    <!-- Main Header Navbar -->
     <div class="navbar bg-base-100 shadow-sm border-b border-base-300 px-4 md:px-8">
         <div class="flex-1">
             <a href="/" class="btn btn-ghost text-xl font-extrabold flex items-center gap-2">
-                <i class="fa-solid fa-ticket-simple text-primary text-2xl"></i>
-                <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">InfraPulse</span>
+                <i class="fa-solid fa-shield-halved text-primary text-2xl"></i>
+                <div class="text-left leading-none">
+                    <div class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold text-2xl">InfraPulse</div>
+                    <div class="text-[9px] text-base-content/60 font-semibold tracking-wider uppercase">Defect Priority Portal</div>
+                </div>
             </a>
         </div>
         
@@ -45,35 +54,59 @@
                 <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
             </button>
 
-            <!-- User Portal Button -->
-            <a href="{% if current_user %}/user/dashboard{% else %}/user/submit{% endif %}" class="btn btn-primary btn-sm sm:btn-md gap-2">
-                <i class="fa-solid fa-ticket"></i>
-                <span>User Portal</span>
+            <!-- Single Primary Create Ticket Button -->
+            <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2 shadow-sm">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Create Ticket</span>
             </a>
 
-            <!-- Staff Portal Button -->
-            <a href="/staff" class="btn btn-secondary btn-sm sm:btn-md gap-2">
+            <!-- User Panel / My Tickets -->
+            {% if current_user %}
+                <a href="/user/dashboard" class="btn btn-outline btn-primary btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span class="hidden sm:inline">My Tickets</span>
+                </a>
+                <a href="/user/logout" class="btn btn-ghost btn-sm text-error" title="Logout User">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            {% else %}
+                <a href="/user/login" class="btn btn-ghost btn-sm sm:btn-md gap-1">
+                    <i class="fa-solid fa-user"></i>
+                    <span class="hidden sm:inline">Sign In</span>
+                </a>
+            {% endif %}
+
+            <div class="divider divider-horizontal my-2 mx-0"></div>
+
+            <!-- Staff Portal -->
+            <a href="/staff" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
                 <i class="fa-solid fa-user-shield"></i>
-                <span>Staff Portal</span>
+                <span class="hidden sm:inline">Staff</span>
             </a>
 
-            <!-- Admin Portal Button -->
-            <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-                <span class="hidden sm:inline">Admin</span>
+            <!-- Admin Portal -->
+            <a href="/admin" class="btn btn-neutral btn-ghost btn-sm sm:btn-md gap-2">
+                <i class="fa-solid fa-gear"></i>
+                <span class="hidden md:inline">Admin</span>
             </a>
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-300 mt-auto">
-        <aside>
-            <p>© 2026 InfraPulse - Infrastructure Defect Priority Maintenance & Ticketing Tool</p>
+    <!-- Official Government / Civic Footer -->
+    <footer class="footer footer-center p-6 bg-base-100 text-base-content border-t border-base-300 mt-auto">
+        <aside class="space-y-2">
+            <div class="flex items-center justify-center gap-2 font-bold text-lg">
+                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Infrastructure Maintenance Portal
+            </div>
+            <p class="text-xs text-base-content/70">
+                Official Civic Maintenance & Defect Priority System • Built for Public Safety & Facility Management
+            </p>
+            <p class="text-[11px] text-base-content/50">© 2026 InfraPulse Services. All Rights Reserved.</p>
         </aside>
     </footer>
 

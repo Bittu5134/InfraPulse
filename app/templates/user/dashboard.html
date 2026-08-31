@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}My Tickets - InfraPulse{% endblock %}
+{% block title %}My Tickets Panel - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
         <div>
             <h2 class="text-3xl font-extrabold flex items-center gap-2">
-                <i class="fa-solid fa-ticket text-primary"></i> My Submitted Tickets
+                <i class="fa-solid fa-ticket text-primary"></i> My Defect Tickets Panel
             </h2>
             <p class="text-xs text-base-content/70">
-                Track resolution status and assigned maintenance staff for your tickets.
+                Logged in as <strong>{{ current_user.name }}</strong> ({{ current_user.email }})
             </p>
         </div>
         <a href="/user/submit" class="btn btn-primary btn-sm gap-2">
@@ -18,13 +19,37 @@
         </a>
     </div>
 
+    <!-- Search & Filter Controls Bar -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 p-4">
+        <form action="/user/dashboard" method="GET" class="flex flex-wrap gap-4 items-center justify-between">
+            <!-- Filter by Status -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold">Status:</span>
+                <select name="status" onchange="this.form.submit()" class="select select-bordered select-sm">
+                    <option value="all" {% if current_status == 'all' or not current_status %}selected{% endif %}>All Tickets</option>
+                    <option value="Submitted" {% if current_status == 'Submitted' %}selected{% endif %}>Submitted</option>
+                    <option value="Assigned" {% if current_status == 'Assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="In Progress" {% if current_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Resolved" {% if current_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+
+            <!-- Search Input -->
+            <div class="flex items-center gap-2 flex-1 max-w-md">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID (#12), address, or defect..." class="input input-bordered input-sm w-full" />
+                <button type="submit" class="btn btn-sm btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tickets List -->
     {% if not complaints %}
     <div class="card bg-base-100 shadow-md border border-base-300 p-12 text-center">
         <i class="fa-solid fa-clipboard-list text-5xl text-base-content/30 mb-4"></i>
         <h3 class="text-xl font-bold">No Tickets Found</h3>
-        <p class="text-sm text-base-content/60 mb-6">You haven't submitted any maintenance tickets yet.</p>
+        <p class="text-xs text-base-content/60 mb-6">No matching maintenance tickets found for your account.</p>
         <div>
-            <a href="/user/submit" class="btn btn-primary">Submit First Ticket</a>
+            <a href="/user/submit" class="btn btn-primary btn-sm">Create Defect Ticket</a>
         </div>
     </div>
     {% else %}
@@ -51,46 +76,56 @@
 
             <div class="card-body p-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-                    <!-- Photo -->
+                    <!-- Photograph -->
                     <div class="w-full h-36 rounded-xl overflow-hidden border border-base-300 bg-base-300">
                         <img src="{{ item.photo_path }}" alt="Photo" class="w-full h-full object-cover" />
                     </div>
 
-                    <!-- Details -->
+                    <!-- Defect Info -->
                     <div class="md:col-span-2 space-y-2">
-                        <div class="flex items-center gap-2">
-                            <span class="badge badge-neutral font-bold">{{ item.defect_name or "Pending Analysis" }}</span>
-                            {% if item.category %}
-                                <span class="badge badge-outline font-semibold">{{ item.category.value }}</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            {% if item.category == "Structural" %}
+                                <span class="badge badge-error font-bold"><i class="fa-solid fa-building text-xs mr-1"></i> Structural</span>
+                            {% elif item.category == "Functional" %}
+                                <span class="badge badge-warning font-bold"><i class="fa-solid fa-droplet text-xs mr-1"></i> Functional</span>
+                            {% elif item.category == "Performance" %}
+                                <span class="badge badge-info font-bold"><i class="fa-solid fa-paint-roller text-xs mr-1"></i> Performance</span>
                             {% endif %}
+                            <span class="font-bold text-base">{{ item.defect_name or "Pending Analysis" }}</span>
                         </div>
-                        <p class="text-sm font-semibold">{{ item.address }}</p>
-                        <p class="text-xs text-base-content/70 italic">"{{ item.description }}"</p>
+
+                        <p class="text-xs font-semibold text-base-content/80">
+                            <i class="fa-solid fa-location-dot text-error mr-1"></i> {{ item.address }}
+                        </p>
+
+                        <p class="text-xs text-base-content/70 italic bg-base-200 p-2 rounded-lg border border-base-300">
+                            "{{ item.description }}"
+                        </p>
                         
-                        <!-- Assigned Staff Info -->
-                        <div class="pt-2 text-xs flex items-center gap-2">
+                        <!-- Assigned Staff -->
+                        <div class="pt-1 text-xs flex items-center gap-2">
                             <span class="font-semibold text-base-content/60">Assigned Staff:</span>
                             {% if item.assigned_staff_name %}
                                 <span class="badge badge-secondary badge-sm gap-1">
                                     <i class="fa-solid fa-user-gear"></i> {{ item.assigned_staff_name }}
                                 </span>
                             {% else %}
-                                <span class="text-base-content/50 italic">Unassigned</span>
+                                <span class="text-base-content/50 italic">Unassigned (Pending Dispatch)</span>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Standing / Priority -->
+                    <!-- Standing & Priority -->
                     <div class="text-center md:text-right border-t md:border-t-0 md:border-l border-base-200 pt-4 md:pt-0 md:pl-6 space-y-2">
                         <div class="text-xs text-base-content/60">Priority Score</div>
                         <div class="text-2xl font-extrabold font-mono text-primary">{{ item.priority_score }}</div>
                         <div class="text-xs text-base-content/60">
                             {% if item.status == "Resolved" %}
-                                <span class="text-success font-bold">Resolved & Closed</span>
+                                <span class="text-success font-bold"><i class="fa-solid fa-circle-check"></i> Ticket Resolved</span>
                             {% elif item.queue_position %}
-                                Position <strong>#{{ item.queue_position }}</strong> in Category Queue
+                                Position <strong>#{{ item.queue_position }}</strong> in Priority Queue
                             {% else %}
-                                In Queue
+                                Priority Queue Standing
                             {% endif %}
                         </div>
                     </div>

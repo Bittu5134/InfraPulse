@@ -9,7 +9,7 @@ from app.config import BASE_DIR
 from app.database import get_db
 from app.models import Staff, Complaint, CategoryEnum, StatusEnum
 from app.auth import verify_password, get_current_staff, get_current_user, require_staff, get_current_admin
-from app.priority_queue import get_all_active_queue
+from app.priority_queue import get_staff_tickets_filtered
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
@@ -71,6 +71,11 @@ async def staff_queue_page(
     request: Request,
     category_str: Optional[str] = None,
     category: Optional[str] = Query(None),
+    status_filter: Optional[str] = Query(None, alias="status"),
+    min_severity: Optional[float] = Query(None),
+    sort_by: str = Query("priority_desc"),
+    search: Optional[str] = Query(None),
+    include_resolved: bool = Query(True),
     db: AsyncSession = Depends(get_db)
 ):
     staff = await get_current_staff(request, db)
@@ -80,15 +85,18 @@ async def staff_queue_page(
     if not staff:
         return RedirectResponse(url="/staff/login", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
         
-    cat_filter = None
-    target_cat_str = category or category_str
-    if target_cat_str and target_cat_str.lower() != "all":
-        try:
-            cat_filter = CategoryEnum(target_cat_str.capitalize())
-        except ValueError:
-            pass
-            
-    complaints = await get_all_active_queue(db, category_filter=cat_filter)
+    cat_param = category or category_str
+    
+    complaints = await get_staff_tickets_filtered(
+        db,
+        status_filter=status_filter,
+        category_filter=cat_param,
+        min_severity=min_severity,
+        search_query=search,
+        sort_by=sort_by,
+        include_resolved=include_resolved
+    )
+    
     return templates.TemplateResponse(
         request=request,
         name="staff/queue.html",
@@ -96,9 +104,15 @@ async def staff_queue_page(
             "current_user": user,
             "current_staff": staff,
             "current_admin": admin,
-            "current_category": cat_filter.value if cat_filter else None,
-            "category": cat_filter.value if cat_filter else "Master Queue",
-            "complaints": complaints
+            "complaints": complaints,
+            "current_status": status_filter or "all",
+            "current_category": cat_param or "all",
+            "min_severity": min_severity or 0,
+            "sort_by": sort_by,
+            "search_query": search or "",
+            "include_resolved": include_resolved,
+            "status_options": ["All", "Submitted", "Assigned", "In Progress", "Resolved"],
+            "category_options": ["All", "Structural", "Functional", "Performance"]
         }
     )
 

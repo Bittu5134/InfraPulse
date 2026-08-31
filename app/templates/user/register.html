@@ -1,26 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}User Registration - InfraPulse{% endblock %}
+{% block title %}Create Account - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto">
     <div class="card bg-base-100 shadow-xl border border-base-300">
         <div class="card-body">
-            <h2 class="card-title text-2xl font-bold justify-center mb-2">
-                <i class="fa-solid fa-user-plus text-primary"></i> Create User Account
+            <h2 class="card-title text-2xl font-bold justify-center mb-1">
+                <i class="fa-solid fa-user-plus text-primary"></i> Create Account
             </h2>
-            <p class="text-xs text-center text-base-content/70 mb-6">
-                Register to easily manage tickets and receive resolution updates.
+            <p class="text-xs text-center text-base-content/70 mb-4">
+                Register a public user account to submit & track maintenance tickets.
             </p>
 
             {% if error %}
-            <div class="alert alert-error text-sm mb-4">
+            <div class="alert alert-error text-xs mb-4">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span>{{ error }}</span>
             </div>
             {% endif %}
 
             <form action="/user/register" method="POST" class="space-y-4">
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
                     <input type="text" name="name" placeholder="Rahul Sharma" class="input input-bordered w-full" required />
@@ -49,7 +53,7 @@
             </form>
 
             <div class="text-center mt-4">
-                <a href="/user/login" class="text-xs link link-hover">Already have an account? Sign in</a>
+                <a href="/user/login{% if next %}?next={{ next }}{% endif %}" class="text-xs link link-hover">Already have an account? Sign in</a>
             </div>
         </div>
     </div>

@@ -1,15 +1,16 @@
 import uuid
 from pathlib import Path
-from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 
 from app.config import BASE_DIR, UPLOAD_DIR, ALLOWED_EXTENSIONS
 from app.database import get_db
 from app.models import User, Complaint, CategoryEnum, StatusEnum
-from app.auth import hash_password, verify_password, get_current_user, get_current_staff, get_current_admin
+from app.auth import hash_password, verify_password, get_current_user, get_current_staff, get_current_admin, require_user
 from app.priority_queue import compute_priority_score, get_queue_position, mock_classify_defect
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
@@ -17,14 +18,16 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 router = APIRouter(prefix="/user", tags=["User Portal"])
 
 @router.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request, db: AsyncSession = Depends(get_db)):
+async def register_page(request: Request, next: Optional[str] = None, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     staff = await get_current_staff(request, db)
     admin = await get_current_admin(request, db)
+    if user:
+        return RedirectResponse(url=next or "/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(
         request=request,
         name="user/register.html",
-        context={"current_user": user, "current_staff": staff, "current_admin": admin, "error": None}
+        context={"current_user": None, "current_staff": staff, "current_admin": admin, "next": next, "error": None}
     )
 
 @router.post("/register")
@@ -34,6 +37,7 @@ async def handle_user_register(
     email: str = Form(...),
     phone: str = Form(None),
     password: str = Form(...),
+    next: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db)
 ):
     email_clean = email.strip().lower()
@@ -45,7 +49,7 @@ async def handle_user_register(
         return templates.TemplateResponse(
             request=request,
             name="user/register.html",
-            context={"error": "An account with this email already exists."}
+            context={"error": "An account with this email address already exists. Please login instead.", "next": next}
         )
         
     user = User(
@@ -59,17 +63,20 @@ async def handle_user_register(
     await db.refresh(user)
     
     request.session["user_id"] = user.id
-    return RedirectResponse(url="/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    target_url = next if (next and next.startswith("/")) else "/user/dashboard"
+    return RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, db: AsyncSession = Depends(get_db)):
+async def login_page(request: Request, next: Optional[str] = None, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     staff = await get_current_staff(request, db)
     admin = await get_current_admin(request, db)
+    if user:
+        return RedirectResponse(url=next or "/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(
         request=request,
         name="user/login.html",
-        context={"current_user": user, "current_staff": staff, "current_admin": admin, "error": None}
+        context={"current_user": None, "current_staff": staff, "current_admin": admin, "next": next, "error": None}
     )
 
 @router.post("/login")
@@ -77,6 +84,7 @@ async def handle_user_login(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
+    next: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db)
 ):
     email_clean = email.strip().lower()
@@ -88,11 +96,12 @@ async def handle_user_login(
         return templates.TemplateResponse(
             request=request,
             name="user/login.html",
-            context={"error": "Invalid email or password."}
+            context={"error": "Invalid user email or password. Please try again.", "next": next}
         )
         
     request.session["user_id"] = user.id
-    return RedirectResponse(url="/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    target_url = next if (next and next.startswith("/")) else "/user/dashboard"
+    return RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/logout")
 async def handle_user_logout(request: Request):
@@ -101,7 +110,11 @@ async def handle_user_logout(request: Request):
 
 @router.get("/submit", response_class=HTMLResponse)
 async def submit_form_page(request: Request, db: AsyncSession = Depends(get_db)):
+    # Creating a ticket requires login first!
     user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url="/user/login?next=/user/submit", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        
     staff = await get_current_staff(request, db)
     admin = await get_current_admin(request, db)
     return templates.TemplateResponse(
@@ -122,6 +135,9 @@ async def handle_complaint_submit(
     db: AsyncSession = Depends(get_db)
 ):
     user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url="/user/login?next=/user/submit", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
     ext = Path(photo.filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         return templates.TemplateResponse(
@@ -148,10 +164,10 @@ async def handle_complaint_submit(
     priority_score = compute_priority_score(category, defect_name, severity, extent)
     
     complaint = Complaint(
-        user_id=user.id if user else None,
-        user_name=user_name.strip(),
-        user_email=user_email.strip().lower(),
-        user_phone=user_phone.strip() if user_phone else None,
+        user_id=user.id,
+        user_name=user_name.strip() or user.name,
+        user_email=user_email.strip().lower() or user.email,
+        user_phone=user_phone.strip() if user_phone else user.phone,
         address=address.strip(),
         description=description.strip(),
         photo_path=relative_photo_url,
@@ -167,27 +183,44 @@ async def handle_complaint_submit(
     await db.commit()
     await db.refresh(complaint)
     
-    if user:
-        return RedirectResponse(url="/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
-    return RedirectResponse(url=f"/user/dashboard?email={user_email.strip().lower()}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/user/dashboard", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/dashboard", response_class=HTMLResponse)
-async def user_dashboard(request: Request, email: str = None, db: AsyncSession = Depends(get_db)):
-    user = await get_current_user(request, db)
+async def user_dashboard(
+    request: Request,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    search: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db)
+):
+    user = await require_user(request, db)
     staff = await get_current_staff(request, db)
     admin = await get_current_admin(request, db)
     
-    query_email = user.email if user else (email.strip().lower() if email else None)
+    stmt = select(Complaint).where(
+        or_(Complaint.user_id == user.id, Complaint.user_email == user.email)
+    )
     
-    complaints = []
-    if query_email:
-        stmt = select(Complaint).where(Complaint.user_email == query_email).order_by(Complaint.created_at.desc())
-        res = await db.execute(stmt)
-        complaints = list(res.scalars().all())
-        
-        for c in complaints:
-            c.queue_position = await get_queue_position(db, c)
+    if status_filter and status_filter.lower() != "all":
+        try:
+            st_enum = StatusEnum(status_filter)
+            stmt = stmt.where(Complaint.status == st_enum)
+        except ValueError:
+            pass
             
+    if search and search.strip():
+        q = f"%{search.strip().lower()}%"
+        if search.strip().isdigit():
+            stmt = stmt.where(or_(Complaint.id == int(search.strip()), Complaint.address.ilike(q)))
+        else:
+            stmt = stmt.where(or_(Complaint.address.ilike(q), Complaint.description.ilike(q), Complaint.defect_name.ilike(q)))
+
+    stmt = stmt.order_by(Complaint.created_at.desc())
+    res = await db.execute(stmt)
+    complaints = list(res.scalars().all())
+    
+    for c in complaints:
+        c.queue_position = await get_queue_position(db, c)
+        
     return templates.TemplateResponse(
         request=request,
         name="user/dashboard.html",
@@ -195,6 +228,8 @@ async def user_dashboard(request: Request, email: str = None, db: AsyncSession =
             "current_user": user,
             "current_staff": staff,
             "current_admin": admin,
-            "complaints": complaints
+            "complaints": complaints,
+            "current_status": status_filter,
+            "search_query": search or ""
         }
     )

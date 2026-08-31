@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Master Queue - Staff Portal{% endblock %}
+{% block title %}Master Ticket Control Panel - Staff Portal{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Header -->
+    <!-- Staff Header -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-3xl">
-                <i class="fa-solid fa-clipboard-list"></i>
+                <i class="fa-solid fa-clipboard-check"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-extrabold">Master Priority Queue</h2>
+                <h2 class="text-3xl font-extrabold">Master Staff Control Panel</h2>
                 <p class="text-xs text-base-content/70">
                     Logged in as <strong>{{ current_staff.name }}</strong> ({{ current_staff.domain.value }} Department)
                 </p>
@@ -20,28 +20,83 @@
 
         <div class="flex items-center gap-2">
             <a href="/staff/logout" class="btn btn-outline btn-error btn-sm gap-1">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
+                <i class="fa-solid fa-right-from-bracket"></i> Logout Staff
             </a>
         </div>
     </div>
 
-    <!-- Department Category Tabs -->
-    <div class="tabs tabs-boxed bg-base-100 border border-base-300 p-1.5 flex flex-wrap gap-2">
-        <a href="/staff/queue" class="tab {% if not current_category %}tab-active font-bold{% endif %}">
-            <i class="fa-solid fa-layer-group text-xs mr-1"></i> All Tickets Queue
-        </a>
-        <a href="/staff/queue?category=Structural" class="tab {% if current_category == 'Structural' %}tab-active font-bold text-error{% endif %}">
-            <i class="fa-solid fa-building text-xs mr-1"></i> Structural Queue
-        </a>
-        <a href="/staff/queue?category=Functional" class="tab {% if current_category == 'Functional' %}tab-active font-bold text-warning{% endif %}">
-            <i class="fa-solid fa-droplet text-xs mr-1"></i> Functional Queue
-        </a>
-        <a href="/staff/queue?category=Performance" class="tab {% if current_category == 'Performance' %}tab-active font-bold text-info{% endif %}">
-            <i class="fa-solid fa-paint-roller text-xs mr-1"></i> Performance Queue
-        </a>
+    <!-- Advanced Ticket Filter & Controls Panel -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 p-5">
+        <form action="/staff/queue" method="GET" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Status Filter</span></label>
+                    <select name="status" class="select select-bordered select-sm w-full">
+                        {% for opt in status_options %}
+                            <option value="{{ opt }}" {% if current_status == opt %}selected{% endif %}>
+                                {{ opt }}{% if opt == 'All' %} Statuses{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Category Type</span></label>
+                    <select name="category" class="select select-bordered select-sm w-full">
+                        {% for opt in category_options %}
+                            <option value="{{ opt }}" {% if current_category == opt %}selected{% endif %}>
+                                {{ opt }}{% if opt == 'All' %} Categories{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sorting Option -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Sorting Order</span></label>
+                    <select name="sort_by" class="select select-bordered select-sm w-full">
+                        <option value="priority_desc" {% if sort_by == 'priority_desc' %}selected{% endif %}>Priority Score (High → Low)</option>
+                        <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (Newest First)</option>
+                        <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (Oldest First)</option>
+                        <option value="severity_desc" {% if sort_by == 'severity_desc' %}selected{% endif %}>Severity (Highest First)</option>
+                    </select>
+                </div>
+
+                <!-- Minimum Severity Filter -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Min Severity Score</span></label>
+                    <select name="min_severity" class="select select-bordered select-sm w-full">
+                        <option value="0" {% if min_severity == 0 %}selected{% endif %}>All Severities (1-10)</option>
+                        <option value="5" {% if min_severity == 5 %}selected{% endif %}>Medium+ (≥ 5.0)</option>
+                        <option value="7.5" {% if min_severity == 7.5 %}selected{% endif %}>High Urgency (≥ 7.5)</option>
+                    </select>
+                </div>
+
+                <!-- Include Resolved Checkbox -->
+                <div class="form-control justify-end pb-1">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" name="include_resolved" value="true" class="checkbox checkbox-primary checkbox-sm" {% if include_resolved %}checked{% endif %} />
+                        <span class="label-text text-xs font-semibold">Show Resolved Tickets</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Search Bar & Apply Button -->
+            <div class="flex flex-wrap gap-2 items-center pt-2 border-t border-base-200">
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID (#1), User Name, Email, or Address..." class="input input-bordered input-sm w-full" />
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary gap-1">
+                    <i class="fa-solid fa-filter"></i> Apply Filters
+                </button>
+                <a href="/staff/queue" class="btn btn-sm btn-ghost">Reset</a>
+            </div>
+        </form>
     </div>
 
-    <!-- Queue Table -->
+    <!-- Master Queue Table -->
     <div id="queue-table-container">
         {% include "components/queue_table.html" %}
     </div>

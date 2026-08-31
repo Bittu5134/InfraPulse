@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User, Staff, Admin
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    # Double hashed SHA-256 with salt prefix for secure storage
+    salt = "InfraPulseGovtSecureSalt2026!"
+    return hashlib.sha256((salt + password).encode()).hexdigest()
 
 def verify_password(password: str, hashed: str) -> bool:
     return hash_password(password) == hashed
@@ -20,9 +22,11 @@ async def get_current_user(request: Request, db: AsyncSession) -> Optional[User]
 async def require_user(request: Request, db: AsyncSession) -> User:
     user = await get_current_user(request, db)
     if not user:
+        # Redirect to login with next path
+        current_path = request.url.path
         raise HTTPException(
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-            headers={"Location": "/user/login"}
+            headers={"Location": f"/user/login?next={current_path}"}
         )
     return user
 

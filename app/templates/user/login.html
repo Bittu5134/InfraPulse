@@ -1,26 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}User Login - InfraPulse{% endblock %}
+{% block title %}Sign In - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto">
     <div class="card bg-base-100 shadow-xl border border-base-300">
         <div class="card-body">
-            <h2 class="card-title text-2xl font-bold justify-center mb-2">
-                <i class="fa-solid fa-right-to-bracket text-primary"></i> User Login
+            <h2 class="card-title text-2xl font-bold justify-center mb-1">
+                <i class="fa-solid fa-right-to-bracket text-primary"></i> User Sign In
             </h2>
-            <p class="text-xs text-center text-base-content/70 mb-6">
-                Sign in to view and track all your submitted maintenance tickets.
+            <p class="text-xs text-center text-base-content/70 mb-4">
+                Please sign in to submit a new defect ticket or track your existing tickets.
             </p>
 
+            {% if next == '/user/submit' %}
+            <div class="alert alert-info text-xs mb-4">
+                <i class="fa-solid fa-info-circle"></i>
+                <span>Please sign in or create an account to create a defect ticket.</span>
+            </div>
+            {% endif %}
+
             {% if error %}
-            <div class="alert alert-error text-sm mb-4">
+            <div class="alert alert-error text-xs mb-4">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span>{{ error }}</span>
             </div>
             {% endif %}
 
             <form action="/user/login" method="POST" class="space-y-4">
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Email Address</span></label>
                     <input type="email" name="email" placeholder="user@example.com" class="input input-bordered w-full" required />
@@ -33,15 +44,17 @@
 
                 <div class="form-control mt-6">
                     <button type="submit" class="btn btn-primary w-full gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In
                     </button>
                 </div>
             </form>
 
-            <div class="divider text-xs">Don't have an account?</div>
+            <div class="divider text-xs">New to InfraPulse?</div>
 
             <div class="text-center">
-                <a href="/user/register" class="btn btn-outline btn-sm w-full">Create New Account</a>
+                <a href="/user/register{% if next %}?next={{ next }}{% endif %}" class="btn btn-outline btn-sm w-full">
+                    Create New Account
+                </a>
             </div>
         </div>
     </div>
