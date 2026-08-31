@@ -1,0 +1,91 @@
+import uvicorn
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy import select
+
+from app.config import UPLOAD_DIR, BASE_DIR, SECRET_KEY
+from app.database import init_db, AsyncSessionLocal
+from app.models import Staff, Admin, CategoryEnum
+from app.auth import hash_password, get_current_user, get_current_staff, get_current_admin
+from app.routers import user, staff, admin, api, live
+
+templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+
+async def seed_demo_accounts():
+    async with AsyncSessionLocal() as session:
+        # Seed Admin Account
+        admin_stmt = select(Admin).where(Admin.email == "admin@infrapulse.org")
+        if not (await session.execute(admin_stmt)).scalar_one_or_none():
+            admin_user = Admin(
+                name="System Administrator",
+                email="admin@infrapulse.org",
+                password_hash=hash_password("admin123")
+            )
+            session.add(admin_user)
+
+        # Seed Staff Accounts
+        demo_staff = [
+            ("Structural Staff", "structural@infrapulse.org", "staff123", CategoryEnum.STRUCTURAL),
+            ("Functional Staff", "functional@infrapulse.org", "staff123", CategoryEnum.FUNCTIONAL),
+            ("Performance Staff", "performance@infrapulse.org", "staff123", CategoryEnum.PERFORMANCE),
+        ]
+        for name, email, password, domain in demo_staff:
+            stmt = select(Staff).where(Staff.email == email)
+            res = await session.execute(stmt)
+            if not res.scalar_one_or_none():
+                staff_member = Staff(
+                    name=name,
+                    email=email,
+                    password_hash=hash_password(password),
+                    domain=domain
+                )
+                session.add(staff_member)
+        await session.commit()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    await init_db()
+    await seed_demo_accounts()
+    yield
+
+app = FastAPI(
+    title="InfraPulse - Defect Priority Maintenance & Ticketing Tool",
+    description="Automated defect priority detection and ticketing tool.",
+    version="2.1.0",
+    lifespan=lifespan
+)
+
+# Session Middleware for User, Staff, Admin Auth
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+
+# Mount static directory
+static_dir = BASE_DIR / "app" / "static"
+static_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# Include Routers
+app.include_router(user.router)
+app.include_router(staff.router)
+app.include_router(admin.router)
+app.include_router(api.router)
+app.include_router(live.router)
+
+@app.get("/", response_class=HTMLResponse)
+async def landing_page(request: Request):
+    async with AsyncSessionLocal() as db:
+        u = await get_current_user(request, db)
+        s = await get_current_staff(request, db)
+        a = await get_current_admin(request, db)
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": u, "current_staff": s, "current_admin": a}
+    )
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
