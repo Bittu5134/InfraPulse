@@ -55,7 +55,6 @@ class Admin(Base):
 class Complaint(Base):
     __tablename__ = "complaints"
 
-    # 10-digit random Ticket ID
     id = Column(BigInteger, primary_key=True, index=True, default=generate_10_digit_id)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
@@ -66,14 +65,12 @@ class Complaint(Base):
     description = Column(Text, nullable=False)
     photo_path = Column(String(255), nullable=False)
     
-    # Model classification & severity fields
     defect_name = Column(String(100), nullable=True, default="Pending Analysis")
     category = Column(Enum(CategoryEnum), nullable=True)
     severity = Column(Float, default=1.0)
     extent = Column(Float, default=1.0)
     priority_score = Column(Float, default=0.0)
     
-    # Lifecycle status & Staff Assignment
     status = Column(Enum(StatusEnum), default=StatusEnum.SUBMITTED, nullable=False)
     assigned_staff_id = Column(Integer, ForeignKey("staff_members.id"), nullable=True)
     assigned_staff_name = Column(String(100), nullable=True)
@@ -83,3 +80,16 @@ class Complaint(Base):
 
     user = relationship("User", back_populates="complaints")
     assigned_staff = relationship("Staff", back_populates="assigned_complaints")
+    comments = relationship("TicketComment", back_populates="ticket", cascade="all, delete-orphan", order_by="TicketComment.created_at.asc()")
+
+class TicketComment(Base):
+    __tablename__ = "ticket_comments"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    ticket_id = Column(BigInteger, ForeignKey("complaints.id"), nullable=False)
+    sender_name = Column(String(100), nullable=False)
+    sender_role = Column(String(50), nullable=False)  # "User", "Staff", "Admin"
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    ticket = relationship("Complaint", back_populates="comments")

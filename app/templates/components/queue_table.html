@@ -16,7 +16,7 @@
                 <th class="text-center">Priority</th>
                 <th>Assigned Staff</th>
                 <th>Status</th>
-                <th class="text-right">Actions</th>
+                <th class="text-right">Quick Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -92,40 +92,33 @@
                         <span class="badge badge-success badge-sm"><i class="fa-solid fa-check text-xs mr-1"></i> Resolved</span>
                     {% endif %}
                 </td>
-                <td class="text-right space-y-1">
-                    {% if current_staff and item.assigned_staff_id != current_staff.id %}
-                        <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
-                            <button type="submit" class="btn btn-xs btn-outline btn-primary gap-1">
-                                <i class="fa-solid fa-hand"></i> Assign to Me
+                <td class="text-right">
+                    <!-- 3 Quick Action Icon Buttons for Staff -->
+                    <div class="flex items-center justify-end gap-1">
+                        <!-- Action 1: Assign to Me -->
+                        {% if current_staff and item.assigned_staff_id != current_staff.id %}
+                            <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
+                                <button type="submit" class="btn btn-square btn-xs btn-primary" title="Assign to Me">
+                                    <i class="fa-solid fa-hand"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <!-- Action 2: Mark In Progress -->
+                        <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="In Progress" />
+                            <button type="submit" class="btn btn-square btn-xs btn-outline btn-info {% if item.status == 'In Progress' %}btn-active{% endif %}" title="Mark In Progress">
+                                <i class="fa-solid fa-spinner"></i>
                             </button>
                         </form>
-                    {% endif %}
 
-                    <div class="dropdown dropdown-left dropdown-end inline-block">
-                        <div tabindex="0" role="button" class="btn btn-xs btn-outline gap-1">
-                            Status <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                        </div>
-                        <ul tabindex="0" class="dropdown-content z-[20] menu p-2 shadow bg-base-100 rounded-box w-48 border border-base-300 text-xs">
-                            <li class="menu-title">Update Status</li>
-                            <li>
-                                <form action="/staff/status/{{ item.id }}" method="POST">
-                                    <input type="hidden" name="status" value="Assigned" />
-                                    <button type="submit" class="w-full text-left text-info">Mark Assigned</button>
-                                </form>
-                            </li>
-                            <li>
-                                <form action="/staff/status/{{ item.id }}" method="POST">
-                                    <input type="hidden" name="status" value="In Progress" />
-                                    <button type="submit" class="w-full text-left text-primary">Mark In Progress</button>
-                                </form>
-                            </li>
-                            <li>
-                                <form action="/staff/status/{{ item.id }}" method="POST">
-                                    <input type="hidden" name="status" value="Resolved" />
-                                    <button type="submit" class="w-full text-left text-success font-bold">Mark Resolved</button>
-                                </form>
-                            </li>
-                        </ul>
+                        <!-- Action 3: Mark Resolved -->
+                        <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="Resolved" />
+                            <button type="submit" class="btn btn-square btn-xs btn-success {% if item.status == 'Resolved' %}btn-active{% endif %}" title="Mark Resolved">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>

@@ -3,12 +3,13 @@
 {% block title %}Ticket #{{ complaint.id }} Details - InfraPulse{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Top Navigation -->
     <div class="flex items-center justify-between">
         <a href="javascript:history.back()" class="btn btn-outline btn-sm gap-1">
             <i class="fa-solid fa-arrow-left"></i> Back
         </a>
-        <span class="badge badge-outline text-xs">Ticket Details Reference</span>
+        <span class="badge badge-outline text-xs">Ticket Details</span>
     </div>
 
     <!-- Ticket Detail Card -->
@@ -19,7 +20,7 @@
                 <span class="text-xs uppercase font-bold text-base-content/60">Ticket Reference ID</span>
                 <h3 class="text-3xl font-mono font-extrabold text-primary">#{{ complaint.id }}</h3>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
                 {% if complaint.status == "Submitted" %}
                     <span class="badge badge-warning badge-lg gap-1"><i class="fa-solid fa-clock"></i> Submitted</span>
                 {% elif complaint.status == "Assigned" %}
@@ -34,7 +35,7 @@
 
         <div class="card-body p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Left: Photograph & Description -->
+                <!-- Left Column: Photo & Details -->
                 <div class="space-y-4">
                     <div class="rounded-2xl overflow-hidden border border-base-300 bg-base-300 flex items-center justify-center max-h-80 shadow-inner">
                         <img src="{{ complaint.photo_path }}" alt="Defect Photo" class="w-full h-full object-cover max-h-80" />
@@ -46,17 +47,65 @@
                         <p class="text-xs text-base-content/80 italic">"{{ complaint.description }}"</p>
                     </div>
 
-                    <div class="text-xs text-base-content/60 space-y-1">
-                        <div>Submitted By: <strong>{{ complaint.user_name }}</strong> ({{ complaint.user_email }})</div>
-                        <div>Date: {{ complaint.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                    <!-- Personal Contact Information (Privacy Protection) -->
+                    <div class="bg-base-200/50 p-4 rounded-xl border border-base-300 space-y-1 text-xs">
+                        <div class="font-bold text-sm mb-1 text-base-content/70">Requester Contact Details</div>
+                        {% if is_authorized_viewer %}
+                            <div><i class="fa-solid fa-user text-primary mr-1"></i> <strong>{{ complaint.user_name }}</strong></div>
+                            <div><i class="fa-solid fa-envelope text-info mr-1"></i> {{ complaint.user_email }}</div>
+                            {% if complaint.user_phone %}
+                                <div><i class="fa-solid fa-phone text-success mr-1"></i> {{ complaint.user_phone }}</div>
+                            {% endif %}
+                        {% else %}
+                            <div class="py-1">
+                                <span class="badge badge-ghost gap-1 text-xs">
+                                    <i class="fa-solid fa-lock text-warning"></i> Personal contact info hidden (Public View)
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="text-[10px] text-base-content/50 pt-1">Date: {{ complaint.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
                     </div>
                 </div>
 
-                <!-- Right: Automated ML Assessment & Status Standing -->
+                <!-- Right Column: AI Detection & Staff Controls -->
                 <div class="space-y-6">
+                    <!-- Staff Action Controls (Visible for Staff Members) -->
+                    {% if current_staff %}
+                    <div class="bg-secondary/10 border border-secondary/30 p-4 rounded-2xl space-y-3">
+                        <h4 class="text-xs uppercase font-extrabold text-secondary flex items-center gap-1">
+                            <i class="fa-solid fa-user-gear"></i> Staff Ticket Actions
+                        </h4>
+
+                        <div class="flex flex-wrap gap-2">
+                            {% if complaint.assigned_staff_id != current_staff.id %}
+                                <form action="/staff/assign/{{ complaint.id }}" method="POST" class="inline">
+                                    <button type="submit" class="btn btn-sm btn-primary gap-1">
+                                        <i class="fa-solid fa-hand"></i> Assign to Me
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
+                                <input type="hidden" name="status" value="In Progress" />
+                                <button type="submit" class="btn btn-sm btn-outline btn-info gap-1" {% if complaint.status == 'In Progress' %}disabled{% endif %}>
+                                    <i class="fa-solid fa-spinner"></i> In Progress
+                                </button>
+                            </form>
+
+                            <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
+                                <input type="hidden" name="status" value="Resolved" />
+                                <button type="submit" class="btn btn-sm btn-success gap-1" {% if complaint.status == 'Resolved' %}disabled{% endif %}>
+                                    <i class="fa-solid fa-circle-check"></i> Mark Resolved
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- AI Detection & Severity Ratings -->
                     <div class="bg-base-200 p-5 rounded-2xl border border-base-300 space-y-4">
                         <h4 class="text-xs uppercase font-extrabold tracking-wider text-base-content/60 flex items-center gap-1">
-                            <i class="fa-solid fa-robot text-primary"></i> Automated AI Defect Classification
+                            <i class="fa-solid fa-robot text-primary"></i> AI Defect Priority Assessment
                         </h4>
 
                         <div class="flex items-center gap-2">
@@ -83,16 +132,16 @@
                         </div>
 
                         <div class="pt-2 border-t border-base-300 flex justify-between items-center">
-                            <span class="text-xs font-semibold">Calculated Priority Score:</span>
+                            <span class="text-xs font-semibold">Priority Rank Score:</span>
                             <span class="text-2xl font-extrabold font-mono text-primary">{{ complaint.priority_score }}</span>
                         </div>
                     </div>
 
-                    <!-- Staff Assignment & Queue Position Card -->
-                    <div class="card bg-primary/5 border border-primary/20">
-                        <div class="card-body p-4 space-y-2">
-                            <div class="text-xs uppercase font-extrabold text-primary text-center">Assigned Maintenance Staff</div>
-                            <div class="text-center font-bold text-base">
+                    <!-- Assigned Staff Info -->
+                    <div class="card bg-base-200 border border-base-300">
+                        <div class="card-body p-4 text-center space-y-1">
+                            <div class="text-xs uppercase font-extrabold text-base-content/60">Assigned Maintenance Staff</div>
+                            <div class="font-bold text-base">
                                 {% if complaint.assigned_staff_name %}
                                     <span class="badge badge-secondary badge-lg gap-1">
                                         <i class="fa-solid fa-user-gear"></i> {{ complaint.assigned_staff_name }}
@@ -101,25 +150,56 @@
                                     <span class="text-base-content/50 italic text-sm">Unassigned (Pending Dispatch)</span>
                                 {% endif %}
                             </div>
-
-                            <div class="text-center pt-2 border-t border-primary/10">
-                                {% if complaint.status == "Resolved" %}
-                                    <div class="text-success font-bold text-sm">
-                                        <i class="fa-solid fa-circle-check"></i> Ticket Marked Resolved
-                                    </div>
-                                {% elif queue_position %}
-                                    <div class="text-xs text-base-content/70">Current Priority Standing</div>
-                                    <div class="text-3xl font-extrabold font-mono text-primary my-1">
-                                        Rank #{{ queue_position }}
-                                    </div>
-                                {% else %}
-                                    <div class="text-xs text-base-content/60">Priority Queue Standing</div>
-                                {% endif %}
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Ticket Chat & Activity Section -->
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body p-6 space-y-6">
+            <h3 class="card-title text-xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-comments text-primary"></i> Ticket Activity & Chat
+            </h3>
+
+            <!-- Comments Timeline -->
+            <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                {% if not comments %}
+                    <div class="text-center py-8 text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-xl">
+                        No chat messages yet. Post a comment below to communicate about this ticket.
+                    </div>
+                {% else %}
+                    {% for c in comments %}
+                        <div class="chat {% if c.sender_role == 'Staff' or c.sender_role == 'Admin' %}chat-end{% else %}chat-start{% endif %}">
+                            <div class="chat-header text-xs mb-1">
+                                <strong>{{ c.sender_name }}</strong>
+                                <span class="badge badge-xs {% if c.sender_role == 'Staff' %}badge-secondary{% elif c.sender_role == 'Admin' %}badge-neutral{% else %}badge-primary{% endif %} ml-1">{{ c.sender_role }}</span>
+                                <time class="text-[10px] opacity-50 ml-2">{{ c.created_at.strftime('%b %d, %H:%M') }}</time>
+                            </div>
+                            <div class="chat-bubble text-sm {% if c.sender_role == 'Staff' %}chat-bubble-secondary{% elif c.sender_role == 'Admin' %}chat-bubble-neutral{% else %}chat-bubble-primary{% endif %}">
+                                {{ c.message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Comment Posting Form -->
+            {% if current_user or current_staff or current_admin %}
+                <form action="/ticket/{{ complaint.id }}/comment" method="POST" class="flex gap-2">
+                    <input type="text" name="message" placeholder="Write a message or update on this ticket..." class="input input-bordered w-full text-sm" required />
+                    <button type="submit" class="btn btn-primary gap-1">
+                        <i class="fa-solid fa-paper-plane"></i> Send
+                    </button>
+                </form>
+            {% else %}
+                <div class="alert alert-info text-xs">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span>Please <a href="/user/login?next=/ticket/{{ complaint.id }}" class="link font-bold">Sign In</a> to join the ticket chat conversation.</span>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

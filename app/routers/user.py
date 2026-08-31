@@ -9,7 +9,7 @@ from sqlalchemy import select, or_
 
 from app.config import BASE_DIR, UPLOAD_DIR, ALLOWED_EXTENSIONS
 from app.database import get_db
-from app.models import User, Complaint, CategoryEnum, StatusEnum, generate_10_digit_id
+from app.models import User, Complaint, TicketComment, CategoryEnum, StatusEnum, generate_10_digit_id
 from app.auth import hash_password, verify_password, get_current_user, get_current_staff, get_current_admin, require_user
 from app.priority_queue import compute_priority_score, get_queue_position, mock_classify_defect
 
@@ -161,8 +161,6 @@ async def handle_complaint_submit(
     extent = auto_class["extent"]
     
     priority_score = compute_priority_score(category, defect_name, severity, extent)
-    
-    # Generate 10-digit random ID
     ticket_id = generate_10_digit_id()
     
     complaint = Complaint(
@@ -200,6 +198,18 @@ async def view_dedicated_ticket_page(ticket_id: int, request: Request, db: Async
     admin = await get_current_admin(request, db)
     queue_pos = await get_queue_position(db, complaint)
     
+    # Authorized viewer check: Only ticket owner, staff member, or admin can view personal contact info!
+    is_authorized_viewer = bool(
+        (user and (user.id == complaint.user_id or user.email == complaint.user_email)) or
+        staff or
+        admin
+    )
+    
+    # Fetch ticket comments
+    comments_stmt = select(TicketComment).where(TicketComment.ticket_id == ticket_id).order_by(TicketComment.created_at.asc())
+    res_comments = await db.execute(comments_stmt)
+    comments = list(res_comments.scalars().all())
+
     return templates.TemplateResponse(
         request=request,
         name="user/ticket_detail.html",
@@ -208,9 +218,50 @@ async def view_dedicated_ticket_page(ticket_id: int, request: Request, db: Async
             "current_staff": staff,
             "current_admin": admin,
             "complaint": complaint,
-            "queue_position": queue_pos
+            "queue_position": queue_pos,
+            "is_authorized_viewer": is_authorized_viewer,
+            "comments": comments
         }
     )
+
+@router.post("/ticket/{ticket_id}/comment")
+async def post_ticket_comment(
+    ticket_id: int,
+    request: Request,
+    message: str = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
+    complaint = await db.get(Complaint, ticket_id)
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+        
+    user = await get_current_user(request, db)
+    staff = await get_current_staff(request, db)
+    admin = await get_current_admin(request, db)
+    
+    if staff:
+        sender_name = staff.name
+        sender_role = "Staff"
+    elif admin:
+        sender_name = admin.name
+        sender_role = "Admin"
+    elif user:
+        sender_name = user.name
+        sender_role = "User"
+    else:
+        # Require login to post chat comments
+        return RedirectResponse(url=f"/user/login?next=/ticket/{ticket_id}", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        
+    comment = TicketComment(
+        ticket_id=ticket_id,
+        sender_name=sender_name,
+        sender_role=sender_role,
+        message=message.strip()
+    )
+    db.add(comment)
+    await db.commit()
+    
+    return RedirectResponse(url=f"/ticket/{ticket_id}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/user/dashboard", response_class=HTMLResponse)
 async def user_dashboard(
