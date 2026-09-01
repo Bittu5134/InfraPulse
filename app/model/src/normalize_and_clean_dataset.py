@@ -15,7 +15,7 @@ DATA_DIR = REPO_ROOT / "app" / "model" / "data"
 CLEAN_DATASET_DIR = DATA_DIR / "normalized_clean_eval"
 
 CLASS_NAMES = ["cracked_tiles", "paint_peeling", "spalling", "stagnant_water"]
-TARGET_COUNT_PER_CLASS = 250  # 250 images per class = 1,000 total balanced test images
+TARGET_COUNT_PER_CLASS = 200  # 200 images per class = 800 total balanced test images (Low Memory Safe)
 
 def extract_water_zip():
     """Extracts water data from downloaded zip files in Downloads."""

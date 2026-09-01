@@ -1,0 +1,91 @@
+{
+  "dataset_size": 800,
+  "per_category_weights": {
+    "cracked_tiles": {
+      "convnext_tiny": 0.2,
+      "mtl_dual_branch": 0.2,
+      "swin_t": 0.2,
+      "baseline": 0.2,
+      "quantized_int8": 0.2
+    },
+    "paint_peeling": {
+      "convnext_tiny": 0.2,
+      "mtl_dual_branch": 0.2,
+      "swin_t": 0.2,
+      "baseline": 0.2,
+      "quantized_int8": 0.2
+    },
+    "spalling": {
+      "convnext_tiny": 0.3333,
+      "mtl_dual_branch": 0.0,
+      "swin_t": 0.0,
+      "baseline": 0.3333,
+      "quantized_int8": 0.3333
+    },
+    "stagnant_water": {
+      "convnext_tiny": 0.2,
+      "mtl_dual_branch": 0.2,
+      "swin_t": 0.2,
+      "baseline": 0.2,
+      "quantized_int8": 0.2
+    }
+  },
+  "per_category_consensus_metrics": {
+    "accuracy": 90.12,
+    "macro_f1": 0.9016,
+    "weighted_f1": 0.9016,
+    "per_class": {
+      "cracked_tiles": {
+        "accuracy": 96.12,
+        "precision": 0.9043,
+        "recall": 0.945,
+        "f1": 0.9242
+      },
+      "paint_peeling": {
+        "accuracy": 95.12,
+        "precision": 0.9259,
+        "recall": 0.875,
+        "f1": 0.8997
+      },
+      "spalling": {
+        "accuracy": 93.25,
+        "precision": 0.8349,
+        "recall": 0.91,
+        "f1": 0.8708
+      },
+      "stagnant_water": {
+        "accuracy": 95.75,
+        "precision": 0.9511,
+        "recall": 0.875,
+        "f1": 0.9115
+      }
+    }
+  },
+  "standalone_models": {
+    "convnext_tiny": {
+      "accuracy": 63.62,
+      "macro_f1": 0.5877,
+      "latency_ms": 91.3
+    },
+    "mtl_dual_branch": {
+      "accuracy": 50.0,
+      "macro_f1": 0.4802,
+      "latency_ms": 38.8
+    },
+    "swin_t": {
+      "accuracy": 73.88,
+      "macro_f1": 0.7345,
+      "latency_ms": 188.4
+    },
+    "baseline": {
+      "accuracy": 89.38,
+      "macro_f1": 0.8939,
+      "latency_ms": 70.0
+    },
+    "quantized_int8": {
+      "accuracy": 89.38,
+      "macro_f1": 0.8939,
+      "latency_ms": 71.1
+    }
+  }
+}

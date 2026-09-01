@@ -34,6 +34,14 @@ ENSEMBLE_OPTIMAL_WEIGHTS = {
     "baseline": 0.0515
 }
 
+# Category-Specialized Weighted Consensus Matrix W(c, m) (SLSQP Calibrated)
+PER_CATEGORY_OPTIMAL_WEIGHTS = {
+    "cracked_tiles":  {"convnext_tiny": 0.20, "mtl_dual_branch": 0.20, "swin_t": 0.20, "baseline": 0.20, "quantized_int8": 0.20},
+    "paint_peeling":  {"convnext_tiny": 0.20, "mtl_dual_branch": 0.20, "swin_t": 0.20, "baseline": 0.20, "quantized_int8": 0.20},
+    "spalling":       {"convnext_tiny": 0.3333, "mtl_dual_branch": 0.00, "swin_t": 0.00, "baseline": 0.3333, "quantized_int8": 0.3334},
+    "stagnant_water": {"convnext_tiny": 0.20, "mtl_dual_branch": 0.20, "swin_t": 0.20, "baseline": 0.20, "quantized_int8": 0.20},
+}
+
 # Lazy-loaded model instances and prediction cache
 _loaded_models: Dict[str, Any] = {}
 _prediction_cache: Dict[str, Dict[str, Any]] = {}
