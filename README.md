@@ -1,90 +1,81 @@
-# InfraPulse - Photo-Based Defect Detection & Priority Maintenance System
+# InfraPulse - Photo-Based Defect Priority Maintenance System
 
-InfraPulse is a fully self-hosted web application built for the **Takneek PS Challenge**. It provides automated complaint registration, photo-based defect classification, live priority queueing across three core domain categories (**Structural**, **Functional**, **Performance**), and separate portals for users and maintenance staff.
-
----
-
-## Features
-
-1. **User Portal**:
-   - Register complaints with Name, Location, Description, and Defect Photograph.
-   - Live complaint tracking showing status (`Submitted` → `Assigned` → `In Progress` → `Resolved`), detected defect label, category, and live position in queue.
-   - Dynamic real-time sync powered by **HTMX**.
-
-2. **Staff Portals**:
-   - Category-specific live priority queues for **Structural**, **Functional**, and **Performance** maintenance teams.
-   - Predefined state transitions: `Submitted` → `Assigned` → `In Progress` → `Resolved`.
-   - Automatic queue removal when a complaint is marked `Resolved`.
-
-3. **Defect Classification & Priority Rules**:
-   - **Structural**: `Spalling` (Highest Category Weight: 3.0)
-   - **Functional**: `Stagnant Water` (Category Weight: 2.0)
-   - **Performance**: `Cracked Tiles` > `Paint Peeling` (Category Weight: 1.0, Priority: Cracked tiles > Paint peeling)
-   - Priority ranking formula combining defect urgency boost, visible severity ($1-10$), and visible defect extent percentage ($0-100\%$).
-
-4. **Self-Hosted & Zero Build Setup**:
-   - Python-only stack (**FastAPI** + **Jinja2** + **SQLite** + **HTMX** + **DaisyUI / Tailwind CSS** via CDN). No Node.js or npm build step required.
+**InfraPulse** is a photo-based infrastructure defect detection and priority maintenance web system built for **Takneek PS**. It enables automated ML defect detection, domain category routing (**Structural**, **Functional**, **Performance**), real-time priority queue calculation, user/staff/admin control panels, and status tracking.
 
 ---
 
-## Setup & Running Locally
+## 🚀 Quick Setup & Execution
 
-### 1. Prerequisites
-- Python 3.10 or higher.
-
-### 2. Installation
+### 1. Clone Repository & Install Dependencies
 ```bash
-# Clone repository
-git clone https://github.com/your-org/InfraPulse.git
+git clone https://github.com/Bittu5134/InfraPulse.git
 cd InfraPulse
 
-# Install dependencies
+# Create virtual environment & install requirements
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Run Web Server
+### 2. Reset Database & Seed Demo Accounts
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python reset_db.py
 ```
-The website will be accessible at `http://localhost:8000`.
+
+### 3. Launch Web Application
+```bash
+PYTHONPATH=. uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+Open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
-## ML Model Integration API
+## 🔑 Demo Account Credentials
 
-The website exposes REST API endpoints for external defect detection / classification models to post inference results.
+| Portal | Email | Password | Role / Domain |
+| :--- | :--- | :--- | :--- |
+| **Demo User** | `user@infrapulse.org` | `user123` | Public User / Ticket Creator |
+| **Structural Staff** | `structural@infrapulse.org` | `staff123` | Structural Maintenance Squad |
+| **Functional Staff** | `functional@infrapulse.org` | `staff123` | Functional Maintenance Squad |
+| **Performance Staff** | `performance@infrapulse.org` | `staff123` | Performance Maintenance Squad |
+| **Administrator** | `admin@infrapulse.org` | `admin123` | System Administrator |
 
-### Endpoint:
-`POST /api/v1/complaints/{complaint_id}/classify`
+---
 
-### Example Request (cURL):
+## 📐 Priority Queue Mathematical Formula
+
+The priority queue engine ranks active maintenance tickets using the following mathematical formulation:
+
+$$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
+
+Where:
+- **Category Weights ($W_{\text{cat}}$)**: Structural = `1.5`, Functional = `1.2`, Performance = `1.0`
+- **Defect Priority Boosts ($B_{\text{defect}}$)**: Spalling = `2.0`, Stagnant Water = `1.5`, Cracked Tiles = `1.2`, Paint Peeling = `1.0`
+
+*Hierarchy Enforced*: `Spalling` (Structural) > `Stagnant Water` (Functional) > `Cracked Tiles` (Performance) > `Paint Peeling` (Performance).
+
+---
+
+## 🛠️ Key Features
+
+- **Automatic Defect Classification**: Uploaded defect photos (JPG, PNG, WEBP, BMP, etc.) are processed, converted to `.png`, and assigned severity & priority scores.
+- **Domain-Specific Staff Queues**: Staff logged into their respective domain (Structural, Functional, Performance) default to viewing their category's active queue.
+- **Lifecycle Tracking**: `Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`. (Resolved tickets automatically drop off active ranking queues).
+- **Privacy Protection**: Personal requester details on single ticket pages (`/ticket/{ticket_id}`) are hidden for unauthorized public visitors.
+- **CSV Data Export**: Staff can export active queue data to a `.csv` file directly from the control panel.
+- **Real-Time Notification Center**: Bell notifications in the header for staff assignment and ticket status changes.
+- **Ticket Activity & Live Chat**: Background polling with Web Audio API sound effects for ticket comments.
+
+---
+
+## 🧪 Running Automated Unit Tests
+
 ```bash
-curl -X POST "http://localhost:8000/api/v1/complaints/1/classify" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "defect_name": "Spalling",
-           "category": "Structural",
-           "severity": 8.5,
-           "extent": 50.0
-         }'
+PYTHONPATH=. .venv/bin/pytest -v
 ```
 
-### Python Request Example:
-```python
-import requests
+---
 
-url = "http://localhost:8000/api/v1/complaints/1/classify"
-payload = {
-    "defect_name": "Cracked Tiles",
-    "category": "Performance",
-    "severity": 7.0,
-    "extent": 35.0
-}
-response = requests.post(url, json=payload)
-print(response.json())
-```
+## 📁 Technical Documentation Report
 
-Upon receiving the classification payload, the website automatically:
-1. Updates the defect label and category on both User and Staff portals.
-2. Recalculates the exact priority score.
-3. Dynamically re-ranks the category queue in real time.
+A full technical documentation report detailing detection logic, priority math, evaluation results, limitations, and model accuracy suggestions is located in [docs/DOCUMENTATION_REPORT.md](docs/DOCUMENTATION_REPORT.md).

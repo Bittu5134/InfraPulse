@@ -1,6 +1,8 @@
+import csv
+import io
 from typing import Optional
 from fastapi import APIRouter, Depends, Request, Form, HTTPException, Query, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -98,6 +100,12 @@ async def staff_queue_page(
         sort_by=sort_by,
         include_resolved=include_resolved
     )
+
+    # Compute category statistics for dashboard widgets
+    all_active = await get_staff_tickets_filtered(db, include_resolved=False)
+    struct_count = sum(1 for c in all_active if c.category == CategoryEnum.STRUCTURAL)
+    func_count = sum(1 for c in all_active if c.category == CategoryEnum.FUNCTIONAL)
+    perf_count = sum(1 for c in all_active if c.category == CategoryEnum.PERFORMANCE)
     
     return templates.TemplateResponse(
         request=request,
@@ -114,8 +122,64 @@ async def staff_queue_page(
             "search_query": search or "",
             "include_resolved": include_resolved,
             "status_options": ["All", "Submitted", "Assigned", "In Progress", "Resolved"],
-            "category_options": ["All", "Structural", "Functional", "Performance"]
+            "category_options": ["All", "Structural", "Functional", "Performance"],
+            "struct_count": struct_count,
+            "func_count": func_count,
+            "perf_count": perf_count
         }
+    )
+
+@router.get("/export/csv")
+async def export_queue_csv(
+    request: Request,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    category: Optional[str] = Query(None),
+    min_severity: Optional[float] = Query(None),
+    sort_by: str = Query("priority_desc"),
+    search: Optional[str] = Query(None),
+    include_resolved: bool = Query(True),
+    db: AsyncSession = Depends(get_db)
+):
+    staff = await require_staff(request, db)
+    complaints = await get_staff_tickets_filtered(
+        db,
+        status_filter=status_filter,
+        category_filter=category,
+        min_severity=min_severity,
+        search_query=search,
+        sort_by=sort_by,
+        include_resolved=include_resolved
+    )
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Ticket ID", "Created At", "Category", "Defect Name",
+        "Severity", "Extent %", "Priority Score", "Status",
+        "Requester Name", "Requester Email", "Address", "Assigned Staff"
+    ])
+    
+    for c in complaints:
+        writer.writerow([
+            c.id,
+            c.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            c.category.value if c.category else "",
+            c.defect_name or "",
+            c.severity,
+            c.extent,
+            c.priority_score,
+            c.status.value,
+            c.user_name,
+            c.user_email,
+            c.address,
+            c.assigned_staff_name or "Unassigned"
+        ])
+        
+    output.seek(0)
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=infrapulse_priority_queue.csv"}
     )
 
 @router.post("/assign/{complaint_id}")
@@ -134,7 +198,6 @@ async def assign_complaint_to_self(
     if complaint.status == StatusEnum.SUBMITTED:
         complaint.status = StatusEnum.ASSIGNED
         
-    # Trigger notification for user
     if complaint.user_id:
         from app.models import Notification
         notif = Notification(
@@ -167,16 +230,13 @@ async def update_complaint_status(
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status_str}")
 
-    # Enforce workflow rule: Cannot mark as In Progress or Resolved without assigning first!
     if not complaint.assigned_staff_id:
         if new_status in [StatusEnum.IN_PROGRESS, StatusEnum.RESOLVED]:
-            # Automatically assign to current acting staff member
             complaint.assigned_staff_id = staff.id
             complaint.assigned_staff_name = staff.name
         
     complaint.status = new_status
 
-    # Trigger notification for user
     if complaint.user_id:
         from app.models import Notification
         notif = Notification(
