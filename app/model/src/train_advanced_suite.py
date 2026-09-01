@@ -113,79 +113,80 @@ def train_and_export_suite(data_dir="app/model/data", ckpt_dir="app/model/checkp
     # 1. Baseline Model: EfficientNet-B0
     # -------------------------------------------------------------
     base_ckpt_path = Path(ckpt_dir) / "best_infrapulse_v1.pt"
-    print("\n[1/5] Evaluating Baseline EfficientNet-B0...")
+    print("\n[1/5] Fine-tuning Baseline EfficientNet-B0 on Expanded Balanced Dataset...")
     base_model = InfraPulseNet(num_classes=4, pretrained=False).to(device)
     if base_ckpt_path.exists():
         state = torch.load(base_ckpt_path, map_location=device, weights_only=False)
         base_model.load_state_dict(state["model_state"])
+    optimizer = AdamW(filter(lambda p: p.requires_grad, base_model.parameters()), lr=1e-4)
+    run_epoch(base_model, fast_train_loader, criterion_focal, device, optimizer)
+    torch.save({"model_state": base_model.state_dict(), "class_to_idx": class_to_idx}, base_ckpt_path)
+
     metrics = evaluate_model_on_test(base_model, test_loader, device)
-    metrics["model_size_mb"] = round(os.path.getsize(base_ckpt_path) / (1024 * 1024), 2) if base_ckpt_path.exists() else 18.09
+    metrics["model_size_mb"] = round(os.path.getsize(base_ckpt_path) / (1024 * 1024), 2)
     metrics["architecture"] = "EfficientNet-B0 (Baseline)"
     metrics["badge"] = "Problem Statement Baseline"
     comparison_results["efficientnet_b0"] = metrics
-    print(f"    • Accuracy: {metrics['accuracy']}% | Macro-F1: {metrics['macro_f1']} | Latency: {metrics['avg_latency_ms']}ms | Size: {metrics['model_size_mb']}MB")
+    print(f"    • Accuracy: {metrics['accuracy']}% | Macro-F1: {metrics['macro_f1']} | Latency: {metrics['avg_latency_ms']}ms | Size: {metrics['model_size_mb']}MB", flush=True)
 
     # -------------------------------------------------------------
     # 2. ConvNeXt-Tiny (Modern Pure CNN + Focal Loss)
     # -------------------------------------------------------------
     conv_ckpt_path = Path(ckpt_dir) / "convnext_tiny_infrapulse.pt"
-    print("\n[2/5] Loading ConvNeXt-Tiny...")
+    print("\n[2/5] Fine-tuning ConvNeXt-Tiny on Expanded Balanced Dataset...")
     conv_model = ConvNeXtInfraPulse(num_classes=4, pretrained=False).to(device)
     if conv_ckpt_path.exists():
         conv_state = torch.load(conv_ckpt_path, map_location=device, weights_only=False)
         conv_model.load_state_dict(conv_state["model_state"])
     else:
         conv_model = ConvNeXtInfraPulse(num_classes=4, pretrained=True).to(device)
-        conv_model.freeze_backbone()
-        optimizer = AdamW(filter(lambda p: p.requires_grad, conv_model.parameters()), lr=5e-4)
-        run_epoch(conv_model, fast_train_loader, criterion_focal, device, optimizer)
-        torch.save({"model_state": conv_model.state_dict(), "class_to_idx": class_to_idx}, conv_ckpt_path)
+    conv_model.freeze_backbone()
+    optimizer = AdamW(filter(lambda p: p.requires_grad, conv_model.parameters()), lr=2e-4)
+    run_epoch(conv_model, fast_train_loader, criterion_focal, device, optimizer)
+    torch.save({"model_state": conv_model.state_dict(), "class_to_idx": class_to_idx}, conv_ckpt_path)
 
     conv_metrics = evaluate_model_on_test(conv_model, test_loader, device)
-    conv_metrics["accuracy"] = max(conv_metrics["accuracy"], 93.8)
-    conv_metrics["macro_f1"] = max(conv_metrics["macro_f1"], 0.8950)
-    conv_metrics["weighted_f1"] = max(conv_metrics["weighted_f1"], 0.9410)
     conv_metrics["model_size_mb"] = round(os.path.getsize(conv_ckpt_path) / (1024 * 1024), 2)
     conv_metrics["architecture"] = "ConvNeXt-Tiny (Modern Pure CNN)"
     conv_metrics["badge"] = "Highest Accuracy (Clear Winner)"
     comparison_results["convnext_tiny"] = conv_metrics
-    print(f"    • Accuracy: {conv_metrics['accuracy']}% | Macro-F1: {conv_metrics['macro_f1']} | Latency: {conv_metrics['avg_latency_ms']}ms | Size: {conv_metrics['model_size_mb']}MB")
+    print(f"    • Accuracy: {conv_metrics['accuracy']}% | Macro-F1: {conv_metrics['macro_f1']} | Latency: {conv_metrics['avg_latency_ms']}ms | Size: {conv_metrics['model_size_mb']}MB", flush=True)
 
     # -------------------------------------------------------------
     # 3. Swin Transformer (Swin-T + Attention)
     # -------------------------------------------------------------
     swin_ckpt_path = Path(ckpt_dir) / "swin_tiny_infrapulse.pt"
-    print("\n[3/5] Loading Swin Transformer (Swin-T)...")
+    print("\n[3/5] Fine-tuning Swin Transformer (Swin-T) on Expanded Balanced Dataset...")
     swin_model = SwinInfraPulse(num_classes=4, pretrained=False).to(device)
     if swin_ckpt_path.exists():
         swin_state = torch.load(swin_ckpt_path, map_location=device, weights_only=False)
         swin_model.load_state_dict(swin_state["model_state"])
     else:
         swin_model = SwinInfraPulse(num_classes=4, pretrained=True).to(device)
-        swin_model.freeze_backbone()
-        optimizer = AdamW(filter(lambda p: p.requires_grad, swin_model.parameters()), lr=5e-4)
-        run_epoch(swin_model, fast_train_loader, criterion_focal, device, optimizer)
-        torch.save({"model_state": swin_model.state_dict(), "class_to_idx": class_to_idx}, swin_ckpt_path)
+    swin_model.freeze_backbone()
+    optimizer = AdamW(filter(lambda p: p.requires_grad, swin_model.parameters()), lr=2e-4)
+    run_epoch(swin_model, fast_train_loader, criterion_focal, device, optimizer)
+    torch.save({"model_state": swin_model.state_dict(), "class_to_idx": class_to_idx}, swin_ckpt_path)
 
     swin_metrics = evaluate_model_on_test(swin_model, test_loader, device)
-    swin_metrics["accuracy"] = max(swin_metrics["accuracy"], 92.5)
-    swin_metrics["macro_f1"] = max(swin_metrics["macro_f1"], 0.8840)
-    swin_metrics["weighted_f1"] = max(swin_metrics["weighted_f1"], 0.9320)
     swin_metrics["model_size_mb"] = round(os.path.getsize(swin_ckpt_path) / (1024 * 1024), 2)
     swin_metrics["architecture"] = "Swin Transformer (Self-Attention)"
     swin_metrics["badge"] = "Best Surface Context"
     comparison_results["swin_t"] = swin_metrics
-    print(f"    • Accuracy: {swin_metrics['accuracy']}% | Macro-F1: {swin_metrics['macro_f1']} | Latency: {swin_metrics['avg_latency_ms']}ms | Size: {swin_metrics['model_size_mb']}MB")
+    print(f"    • Accuracy: {swin_metrics['accuracy']}% | Macro-F1: {swin_metrics['macro_f1']} | Latency: {swin_metrics['avg_latency_ms']}ms | Size: {swin_metrics['model_size_mb']}MB", flush=True)
 
     # -------------------------------------------------------------
     # 5. Multi-Task Learning (MTL) Dual-Branch Vision Model
     # -------------------------------------------------------------
     from model import MultiTaskInfraPulse
     mtl_ckpt_path = Path(ckpt_dir) / "multitask_mtl_infrapulse.pt"
-    print("\n[5/6] Building Multi-Task Learning (MTL Dual-Branch) Model...")
+    print("\n[5/6] Fine-tuning Multi-Task Learning (MTL Dual-Branch) Model...")
     mtl_model = MultiTaskInfraPulse(num_classes=4, pretrained=True).to(device)
+    if mtl_ckpt_path.exists():
+        mtl_state = torch.load(mtl_ckpt_path, map_location=device, weights_only=False)
+        mtl_model.load_state_dict(mtl_state["model_state"])
     mtl_model.freeze_backbone()
-    optimizer = AdamW(filter(lambda p: p.requires_grad, mtl_model.parameters()), lr=5e-4)
+    optimizer = AdamW(filter(lambda p: p.requires_grad, mtl_model.parameters()), lr=2e-4)
     run_epoch(mtl_model, fast_train_loader, criterion_focal, device, optimizer)
 
     torch.save({
@@ -195,9 +196,11 @@ def train_and_export_suite(data_dir="app/model/data", ckpt_dir="app/model/checkp
     }, mtl_ckpt_path)
 
     mtl_metrics = evaluate_model_on_test(mtl_model, test_loader, device)
-    mtl_metrics["accuracy"] = max(mtl_metrics["accuracy"], 91.2)
-    mtl_metrics["macro_f1"] = max(mtl_metrics["macro_f1"], 0.8650)
-    mtl_metrics["weighted_f1"] = max(mtl_metrics["weighted_f1"], 0.9180)
+    mtl_metrics["model_size_mb"] = round(os.path.getsize(mtl_ckpt_path) / (1024 * 1024), 2)
+    mtl_metrics["architecture"] = "Multi-Task Learning (MTL Dual-Branch)"
+    mtl_metrics["badge"] = "Classification + Area Extractor (MTL)"
+    comparison_results["mtl_dual_branch"] = mtl_metrics
+    print(f"    • Accuracy: {mtl_metrics['accuracy']}% | Macro-F1: {mtl_metrics['macro_f1']} | Latency: {mtl_metrics['avg_latency_ms']}ms | Size: {mtl_metrics['model_size_mb']}MB", flush=True)
     mtl_metrics["model_size_mb"] = round(os.path.getsize(mtl_ckpt_path) / (1024 * 1024), 2)
     mtl_metrics["architecture"] = "Multi-Task Learning (MTL Dual-Branch)"
     mtl_metrics["badge"] = "Classification + Area Extractor (MTL)"
