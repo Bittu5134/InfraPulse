@@ -84,6 +84,37 @@ stateDiagram-v2
 
 ---
 
+## 🌟 Beyond-the-PS Extra & Quality-of-Life (QOL) Features
+
+InfraPulse extends the baseline Problem Statement requirements with numerous production-grade features:
+
+1. **💬 Live In-Ticket Chat Timeline & Web Audio Alerts**:
+   - Integrated activity timeline with real-time polling and synthesized sound pop effects (using browser Web Audio API with zero external audio assets).
+2. **🔔 Real-Time Notification Center**:
+   - Header dropdown badge providing instant notifications when a staff member claims a ticket or updates its progress.
+3. **🔒 Sensitive Data Privacy Masking**:
+   - Obfuscates personal requester phone numbers and emails for public/unauthorized viewers on single ticket links (`/ticket/{id}`).
+4. **🖼️ Universal Image Auto-Conversion Pipeline**:
+   - Automatically ingests any image format (JPEG, WEBP, BMP, GIF) and normalizes it to lossless `.png` via Pillow.
+5. **🔢 10-Digit Non-Sequential Reference IDs**:
+   - Cryptographically random 10-digit IDs (`#8492019482`) instead of predictable incremental IDs to prevent ID enumeration.
+6. **📊 1-Click Priority Queue CSV Exporter**:
+   - Staff and administrators can export the complete multi-category priority queue to a `.csv` spreadsheet with one click.
+7. **📈 Live Department Analytics Counter Badges**:
+   - Active ticket breakdown badges (**Structural**, **Functional**, **Performance**) displayed prominently on staff dashboards.
+8. **🌐 100% Self-Contained Offline Asset Suite**:
+   - Self-hosted Tailwind CSS, DaisyUI, and FontAwesome webfonts ensuring the system operates 100% offline without remote CDN dependencies.
+9. **⚡ One-Command Instant Reset Utility (`reset_db.py`)**:
+   - Instantly wipes test data and restores clean demo accounts in $<1$ second for judge demonstrations.
+10. **🛡️ Domain Security Boundaries**:
+    - Backend RBAC enforcement prevents staff in one category from claiming or updating tickets in another category.
+11. **🌓 Dark / Light Mode Persistence**:
+    - Built-in theme switcher with client-side `localStorage` state persistence.
+12. **🐳 Multi-Stage Docker & Compose Orchestration**:
+    - Ready-to-deploy containerized stack with healthchecks and persistent storage volumes.
+
+---
+
 ## 📐 Priority Queue Mathematical Formulation
 
 As required by the specification, complaints are ranked dynamically within each domain queue using an objective mathematical formulation accounting for visible defect severity, surface extent coverage, defect hazard hierarchy, and domain criticality:
@@ -264,11 +295,11 @@ PYTHONPATH=. .venv/bin/pytest -v
 
 ---
 
-## 📁 Repository Structure
+## 📁 Repository & Documentation Architecture
 
 ```text
 InfraPulse/
-├── Dockerfile                  # Production container definition
+├── Dockerfile                  # Multi-stage production container definition
 ├── docker-compose.yml          # Container orchestration configuration
 ├── schema.sql                  # Relational database DDL schema & indexes
 ├── reset_db.py                 # Clean database reset & seeding utility
@@ -291,6 +322,7 @@ InfraPulse/
 │   └── templates/              # Jinja2 responsive HTML templates
 ├── docs/
 │   ├── InfraPulse.pdf          # Official problem statement specification
+│   ├── DESIGN_DOCUMENT.md      # High-Level & Low-Level Design Document (HLD/LLD)
 │   ├── DOCUMENTATION_REPORT.md # Technical documentation report deliverable
 │   └── walkthrough.md          # Step-by-step feature walkthrough log
 └── tests/
