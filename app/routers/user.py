@@ -162,11 +162,14 @@ async def handle_complaint_submit(
             context={"current_user": user, "error": f"Invalid image file. Could not process image: {str(e)}"}
         )
 
-    auto_class = mock_classify_defect(description, photo.filename)
-    defect_name = auto_class["defect_name"]
-    category = auto_class["category"]
-    severity = auto_class["severity"]
-    extent = auto_class["extent"]
+    # Run deep learning vision inference on uploaded defect photo
+    from app.model_service import predict_single_image
+    pred = predict_single_image(str(file_path))
+    
+    defect_name = pred["defect_name"]
+    category = pred["category"]
+    severity = pred["severity"]
+    extent = pred["extent"]
     
     priority_score = compute_priority_score(category, defect_name, severity, extent)
     ticket_id = generate_10_digit_id()

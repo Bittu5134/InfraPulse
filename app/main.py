@@ -12,7 +12,7 @@ from app.config import UPLOAD_DIR, BASE_DIR, SECRET_KEY
 from app.database import init_db, AsyncSessionLocal
 from app.models import User, Staff, Admin, CategoryEnum
 from app.auth import hash_password, get_current_user, get_current_staff, get_current_admin
-from app.routers import user, staff, admin, api, live
+from app.routers import user, staff, admin, api, live, test_bench
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
@@ -97,12 +97,18 @@ static_dir = BASE_DIR / "app" / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+# Mount dataset images for testing & benchmarking
+model_data_dir = BASE_DIR / "app" / "model" / "data"
+if model_data_dir.exists():
+    app.mount("/test_data", StaticFiles(directory=str(model_data_dir)), name="test_data")
+
 # Include Routers
 app.include_router(user.router)
 app.include_router(staff.router)
 app.include_router(admin.router)
 app.include_router(api.router)
 app.include_router(live.router)
+app.include_router(test_bench.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request):

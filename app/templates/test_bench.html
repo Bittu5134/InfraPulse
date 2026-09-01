@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Model Benchmark & Live Evaluation - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Card -->
+    <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-900/80 text-[#f38020] flex items-center justify-center text-xl">
+                <i class="fa-solid fa-flask"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Model Evaluation & Benchmark</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Live side-by-side comparison between the <strong>PyTorch EfficientNet-B0 Vision Model</strong> vs the <strong>Baseline Classifier</strong> on holdout datasets.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono">
+                <i class="fa-solid fa-images text-slate-400"></i> Total Samples: <strong>{{ total_images }}</strong>
+            </span>
+        </div>
+    </div>
+
+    <!-- Filter & Pagination Controls -->
+    <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
+        <form action="/test" method="GET" class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3 text-xs">
+                <!-- Split Selector -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Dataset Split</label>
+                    <select name="split" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                        <option value="test" {% if split == 'test' %}selected{% endif %}>Holdout Test Split</option>
+                        <option value="val" {% if split == 'val' %}selected{% endif %}>Validation Split</option>
+                        <option value="train" {% if split == 'train' %}selected{% endif %}>Training Split</option>
+                    </select>
+                </div>
+
+                <!-- Class Filter -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Defect Category</label>
+                    <select name="class_filter" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                        <option value="all" {% if class_filter == 'all' %}selected{% endif %}>All Classes</option>
+                        {% for c in classes %}
+                            <option value="{{ c }}" {% if class_filter == c %}selected{% endif %}>{{ c.replace('_', ' ').title() }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Batch Size -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Batch Size (Page)</label>
+                    <select name="page_size" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                        <option value="10" {% if page_size == 10 %}selected{% endif %}>10 per page (Recommended)</option>
+                        <option value="20" {% if page_size == 20 %}selected{% endif %}>20 per page</option>
+                        <option value="30" {% if page_size == 30 %}selected{% endif %}>30 per page</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="flex items-center gap-2">
+                {% if current_page > 1 %}
+                    <a href="/test?page={{ current_page - 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                        <i class="fa-solid fa-chevron-left text-xs mr-1"></i> Previous
+                    </a>
+                {% endif %}
+
+                <span class="text-xs text-slate-500 px-2">Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong></span>
+
+                {% if current_page < total_pages %}
+                    <a href="/test?page={{ current_page + 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                        Next <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Benchmark Cards List -->
+    {% if not items %}
+    <div class="p-12 text-center rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]">
+        <i class="fa-solid fa-images text-3xl text-slate-300 dark:text-slate-700 mb-3"></i>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">No Images Found</h3>
+        <p class="text-xs text-slate-500 mt-1">No images matched the selected split and class filter.</p>
+    </div>
+    {% else %}
+    <div class="space-y-4">
+        {% for item in items %}
+        <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm overflow-hidden p-5">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                <!-- 1. Image & Ground Truth (3 Cols) -->
+                <div class="lg:col-span-3 space-y-2">
+                    <div class="w-full h-40 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                        <img src="{{ item.meta.img_url }}" alt="{{ item.meta.filename }}" loading="lazy" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] text-slate-400">Ground Truth:</span>
+                            <span class="font-semibold text-slate-900 dark:text-white">{{ item.meta.ground_truth_name }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400">Department:</span>
+                            <span class="font-mono text-slate-600 dark:text-slate-300">{{ item.meta.ground_truth_category }}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-mono truncate" title="{{ item.meta.filename }}">
+                            {{ item.meta.filename }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PyTorch Deep Learning Model (5 Cols) -->
+                <div class="lg:col-span-5 rounded-lg border border-orange-200/70 dark:border-orange-950 bg-orange-50/30 dark:bg-orange-950/20 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-[#c2410c] dark:text-[#f97316]">
+                            <i class="fa-solid fa-brain text-xs"></i>
+                            <span>PyTorch Model (EfficientNet-B0)</span>
+                        </div>
+                        {% if item.is_ml_correct %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                <i class="fa-solid fa-check text-[9px]"></i> Correct
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                                <i class="fa-solid fa-xmark text-[9px]"></i> Mismatch
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold">Predicted Defect</span>
+                            <div class="font-semibold text-slate-900 dark:text-white">{{ item.ml_model.defect_name }}</div>
+                            <div class="text-[10px] text-slate-400">Confidence: {{ item.ml_model.confidence }}%</div>
+                        </div>
+
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold">Routed Queue</span>
+                            <div class="font-semibold text-[#ea580c] dark:text-[#f97316]">{{ item.ml_model.category_str }}</div>
+                            <div class="text-[10px] text-slate-400">Mode: {{ item.ml_model.model_mode }}</div>
+                        </div>
+                    </div>
+
+                    <!-- GradCAM++ Calculated Severity & Extent -->
+                    <div class="space-y-1.5 text-[11px] pt-1 border-t border-orange-100 dark:border-orange-900/40">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500">GradCAM++ Severity:</span>
+                            <strong class="font-mono text-slate-800 dark:text-slate-200">{{ item.ml_model.severity }}%</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500">GradCAM++ Extent:</span>
+                            <strong class="font-mono text-slate-800 dark:text-slate-200">{{ item.ml_model.extent }}%</strong>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">Priority Score:</span>
+                            <span class="font-mono font-bold text-sm text-[#ea580c] dark:text-[#f97316]">{{ item.ml_model.priority_score }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Baseline Classifier (4 Cols) -->
+                <div class="lg:col-span-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                            Baseline Rule Classifier
+                        </div>
+                        {% if item.is_rule_correct %}
+                            <span class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">✓ Match</span>
+                        {% else %}
+                            <span class="text-[10px] font-medium text-slate-400">✗ Mismatch</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400">Defect:</span>
+                            <span class="font-medium text-slate-800 dark:text-slate-200">{{ item.rule_model.defect_name }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400">Category:</span>
+                            <span class="font-medium text-slate-800 dark:text-slate-200">{{ item.rule_model.category_str }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400">Severity:</span>
+                            <span class="font-mono text-slate-700 dark:text-slate-300">{{ item.rule_model.severity }}/10</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400">Extent:</span>
+                            <span class="font-mono text-slate-700 dark:text-slate-300">{{ item.rule_model.extent }}%</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
+                            <span class="text-slate-500">Score:</span>
+                            <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ item.rule_model.priority_score }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Pagination -->
+    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]">
+        <span class="text-xs text-slate-500">Showing page {{ current_page }} of {{ total_pages }} ({{ total_images }} total images)</span>
+        <div class="flex items-center gap-2">
+            {% if current_page > 1 %}
+                <a href="/test?page={{ current_page - 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                    Previous
+                </a>
+            {% endif %}
+            {% if current_page < total_pages %}
+                <a href="/test?page={{ current_page + 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                    Next
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

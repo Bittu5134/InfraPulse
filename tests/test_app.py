@@ -135,6 +135,12 @@ async def test_staff_login_and_self_assignment():
             res = await session.execute(stmt)
             created_ticket = res.scalar_one()
 
+            # Ensure staff domain matches the ticket category
+            staff_stmt = select(Staff).where(Staff.email == "alice@infrapulse.org")
+            alice = (await session.execute(staff_stmt)).scalar_one()
+            alice.domain = created_ticket.category
+            await session.commit()
+
         assign_resp = await client.post(f"/staff/assign/{created_ticket.id}", follow_redirects=True)
         assert assign_resp.status_code == 200
         assert "Alice Structural" in assign_resp.text
@@ -163,3 +169,12 @@ async def test_admin_portal_management():
         )
         assert create_staff_resp.status_code == 200
         assert "newtech@infrapulse.org" in create_staff_resp.text
+
+@pytest.mark.asyncio
+async def test_benchmark_page():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+        resp = await client.get("/test?page=1&page_size=5")
+        assert resp.status_code == 200
+        assert "Model Evaluation & Benchmark" in resp.text
+        assert "EfficientNet-B0" in resp.text
