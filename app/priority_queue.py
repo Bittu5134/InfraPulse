@@ -1,3 +1,4 @@
+import os
 import random
 from typing import List, Optional
 from sqlalchemy import select, or_
@@ -25,18 +26,13 @@ def compute_priority_score(category: Optional[CategoryEnum], defect_name: Option
     return round(total_score, 2)
 
 def mock_classify_defect(description: str, filename: str) -> dict:
-    """
-    Generates realistic randomized mockup ML model output for defect classification.
-    """
     text = (description + " " + filename).lower()
-    
     defects = [
         {"defect_name": "Spalling", "category": CategoryEnum.STRUCTURAL, "severity": round(random.uniform(7.0, 9.8), 1), "extent": round(random.uniform(30.0, 80.0), 1)},
         {"defect_name": "Stagnant Water", "category": CategoryEnum.FUNCTIONAL, "severity": round(random.uniform(5.5, 8.5), 1), "extent": round(random.uniform(25.0, 75.0), 1)},
         {"defect_name": "Cracked Tiles", "category": CategoryEnum.PERFORMANCE, "severity": round(random.uniform(5.0, 8.0), 1), "extent": round(random.uniform(20.0, 60.0), 1)},
         {"defect_name": "Paint Peeling", "category": CategoryEnum.PERFORMANCE, "severity": round(random.uniform(3.0, 6.0), 1), "extent": round(random.uniform(15.0, 50.0), 1)},
     ]
-    
     if "spall" in text or "concrete" in text or "pillar" in text or "beam" in text:
         chosen = defects[0]
     elif "water" in text or "drain" in text or "puddle" in text or "flood" in text:
@@ -47,13 +43,26 @@ def mock_classify_defect(description: str, filename: str) -> dict:
         chosen = defects[3]
     else:
         chosen = random.choice(defects)
-        
-    return {
-        "defect_name": chosen["defect_name"],
-        "category": chosen["category"],
-        "severity": chosen["severity"],
-        "extent": chosen["extent"]
-    }
+    return chosen
+
+def classify_defect(image_path: Optional[str] = None, description: str = "", filename: str = "") -> dict:
+    """
+    Primary classifier using the PyTorch EfficientNet-B0 ML model with GradCAM++ severity & extent.
+    Falls back gracefully to heuristic analysis if image path is unavailable.
+    """
+    if image_path and os.path.exists(image_path):
+        from app.model_service import predict_single_image
+        res = predict_single_image(image_path)
+        return {
+            "defect_name": res["defect_name"],
+            "category": res["category"],
+            "severity": res["severity"],
+            "extent": res["extent"],
+            "confidence": res.get("confidence", 0.0),
+            "priority_score": res.get("priority_score", 0.0)
+        }
+
+    return mock_classify_defect(description, filename)
 
 async def get_staff_tickets_filtered(
     db: AsyncSession,
