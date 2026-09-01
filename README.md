@@ -4,9 +4,9 @@ InfraPulse is an automated infrastructure defect triage and maintenance prioriti
 
 ---
 
-## 1. System Architecture & Workflows
+## 1. System Architecture
 
-### 1.1 High-Level Architecture
+The platform is structured into four decoupled layers spanning presentation, core application logic, computer vision inference, and persistence.
 
 ```mermaid
 graph TD
@@ -19,14 +19,14 @@ graph TD
 
     subgraph Application_Tier ["Application Tier"]
         Router["FastAPI Core Application"]
-        Auth["Session Auth & RBAC Guard"]
-        MDEngine["EasyMDE & Bleach Sanitizer"]
+        Auth["Session Auth and RBAC Guard"]
+        MDEngine["EasyMDE and Bleach Sanitizer"]
         ModelService["Model Service Singleton"]
         PriorityEngine["Mathematical Priority Engine"]
         NotificationService["In-App Notification Service"]
     end
 
-    subgraph CV_Tier ["Computer Vision Tier (Core AI Engine)"]
+    subgraph CV_Tier ["Computer Vision Tier"]
         Net["InfraPulseNet (EfficientNet-B0)"]
         GradCAM["GradCAM++ Explainability Engine"]
         Weights[("best_infrapulse_v1.pt (18.9 MB)")]
@@ -37,9 +37,9 @@ graph TD
         Storage[("Upload Storage (/uploads)")]
     end
 
-    U -->|Submit Defect & Details| Router
-    S -->|Claim & Progress Tickets| Router
-    A -->|Staff Provisioning & Governance| Router
+    U -->|Submit Defect and Details| Router
+    S -->|Claim and Progress Tickets| Router
+    A -->|Staff Provisioning and Governance| Router
     B -->|Holdout Test Benchmarking| Router
 
     Router --> Auth
@@ -58,51 +58,103 @@ graph TD
 
 ---
 
-### 1.2 End-to-End Defect Ingestion & Dispatch Flow
+## 2. Problem Statement Requirements (Core Deliverables)
+
+The platform implements the end-to-end defect detection, triage, scoring, and dispatch workflows specified in the Problem Statement.
+
+### 2.1 Deep Learning Vision-Based Defect Classification
+- **PyTorch Neural Network (`InfraPulseNet`)**: Built on an EfficientNet-B0 backbone fine-tuned for multi-class infrastructure defect detection.
+- **Holdout Evaluation Performance**: Achieved **88.8% accuracy** and **0.89 weighted F1-score** across 241 holdout test images.
+- **Supported Defect Classes**:
+  - **Spalling** (Concrete delamination / exposed rebar) -> Routed to **Structural Department**
+  - **Stagnant Water** (Puddles / drainage overflow) -> Routed to **Functional Department**
+  - **Cracked Tiles** (Floor fractures) -> Routed to **Performance Department**
+  - **Paint Peeling** (Wall surface flaking) -> Routed to **Performance Department**
+
+### 2.2 Computer Vision Damage Localization (Severity & Extent)
+- **GradCAM++ Visual Localization**: Extracts class activation heatmaps from layer `backbone.features[-1]` to locate defect regions on the image pixels.
+- **Dynamic Severity Calculation**: Computed from peak and mean heatmap activation combined with Canny edge contour density.
+- **Dynamic Extent Calculation**: Computed from active coverage area ratio, component fragmentation, and spatial dispersion.
+
+### 2.3 Defect Routing Hierarchy Matrix
+
+```mermaid
+graph LR
+    subgraph Defect_Inputs ["Defect Types"]
+        D1["Concrete Spalling"]
+        D2["Stagnant Water / Leaks"]
+        D3["Cracked Floor Tiles"]
+        D4["Peeling Wall Paint"]
+    end
+
+    subgraph Department_Queues ["Department Queues"]
+        Q1["Structural Department Queue<br/>Weight: 1.5 | Boost: +2.0"]
+        Q2["Functional Department Queue<br/>Weight: 1.2 | Boost: +1.5"]
+        Q3["Performance Department Queue<br/>Weight: 1.0 | Boost: +1.2 / +1.0"]
+    end
+
+    D1 -->|Critical Structural Hazard| Q1
+    D2 -->|Service Disruption and Health Hazard| Q2
+    D3 -->|Aesthetic and Floor Integrity| Q3
+    D4 -->|Cosmetic Surface Wear| Q3
+```
+
+### 2.4 Objective Priority Scoring Engine
+Complaints within each department queue are ordered by a deterministic mathematical formula based on visible defect severity, surface extent, defect type, and department criticality:
+
+$$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
+
+- **Category Weights ($W_{\text{cat}}$)**: Structural = `1.5`, Functional = `1.2`, Performance = `1.0`.
+- **Defect Boosts ($B_{\text{defect}}$)**: Spalling = `+2.0`, Stagnant Water = `+1.5`, Cracked Tiles = `+1.2`, Paint Peeling = `+1.0`.
+
+### 2.5 End-to-End Defect Ingestion and Dispatch Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Resident as 👤 User / Resident
-    participant App as ⚡ FastAPI Application
-    participant ML as 🧠 PyTorch & GradCAM++ Engine
-    participant Engine as 📐 Priority Scoring Engine
-    participant DB as 🗄️ SQLite Database
-    actor Staff as 👷 Department Crew
+    actor Resident as User / Resident
+    participant App as FastAPI Application
+    participant ML as PyTorch and GradCAM++ Engine
+    participant Engine as Priority Scoring Engine
+    participant DB as SQLite Database
+    actor Staff as Department Crew
 
-    Resident->>App: Submits photo, location & Markdown description
-    App->>App: Sanitizes markdown via Bleach & normalizes photo (PNG)
+    Resident->>App: Submits photo, location and Markdown description
+    App->>App: Sanitizes markdown via Bleach and normalizes photo (PNG)
     App->>ML: Passes photo to InfraPulseInference
     ML->>ML: Computes Softmax Probabilities (EfficientNet-B0)
-    ML->>ML: Extracts GradCAM++ Heatmap & Canny Edge Contours
-    ML-->>App: Returns Predicted Defect, Category, Severity (%) & Extent (%)
+    ML->>ML: Extracts GradCAM++ Heatmap and Canny Edge Contours
+    ML-->>App: Returns Predicted Defect, Category, Severity (%) and Extent (%)
     App->>Engine: Computes Priority Score (Formula)
     Engine-->>App: Priority Score (e.g., 548.20)
     App->>DB: Stores Ticket in designated Department Queue (Submitted)
-    App-->>Resident: Returns Ticket Confirmation (#INF-XXXXXXXXXX) & Live Queue Rank
+    App-->>Resident: Returns Ticket Confirmation (#INF-XXXXXXXXXX) and Live Queue Rank
     Staff->>App: Views Department Queue (Sorted by Priority Score Descending)
     Staff->>App: Claims Ticket (Self-Assign)
-    App->>DB: Updates Status to Assigned & Generates User Notification
-    Staff->>App: Completes Work & Marks Ticket as Resolved
+    App->>DB: Updates Status to Assigned and Generates User Notification
+    Staff->>App: Completes Work and Marks Ticket as Resolved
     App->>DB: Updates Status to Resolved (Removed from Active Queue)
 ```
 
----
-
-### 1.3 Ticket Lifecycle State Machine
+### 2.6 Ticket Lifecycle State Machine
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Submitted: User submits defect photo & details
+    [*] --> Submitted: User submits defect photo and details
     Submitted --> Assigned: Staff member self-assigns ticket
     Assigned --> In_Progress: Maintenance work commences
-    In_Progress --> Resolved: Defect repaired & validated
+    In_Progress --> Resolved: Defect repaired and validated
     Resolved --> [*]: Ticket removed from active priority queue
 ```
 
+### 2.7 Multi-Role Portals
+- **User Portal**: Report defects, track submission status, view live queue standing, and post comments.
+- **Staff Operations Console**: Filter queues by department, claim tickets within domain, update progress, and export records.
+- **Administrator Portal**: System-wide oversight, staff account provisioning, and record governance.
+
 ---
 
-### 1.4 Database Entity-Relationship Diagram (ERD)
+## 3. Database Architecture
 
 ```mermaid
 erDiagram
@@ -180,123 +232,30 @@ erDiagram
 
 ---
 
-### 1.5 Defect Category & Queue Routing Hierarchy
-
-```mermaid
-graph LR
-    subgraph Defect_Inputs ["Defect Types"]
-        D1["Concrete Spalling"]
-        D2["Stagnant Water / Leaks"]
-        D3["Cracked Floor Tiles"]
-        D4["Peeling Wall Paint"]
-    end
-
-    subgraph Department_Queues ["Department Queues"]
-        Q1["Structural Department Queue<br/>Weight: 1.5 | Boost: +2.0"]
-        Q2["Functional Department Queue<br/>Weight: 1.2 | Boost: +1.5"]
-        Q3["Performance Department Queue<br/>Weight: 1.0 | Boost: +1.2 / +1.0"]
-    end
-
-    D1 -->|Critical Structural Hazard| Q1
-    D2 -->|Service Disruption & Health Hazard| Q2
-    D3 -->|Aesthetic & Floor Integrity| Q3
-    D4 -->|Cosmetic Surface Wear| Q3
-```
-
----
-
-## 2. Problem Statement Requirements (Core Deliverables)
-
-The platform fully implements the end-to-end defect detection, triage, scoring, and dispatch workflows specified in the Problem Statement:
-
-1. **Deep Learning Vision-Based Defect Classification**:
-   - **PyTorch Neural Network (`InfraPulseNet`)**: Built on an EfficientNet-B0 backbone fine-tuned for multi-class infrastructure defect detection.
-   - **Supported Defect Types**:
-     - **Spalling** (Concrete damage / exposed rebar) $\to$ Routed to **Structural Department**
-     - **Stagnant Water** (Puddles / drainage overflow) $\to$ Routed to **Functional Department**
-     - **Cracked Tiles** (Floor fractures) $\to$ Routed to **Performance Department**
-     - **Paint Peeling** (Wall surface flaking) $\to$ Routed to **Performance Department**
-   - **Holdout Evaluation Performance**: Achieved **88.8% accuracy** and **0.89 weighted F1-score** across 241 holdout test images.
-
-2. **Computer Vision Damage Localization (Severity & Extent Calculation)**:
-   - **GradCAM++ Visual Explainability**: Computes class activation heatmaps from layer `backbone.features[-1]` to locate defect regions on the image pixels.
-   - **Dynamic Severity Calculation**: Computed directly from peak/mean heatmap activation and Canny edge contour density.
-   - **Dynamic Extent Calculation**: Computed directly from active damage coverage area and spatial fragmentation.
-
-3. **Objective Priority Scoring Engine**:
-   - Mathematically orders queues to eliminate human bias and manual triage bottlenecks:
-     $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
-   - **Category Weights ($W_{\text{cat}}$)**: Structural = `1.5`, Functional = `1.2`, Performance = `1.0`.
-   - **Defect Boosts ($B_{\text{defect}}$)**: Spalling = `+2.0`, Stagnant Water = `+1.5`, Cracked Tiles = `+1.2`, Paint Peeling = `+1.0`.
-
-4. **Lifecycle State Machine & Queue Dispatch**:
-   - Sequential ticket status progression: `Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`.
-   - Automatic removal of resolved tickets from the active prioritization queue.
-
-5. **Multi-Role Portals**:
-   - **User Portal**: Report defects, track submission status, live queue standing, and post comments.
-   - **Staff Operations Console**: Filter queues by department, claim tickets, update progress, and export records.
-   - **Administrator Portal**: System-wide oversight, staff account provisioning, and record governance.
-
----
-
-## 3. Extra Features & Quality of Life (QoL) Enhancements
+## 4. Extra Features and Quality of Life (QoL) Enhancements
 
 Beyond the baseline specifications, InfraPulse incorporates the following 14 production-grade capabilities:
 
-### 🧪 Live Evaluation & Benchmarking
-1. **Interactive Model Benchmark Center (`/test`)**:
-   - Dedicated web GUI allowing evaluators to run side-by-side comparisons between the PyTorch ML Model and the baseline classifier across 1,500+ holdout dataset images.
-   - Ground truth verification with visual `✓ Correct` / `✗ Mismatch` status chips.
-   - Memory-safe batch pagination (10 images/page) and in-memory prediction caching to prevent CPU/RAM throttling.
-   - Split filtering (`test`, `val`, `train`) and defect category filters.
-
-### ✍️ Rich Text & Markdown Support
-2. **Embedded EasyMDE WYSIWYG Markdown Editor**:
-   - Client-side EasyMDE toolbar on ticket submission supporting **Bold**, *Italic*, **H3 Headers**, **Blockquotes**, **Lists**, **Code blocks**, and **Tables**.
-   - Built-in **Side-by-Side Live Preview** and **Full-screen mode** with auto-syncing form inputs.
-3. **Server-Side Safe Markdown Sanitization Pipeline**:
-   - Server-side Python `markdown` engine with `bleach` HTML tag sanitization to render rich typography while guaranteeing protection against XSS attacks.
-
-### 💬 Real-Time Collaboration & Alerts
-4. **Real-Time Live Discussion Feed & Sound Chime**:
-   - Chronological communication timeline on ticket detail pages between residents and assigned staff.
-   - Live asynchronous polling with Web Audio API acoustic pop sound indicator when new comments arrive.
-5. **Centralized In-App Notification Center**:
-   - Global navbar notification bell with dynamic unread counter badge.
-   - Real-time polling alerting users and staff on ticket assignments and status changes with direct deep-links.
-
-### 🔒 Security, Governance & Privacy
-6. **Departmental RBAC & Cross-Domain Jurisdiction Enforcement**:
-   - Staff accounts are strictly bound to their department domain (`Structural`, `Functional`, `Performance`).
-   - Server enforces `HTTP 403 Forbidden` checks preventing staff from claiming or modifying tickets outside their jurisdiction.
-7. **Privacy-Preserving Contact Information Masking**:
-   - User phone numbers and emails are automatically masked (e.g., `+91 ••••• •••10` and `u•••••@example.com`) on public ticket views.
-   - Full unmasked contact data is visible only to the ticket owner, assigned staff, and system administrators.
-8. **Enterprise CSV Queue Export**:
-   - Dedicated `/staff/export/csv` endpoint allowing operators to export filtered queue datasets for auditing and compliance.
-
-### 🎨 User Experience & Accessibility
-9. **Cloudflare-Inspired Ergonomic UI (Light & Dark Modes)**:
-   - Eye-friendly neutral slate palette (`#f8fafc` soft background, `#ffffff` cards, `#0b0f19` dark mode) paired with Cloudflare orange accents (`#f38020`).
-   - Crisp Inter typography system with custom smooth scrollbars and theme toggle persisted in `localStorage`.
-10. **Multi-Dimensional Search & Granular Queue Filtering**:
-    - User dashboard search by ticket ID, address, or defect description.
-    - Staff console multi-filter by queue domain, resolution status, minimum severity threshold, and sorting options (priority descending, newest, oldest, severity).
-11. **Branded Custom 404 Error Page**:
-    - Branded error interface maintaining visual consistency across invalid routes.
-
-### ⚙️ Reliability & Infrastructure
-12. **100% Offline & Self-Contained Static Assets**:
-    - Zero external CDN dependencies: bundled Tailwind JS, EasyMDE CSS/JS, and FontAwesome webfonts in `app/static/vendor/` for secure, air-gapped intranet deployments.
-13. **Automatic Image Format Normalization & Validation**:
-    - Pillow pipeline that validates image headers, strips malicious payloads, and converts incoming WEBP/JPEG/BMP photos into standardized PNG representations.
-14. **Multi-Stage Production Docker & Automated Seeding**:
-    - Optimized multi-stage `Dockerfile` and `docker-compose.yml` with automated database seeding on boot.
+| # | Feature Area | Extra / QoL Feature | Architectural Implementation and Benefit |
+| :-: | :--- | :--- | :--- |
+| **1** | **Benchmarking** | **Interactive Benchmark Center (`/test`)** | Web GUI with memory-safe pagination (10/page) and prediction caching to evaluate holdout test datasets without CPU/RAM spikes. |
+| **2** | **Rich Text** | **Embedded EasyMDE WYSIWYG Editor** | Client-side EasyMDE toolbar with side-by-side live preview and fullscreen distraction-free editing on ticket submission. |
+| **3** | **Security** | **Server-Side Safe Markdown Sanitizer** | Python `markdown` engine coupled with `bleach` whitelist tag sanitizer to render rich typography while guaranteeing protection against XSS. |
+| **4** | **Collaboration** | **Real-Time Live Discussion Feed** | Chronological comment timeline on ticket details with background polling for bidirectional communication. |
+| **5** | **Feedback** | **Web Audio API Feedback** | Client-side acoustic audio chime synthesis triggered when new comments or status updates arrive. |
+| **6** | **Notifications** | **In-App Notification Center** | Global navbar notification bell with unread badge counter and direct deep-links for ticket assignments. |
+| **7** | **Governance** | **Departmental RBAC Jurisdiction** | Strict backend `HTTP 403 Forbidden` checks preventing staff from claiming or altering tickets outside their assigned department. |
+| **8** | **Data Privacy** | **Contact Information Masking** | Personal user phone numbers and emails are masked (`+91 ••••• •••10`) for unauthorized public viewers. |
+| **9** | **Reporting** | **Enterprise CSV Data Export** | Streaming CSV generator (`/staff/export/csv`) with granular department, status, and severity filters for audits. |
+| **10** | **Design** | **Cloudflare-Inspired Ergonomic Theme** | Soft eye-friendly neutral slate palette (`#f8fafc` / `#0b0f19`) with Cloudflare orange accents and persistent dark/light theme switching. |
+| **11** | **Search** | **Multi-Dimensional Search and Filtering** | Instant search by Ticket ID, address, and description, plus sorting by priority, date, or severity. |
+| **12** | **Air-Gapped** | **100% Offline Static Assets** | Locally bundled Tailwind, FontAwesome webfonts, and EasyMDE in `app/static/vendor/` with zero external CDN reliance. |
+| **13** | **Reliability** | **Automatic Image Normalization** | Pillow pipeline validating image headers and converting incoming WEBP/JPEG/BMP photos into standardized PNGs. |
+| **14** | **DevOps** | **Production Docker and Compose** | Multi-stage Docker containerization with automated database seeding on boot (`docker compose up --build`). |
 
 ---
 
-## 4. Setup and Execution
+## 5. Setup and Execution
 
 ### Using Docker Compose
 
@@ -324,7 +283,7 @@ PYTHONPATH=. uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ---
 
-## 5. Default Accounts
+## 6. Default Accounts
 
 | Portal | Email | Password | Role / Department |
 | :--- | :--- | :--- | :--- |
@@ -336,7 +295,7 @@ PYTHONPATH=. uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ---
 
-## 6. Machine Learning Integration Endpoint
+## 7. Machine Learning Integration Endpoint
 
 External classification scripts or pipelines can submit defect metrics via the REST API:
 
@@ -354,7 +313,7 @@ Content-Type: application/json
 
 ---
 
-## 7. Automated Tests
+## 8. Automated Tests
 
 Run the complete test suite using pytest:
 
@@ -364,7 +323,7 @@ PYTHONPATH=. .venv/bin/pytest -v
 
 ---
 
-## 8. Project Structure
+## 9. Project Structure
 
 ```text
 InfraPulse/

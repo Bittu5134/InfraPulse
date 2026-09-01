@@ -78,12 +78,12 @@ graph TB
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Resident as 👤 User / Resident
-    participant App as ⚡ FastAPI Application
-    participant ML as 🧠 PyTorch & GradCAM++ Engine
-    participant Engine as 📐 Priority Scoring Engine
-    participant DB as 🗄️ SQLite Database
-    actor Staff as 👷 Department Crew
+    actor Resident as User / Resident
+    participant App as FastAPI Application
+    participant ML as PyTorch & GradCAM++ Engine
+    participant Engine as Priority Scoring Engine
+    participant DB as SQLite Database
+    actor Staff as Department Crew
 
     Resident->>App: Submits photo, location & Markdown description
     App->>App: Sanitizes markdown via Bleach & normalizes photo (PNG)
