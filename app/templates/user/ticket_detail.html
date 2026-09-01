@@ -312,46 +312,56 @@
             }
         }
 
-        // Filter for true defect crack/boundary pixels (top ~12% highest edge intensity)
-        const thresh = maxEdge * 0.35;
+        // Filter & Dilate for thick, bold, highly visible defect crack lines
+        const thresh = maxEdge * 0.30;
         const overlayData = ctx.createImageData(w, h);
         const out = overlayData.data;
         const focalPoints = [];
+        const radius = Math.max(2, Math.round(w / 120)); // Thick dilation neighborhood
 
-        for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
+        for (let y = 2; y < h - 2; y++) {
+            for (let x = 2; x < w - 2; x++) {
                 const idx = y * w + x;
                 const eVal = edges[idx];
                 if (eVal > thresh) {
                     const norm = (eVal - thresh) / (maxEdge - thresh || 1);
-                    const i = idx * 4;
-                    // Neon Red/Orange Defect Crack Trace
-                    out[i] = 239;                             // R
-                    out[i + 1] = Math.round(68 * (1 - norm)); // G
-                    out[i + 2] = 68;                          // B
-                    out[i + 3] = Math.round(norm * 220 + 35);    // Opacity
+                    
+                    // Morphological Dilation: Spread thick bold line stroke to surrounding pixels
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const ny = y + dy;
+                            const nx = x + dx;
+                            if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
+                                const nI = (ny * w + nx) * 4;
+                                out[nI] = 255;                               // Bright Neon Red (R)
+                                out[nI + 1] = Math.round(30 * (1 - norm));    // G
+                                out[nI + 2] = 30;                             // B
+                                out[nI + 3] = Math.max(out[nI + 3], Math.round(norm * 230 + 50)); // Bold Opacity
+                            }
+                        }
+                    }
 
-                    if (norm > 0.7 && (x % 30 === 0) && (y % 30 === 0)) {
+                    if (norm > 0.65 && (x % 25 === 0) && (y % 25 === 0)) {
                         focalPoints.push({ x, y });
                     }
                 }
             }
         }
 
-        // Render pixel outline directly over defect
+        // Render thick pixel outline directly over defect
         ctx.putImageData(overlayData, 0, 0);
 
-        // Draw pin-point glowing target nodes on key crack focal points
+        // Draw bold glowing target nodes on key crack focal points
         ctx.save();
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = Math.max(2, Math.round(w / 250));
-        ctx.shadowColor = '#dc2626';
-        ctx.shadowBlur = 8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(3, Math.round(w / 120));
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 12;
 
         focalPoints.forEach(pt => {
             ctx.beginPath();
-            ctx.arc(pt.x, pt.y, Math.max(3, Math.round(w / 180)), 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+            ctx.arc(pt.x, pt.y, Math.max(6, Math.round(w / 90)), 0, 2 * Math.PI);
+            ctx.fillStyle = '#ef4444';
             ctx.fill();
             ctx.stroke();
         });
@@ -368,9 +378,9 @@
 
         ctx.save();
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = Math.max(3, Math.round(w / 180));
-        ctx.shadowColor = '#dc2626';
-        ctx.shadowBlur = 8;
+        ctx.lineWidth = Math.max(6, Math.round(w / 70)); // Bold thick stroke line
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 12;
 
         // Draw simulated crack trace across defect region
         const cx = w * 0.5, cy = h * 0.5;
