@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Infrastructure Maintenance Platform{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Community Infrastructure & Issue Reporting Platform{% endblock %}</title>
     
     <!-- Local Tailwind CSS Engine -->
     <script src="/static/vendor/tailwind/tailwind.js"></script>
@@ -115,7 +115,7 @@
                 {% if request.url.path != '/' %}
                     <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
                         <i class="fa-solid fa-plus text-xs"></i>
-                        <span>Create Ticket</span>
+                        <span>Report an Issue</span>
                     </a>
                 {% endif %}
 
@@ -123,7 +123,7 @@
                 {% if current_user %}
                     <a href="/user/dashboard" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
                         <i class="fa-solid fa-ticket text-[#f38020]"></i>
-                        <span>My Tickets</span>
+                        <span>My Reports</span>
                     </a>
                 {% else %}
                     <a href="/user/login" class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
@@ -176,7 +176,7 @@
             <div class="flex items-center gap-2">
                 <span class="font-semibold text-slate-700 dark:text-slate-300">InfraPulse</span>
                 <span class="text-slate-300 dark:text-slate-700">•</span>
-                <span>Infrastructure Prioritization & Maintenance System</span>
+                <span>Public Infrastructure Reporting & Repair Tracking</span>
             </div>
             <div>© Takneek'26 | Nawabs</div>
         </div>
