@@ -128,7 +128,7 @@ async def get_queue_position(db: AsyncSession, complaint: Complaint) -> Optional
     if complaint.status == StatusEnum.RESOLVED or not complaint.category:
         return None
     
-    queue = await get_all_active_queue(db)
+    queue = await get_category_live_queue(db, complaint.category)
     for idx, item in enumerate(queue, start=1):
         if item.id == complaint.id:
             return idx
