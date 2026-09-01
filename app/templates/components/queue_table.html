@@ -93,33 +93,38 @@
                     {% endif %}
                 </td>
                 <td class="text-right">
-                    <!-- 3 Quick Action Icon Buttons for Staff -->
-                    <div class="flex items-center justify-end gap-1">
-                        <!-- Action 1: Assign to Me -->
-                        {% if current_staff and item.assigned_staff_id != current_staff.id %}
-                            <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
-                                <button type="submit" class="btn btn-square btn-xs btn-primary" title="Assign to Me">
-                                    <i class="fa-solid fa-hand"></i>
-                                </button>
-                            </form>
+                    {% if current_staff %}
+                        {% if not item.category or item.category == current_staff.domain %}
+                            <!-- 3 Quick Action Icon Buttons for Matching Staff Domain -->
+                            <div class="flex items-center justify-end gap-1">
+                                {% if item.assigned_staff_id != current_staff.id %}
+                                    <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
+                                        <button type="submit" class="btn btn-square btn-xs btn-primary" title="Assign to Me">
+                                            <i class="fa-solid fa-hand"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
+                                    <input type="hidden" name="status" value="In Progress" />
+                                    <button type="submit" class="btn btn-square btn-xs btn-outline btn-info {% if item.status == 'In Progress' %}btn-active{% endif %}" title="Mark In Progress">
+                                        <i class="fa-solid fa-spinner"></i>
+                                    </button>
+                                </form>
+
+                                <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
+                                    <input type="hidden" name="status" value="Resolved" />
+                                    <button type="submit" class="btn btn-square btn-xs btn-success {% if item.status == 'Resolved' %}btn-active{% endif %}" title="Mark Resolved">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <span class="badge badge-ghost text-xs opacity-60" title="Domain Restricted: Managed by {{ item.category.value }} Squad">
+                                <i class="fa-solid fa-lock text-[10px] mr-1"></i> {{ item.category.value }} Only
+                            </span>
                         {% endif %}
-
-                        <!-- Action 2: Mark In Progress -->
-                        <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
-                            <input type="hidden" name="status" value="In Progress" />
-                            <button type="submit" class="btn btn-square btn-xs btn-outline btn-info {% if item.status == 'In Progress' %}btn-active{% endif %}" title="Mark In Progress">
-                                <i class="fa-solid fa-spinner"></i>
-                            </button>
-                        </form>
-
-                        <!-- Action 3: Mark Resolved -->
-                        <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
-                            <input type="hidden" name="status" value="Resolved" />
-                            <button type="submit" class="btn btn-square btn-xs btn-success {% if item.status == 'Resolved' %}btn-active{% endif %}" title="Mark Resolved">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </button>
-                        </form>
-                    </div>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

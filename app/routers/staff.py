@@ -193,6 +193,12 @@ async def assign_complaint_to_self(
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found")
         
+    if complaint.category and staff.domain and complaint.category != staff.domain:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Domain Restricted: Staff in {staff.domain.value} domain cannot manage {complaint.category.value} tickets."
+        )
+
     complaint.assigned_staff_id = staff.id
     complaint.assigned_staff_name = staff.name
     if complaint.status == StatusEnum.SUBMITTED:
@@ -225,6 +231,12 @@ async def update_complaint_status(
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found")
         
+    if complaint.category and staff.domain and complaint.category != staff.domain:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Domain Restricted: Staff in {staff.domain.value} domain cannot manage {complaint.category.value} tickets."
+        )
+
     try:
         new_status = StatusEnum(status_str)
     except ValueError:

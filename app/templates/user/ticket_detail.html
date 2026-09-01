@@ -69,36 +69,43 @@
 
                 <!-- Right Column: AI Detection & Staff Controls -->
                 <div class="space-y-6">
-                    <!-- Staff Action Controls (Visible for Staff Members) -->
+                    <!-- Staff Action Controls (Visible for Staff Members of Matching Domain) -->
                     {% if current_staff %}
                     <div class="bg-secondary/10 border border-secondary/30 p-4 rounded-2xl space-y-3">
                         <h4 class="text-xs uppercase font-extrabold text-secondary flex items-center gap-1">
                             <i class="fa-solid fa-user-gear"></i> Staff Ticket Actions
                         </h4>
 
-                        <div class="flex flex-wrap gap-2">
-                            {% if complaint.assigned_staff_id != current_staff.id %}
-                                <form action="/staff/assign/{{ complaint.id }}" method="POST" class="inline">
-                                    <button type="submit" class="btn btn-sm btn-primary gap-1">
-                                        <i class="fa-solid fa-hand"></i> Assign to Me
+                        {% if not complaint.category or complaint.category == current_staff.domain %}
+                            <div class="flex flex-wrap gap-2">
+                                {% if complaint.assigned_staff_id != current_staff.id %}
+                                    <form action="/staff/assign/{{ complaint.id }}" method="POST" class="inline">
+                                        <button type="submit" class="btn btn-sm btn-primary gap-1">
+                                            <i class="fa-solid fa-hand"></i> Assign to Me
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
+                                    <input type="hidden" name="status" value="In Progress" />
+                                    <button type="submit" class="btn btn-sm btn-outline btn-info gap-1" {% if complaint.status == 'In Progress' %}disabled{% endif %}>
+                                        <i class="fa-solid fa-spinner"></i> In Progress
                                     </button>
                                 </form>
-                            {% endif %}
 
-                            <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
-                                <input type="hidden" name="status" value="In Progress" />
-                                <button type="submit" class="btn btn-sm btn-outline btn-info gap-1" {% if complaint.status == 'In Progress' %}disabled{% endif %}>
-                                    <i class="fa-solid fa-spinner"></i> In Progress
-                                </button>
-                            </form>
-
-                            <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
-                                <input type="hidden" name="status" value="Resolved" />
-                                <button type="submit" class="btn btn-sm btn-success gap-1" {% if complaint.status == 'Resolved' %}disabled{% endif %}>
-                                    <i class="fa-solid fa-circle-check"></i> Mark Resolved
-                                </button>
-                            </form>
-                        </div>
+                                <form action="/staff/status/{{ complaint.id }}" method="POST" class="inline">
+                                    <input type="hidden" name="status" value="Resolved" />
+                                    <button type="submit" class="btn btn-sm btn-success gap-1" {% if complaint.status == 'Resolved' %}disabled{% endif %}>
+                                        <i class="fa-solid fa-circle-check"></i> Mark Resolved
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning text-xs">
+                                <i class="fa-solid fa-lock"></i>
+                                <span>Domain Restricted: This ticket is assigned to <strong>{{ complaint.category.value }} Squad</strong>. Your account is in <strong>{{ current_staff.domain.value }}</strong>.</span>
+                            </div>
+                        {% endif %}
                     </div>
                     {% endif %}
 
@@ -235,7 +242,6 @@
     const ticketId = {{ complaint.id }};
     const chatContainer = document.getElementById('chat-timeline-container');
 
-    // Auto scroll chat to bottom by default
     function scrollToBottom() {
         if (chatContainer) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
