@@ -1,10 +1,11 @@
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import select
 
 from app.config import UPLOAD_DIR, BASE_DIR, SECRET_KEY
@@ -71,6 +72,22 @@ app = FastAPI(
     version="3.0.0",
     lifespan=lifespan
 )
+
+# Custom 404 Error Exception Handler
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        async with AsyncSessionLocal() as db:
+            u = await get_current_user(request, db)
+            s = await get_current_staff(request, db)
+            a = await get_current_admin(request, db)
+        return templates.TemplateResponse(
+            request=request,
+            name="404.html",
+            context={"current_user": u, "current_staff": s, "current_admin": a},
+            status_code=404
+        )
+    return HTMLResponse(content=str(exc.detail), status_code=exc.status_code)
 
 # Session Middleware for User, Staff, Admin Auth
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)

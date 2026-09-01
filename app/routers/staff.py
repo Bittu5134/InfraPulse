@@ -164,11 +164,15 @@ async def update_complaint_status(
         new_status = StatusEnum(status_str)
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status_str}")
+
+    # Enforce workflow rule: Cannot mark as In Progress or Resolved without assigning first!
+    if not complaint.assigned_staff_id:
+        if new_status in [StatusEnum.IN_PROGRESS, StatusEnum.RESOLVED]:
+            # Automatically assign to current acting staff member
+            complaint.assigned_staff_id = staff.id
+            complaint.assigned_staff_name = staff.name
         
     complaint.status = new_status
-    if not complaint.assigned_staff_id:
-        complaint.assigned_staff_id = staff.id
-        complaint.assigned_staff_name = staff.name
 
     # Trigger notification for user
     if complaint.user_id:
