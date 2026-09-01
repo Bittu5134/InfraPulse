@@ -10,31 +10,31 @@ InfraPulse is an automated infrastructure defect triage and maintenance prioriti
 
 ```mermaid
 graph TD
-    subgraph Client Tier
-        U["👤 User Portal (/user)"]
-        S["👷 Staff Portal (/staff)"]
-        A["🛡️ Admin Portal (/admin)"]
-        B["🧪 Benchmark Center (/test)"]
+    subgraph Client_Tier ["Client Tier"]
+        U["User Portal (/user)"]
+        S["Staff Portal (/staff)"]
+        A["Admin Portal (/admin)"]
+        B["Benchmark Center (/test)"]
     end
 
-    subgraph Application Tier
-        Router["⚡ FastAPI Core Application"]
-        Auth["🔑 Session Auth & RBAC Guard"]
-        MDEngine["📝 EasyMDE & Bleach Sanitizer"]
-        ModelService["🧠 Model Service Singleton"]
-        PriorityEngine["📐 Mathematical Priority Engine"]
-        NotificationService["🔔 In-App Notification Service"]
+    subgraph Application_Tier ["Application Tier"]
+        Router["FastAPI Core Application"]
+        Auth["Session Auth & RBAC Guard"]
+        MDEngine["EasyMDE & Bleach Sanitizer"]
+        ModelService["Model Service Singleton"]
+        PriorityEngine["Mathematical Priority Engine"]
+        NotificationService["In-App Notification Service"]
     end
 
-    subgraph Computer Vision Tier (Problem Statement Core)
-        Net["🔬 InfraPulseNet (EfficientNet-B0)"]
-        GradCAM["🔥 GradCAM++ Explainability Engine"]
-        Weights[("📦 best_infrapulse_v1.pt (18.9 MB)")]
+    subgraph CV_Tier ["Computer Vision Tier (Core AI Engine)"]
+        Net["InfraPulseNet (EfficientNet-B0)"]
+        GradCAM["GradCAM++ Explainability Engine"]
+        Weights[("best_infrapulse_v1.pt (18.9 MB)")]
     end
 
-    subgraph Data Tier
-        DB[("🗄️ SQLite Database (Async SQLAlchemy)")]
-        Storage[("🖼️ Upload Storage (/uploads)")]
+    subgraph Data_Tier ["Data Tier"]
+        DB[("SQLite Database (Async SQLAlchemy)")]
+        Storage[("Upload Storage (/uploads)")]
     end
 
     U -->|Submit Defect & Details| Router
@@ -184,17 +184,17 @@ erDiagram
 
 ```mermaid
 graph LR
-    subgraph Defect Inputs
-        D1["🧱 Concrete Spalling"]
-        D2["💧 Stagnant Water / Leaks"]
-        D3["🔲 Cracked Floor Tiles"]
-        D4["🎨 Peeling Wall Paint"]
+    subgraph Defect_Inputs ["Defect Types"]
+        D1["Concrete Spalling"]
+        D2["Stagnant Water / Leaks"]
+        D3["Cracked Floor Tiles"]
+        D4["Peeling Wall Paint"]
     end
 
-    subgraph Department Queues
-        Q1["🏢 Structural Department Queue<br/><b>Weight: 1.5 | Boost: +2.0</b>"]
-        Q2["🚰 Functional Department Queue<br/><b>Weight: 1.2 | Boost: +1.5</b>"]
-        Q3["🛠️ Performance Department Queue<br/><b>Weight: 1.0 | Boost: +1.2 / +1.0</b>"]
+    subgraph Department_Queues ["Department Queues"]
+        Q1["Structural Department Queue<br/>Weight: 1.5 | Boost: +2.0"]
+        Q2["Functional Department Queue<br/>Weight: 1.2 | Boost: +1.5"]
+        Q3["Performance Department Queue<br/>Weight: 1.0 | Boost: +1.2 / +1.0"]
     end
 
     D1 -->|Critical Structural Hazard| Q1

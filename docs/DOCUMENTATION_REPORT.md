@@ -44,17 +44,17 @@ stateDiagram-v2
 
 ```mermaid
 graph LR
-    subgraph Defect Inputs
-        D1["🧱 Concrete Spalling"]
-        D2["💧 Stagnant Water / Leaks"]
-        D3["🔲 Cracked Floor Tiles"]
-        D4["🎨 Peeling Wall Paint"]
+    subgraph Defect_Inputs ["Defect Types"]
+        D1["Concrete Spalling"]
+        D2["Stagnant Water / Leaks"]
+        D3["Cracked Floor Tiles"]
+        D4["Peeling Wall Paint"]
     end
 
-    subgraph Department Queues
-        Q1["🏢 Structural Department Queue<br/><b>Weight: 1.5 | Boost: +2.0</b>"]
-        Q2["🚰 Functional Department Queue<br/><b>Weight: 1.2 | Boost: +1.5</b>"]
-        Q3["🛠️ Performance Department Queue<br/><b>Weight: 1.0 | Boost: +1.2 / +1.0</b>"]
+    subgraph Department_Queues ["Department Queues"]
+        Q1["Structural Department Queue<br/>Weight: 1.5 | Boost: +2.0"]
+        Q2["Functional Department Queue<br/>Weight: 1.2 | Boost: +1.5"]
+        Q3["Performance Department Queue<br/>Weight: 1.0 | Boost: +1.2 / +1.0"]
     end
 
     D1 -->|Critical Structural Hazard| Q1
