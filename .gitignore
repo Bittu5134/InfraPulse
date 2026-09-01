@@ -35,6 +35,7 @@ data/
 app/model/data/
 app/model/checkpoints/convnext_tiny_infrapulse.pt
 app/model/checkpoints/swin_tiny_infrapulse.pt
+app/model/checkpoints/multitask_mtl_infrapulse.pt
 app/model/checkpoints/infrapulse_model.onnx
 
 # IDE / Editor files

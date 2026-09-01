@@ -44,14 +44,18 @@ def load_custom_model(model_key: str):
         return _loaded_models[model_key]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    from model import InfraPulseNet, ConvNeXtInfraPulse, SwinInfraPulse, MultiModalInfraPulse, CATEGORY_MAP, CLASS_NAMES
+    from model import (
+        InfraPulseNet, ConvNeXtInfraPulse, SwinInfraPulse,
+        MultiModalInfraPulse, MultiTaskInfraPulse, CATEGORY_MAP, CLASS_NAMES
+    )
 
     ckpt_map = {
         "baseline": CKPT_DIR / "best_infrapulse_v1.pt",
         "convnext_tiny": CKPT_DIR / "convnext_tiny_infrapulse.pt",
         "swin_t": CKPT_DIR / "swin_tiny_infrapulse.pt",
         "multimodal_fusion": CKPT_DIR / "multimodal_fusion_infrapulse.pt",
-        "quantized_int8": CKPT_DIR / "infrapulse_int8_quantized.pt"
+        "quantized_int8": CKPT_DIR / "infrapulse_int8_quantized.pt",
+        "mtl_dual_branch": CKPT_DIR / "multitask_mtl_infrapulse.pt"
     }
 
     ckpt_path = ckpt_map.get(model_key)
@@ -72,6 +76,9 @@ def load_custom_model(model_key: str):
             m.load_state_dict(state["model_state"])
         elif model_key == "multimodal_fusion" and "multimodal" in str(ckpt_path):
             m = MultiModalInfraPulse(num_classes=4, pretrained=False).to(device)
+            m.load_state_dict(state["model_state"])
+        elif model_key == "mtl_dual_branch" and "multitask" in str(ckpt_path):
+            m = MultiTaskInfraPulse(num_classes=4, pretrained=False).to(device)
             m.load_state_dict(state["model_state"])
         elif model_key == "quantized_int8" and "quantized" in str(ckpt_path):
             base_cpu = InfraPulseNet(num_classes=4, pretrained=False).to("cpu")
@@ -210,12 +217,16 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         return _comparison_cache[cache_key]
 
     from model import CATEGORY_MAP, CLASS_NAMES
+    from app.quality_gate import check_image_quality
+
+    quality_info = check_image_quality(image_path)
 
     pil = Image.open(image_path).convert("RGB")
     tfm = get_transform(224)
 
     models_to_evaluate = [
         ("convnext_tiny", "ConvNeXt-Tiny (Modern CNN + Focal Loss)", "convnext_tiny"),
+        ("mtl_dual_branch", "Multi-Task Learning (MTL Dual-Branch)", "mtl_dual_branch"),
         ("swin_t", "Swin Transformer (Shifted-Window Attention)", "swin_t"),
         ("baseline", "EfficientNet-B0 (Baseline PyTorch)", "baseline"),
         ("quantized_int8", "INT8 Quantized Engine (Ultra-Fast CPU)", "quantized_int8"),
@@ -240,14 +251,20 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         device = m_obj["device"]
         x = tfm(pil).unsqueeze(0).to(device)
 
-        from model import MultiModalInfraPulse
+        from model import MultiModalInfraPulse, MultiTaskInfraPulse
         start_t = time.perf_counter()
         with torch.inference_mode():
             if isinstance(model, MultiModalInfraPulse):
                 tokens = tokenize_text_to_tensor(description, vocab_size=500, device=device)
                 logits = model(x, text_tokens=tokens)
+                mtl_extent = None
+            elif isinstance(model, MultiTaskInfraPulse):
+                mtl_out = model(x, return_all=True)
+                logits = mtl_out["logits"]
+                mtl_extent = float(mtl_out["extent_ratio"].item())
             else:
                 logits = model(x)
+                mtl_extent = None
             probs = torch.softmax(logits, dim=1)[0]
         latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
 
@@ -263,7 +280,10 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         gray = np.array(pil.convert("L"))
         edges = float(np.sum(gray < 80) / max(1, gray.size) * 100.0)
         severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
-        extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
+        if mtl_extent is not None:
+            extent = round(min(95.0, max(15.0, mtl_extent)), 1)
+        else:
+            extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
         priority_score = compute_priority_score(cat_enum, defect, severity, extent)
 
         defect_title = defect.replace("_", " ").title()
@@ -327,7 +347,8 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
 
     result = {
         "models": evaluated_outputs,
-        "winner": winner
+        "winner": winner,
+        "quality_gate": quality_info
     }
     _comparison_cache[cache_key] = result
     return result
