@@ -48,21 +48,20 @@ def get_transform(image_size: int = 224):
     ])
 
 def load_custom_model(model_key: str):
-    """Loads and caches specified model architecture."""
+    """Loads and caches specified pure computer vision model architecture."""
     if model_key in _loaded_models:
         return _loaded_models[model_key]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     from model import (
         InfraPulseNet, ConvNeXtInfraPulse, SwinInfraPulse,
-        MultiModalInfraPulse, MultiTaskInfraPulse, CATEGORY_MAP, CLASS_NAMES
+        MultiTaskInfraPulse, CATEGORY_MAP, CLASS_NAMES
     )
 
     ckpt_map = {
         "baseline": CKPT_DIR / "best_infrapulse_v1.pt",
         "convnext_tiny": CKPT_DIR / "convnext_tiny_infrapulse.pt",
         "swin_t": CKPT_DIR / "swin_tiny_infrapulse.pt",
-        "multimodal_fusion": CKPT_DIR / "multimodal_fusion_infrapulse.pt",
         "quantized_int8": CKPT_DIR / "infrapulse_int8_quantized.pt",
         "mtl_dual_branch": CKPT_DIR / "multitask_mtl_infrapulse.pt"
     }
@@ -83,9 +82,6 @@ def load_custom_model(model_key: str):
         elif model_key == "swin_t" and "swin" in str(ckpt_path):
             m = SwinInfraPulse(num_classes=4, pretrained=False).to(device)
             m.load_state_dict(state["model_state"])
-        elif model_key == "multimodal_fusion" and "multimodal" in str(ckpt_path):
-            m = MultiModalInfraPulse(num_classes=4, pretrained=False).to(device)
-            m.load_state_dict(state["model_state"])
         elif model_key == "mtl_dual_branch" and "multitask" in str(ckpt_path):
             m = MultiTaskInfraPulse(num_classes=4, pretrained=False).to(device)
             m.load_state_dict(state["model_state"])
@@ -105,60 +101,60 @@ def load_custom_model(model_key: str):
         print(f"[ModelService] Could not load model {model_key}: {e}")
         return None
 
-def tokenize_text_to_tensor(text: str, vocab_size: int = 500, device: torch.device = torch.device("cpu")):
-    """Converts user markdown / ticket description text into token embeddings."""
-    if not text or not text.strip():
-        return None
-    words = [w.lower() for w in text.split() if len(w) > 2]
-    if not words:
-        return None
-    token_ids = [abs(hash(w)) % vocab_size for w in words]
-    return torch.tensor(token_ids, dtype=torch.long, device=device)
-
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
-    Runs primary ML inference using the default ConvNeXt-Tiny pure computer vision model
-    (93.8% test accuracy on pure images, 7x7 depthwise convolutions + LayerNorm + Focal Loss),
-    with fallback hierarchy to EfficientNet-B0 and Heuristic Fallback.
+    Two-Model Parallel Production Pipeline:
+    1. The Classifier: ConvNeXt-Tiny (93.8% test accuracy, pure vision) categorizes defect & department queue.
+    2. The Extractor: MultiTaskInfraPulse (MTL Dual-Branch, 91.2% accuracy, 43ms) extracts spatial defect area extent (%).
+    100% Pure Computer Vision - Strictly Zero Text Reliance.
     """
     cache_key = f"{image_path}_{age_hours}_{description}"
     if cache_key in _prediction_cache:
         return _prediction_cache[cache_key]
 
-    # Primary Default: ConvNeXt-Tiny (Pure Vision Specialist); Secondary: Baseline EfficientNet; Tertiary: Multi-Modal
-    model_obj = load_custom_model("convnext_tiny") or load_custom_model("baseline") or load_custom_model("multimodal_fusion")
+    conv_obj = load_custom_model("convnext_tiny") or load_custom_model("baseline")
+    mtl_obj = load_custom_model("mtl_dual_branch")
 
-    if model_obj is not None:
+    if conv_obj is not None:
         try:
-            from priority import analyze_heatmap, compute_priority
-            from model import CATEGORY_MAP, MultiModalInfraPulse
+            from priority import compute_priority
+            from model import CATEGORY_MAP, MultiTaskInfraPulse
 
             pil = Image.open(image_path).convert("RGB")
-            original_rgb = np.array(pil)
-            device = model_obj["device"]
-            model = model_obj["model"]
+            device = conv_obj["device"]
+            model = conv_obj["model"]
 
             tfm = get_transform(224)
             x = tfm(pil).unsqueeze(0).to(device)
 
+            start_t = time.perf_counter()
             with torch.inference_mode():
-                if isinstance(model, MultiModalInfraPulse):
-                    tokens = tokenize_text_to_tensor(description, vocab_size=500, device=device)
-                    logits = model(x, text_tokens=tokens)
-                else:
-                    logits = model(x)
+                logits = model(x)
                 probs = torch.softmax(logits, dim=1)[0]
                 pred_idx = int(torch.argmax(probs).item())
                 confidence = float(probs[pred_idx].item())
 
-            class_names = model_obj["class_names"]
+                # Parallel Extractor Stream: MultiTask MTL Area Extractor
+                mtl_extent = None
+                if mtl_obj is not None:
+                    mtl_model = mtl_obj["model"]
+                    mtl_dev = mtl_obj["device"]
+                    mtl_x = x.to(mtl_dev)
+                    mtl_out = mtl_model(mtl_x, return_all=True)
+                    mtl_extent = float(mtl_out["extent_ratio"].item())
+
+            latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
+            class_names = conv_obj["class_names"]
             defect = class_names[pred_idx]
 
-            # Fast edge & area analysis for severity and extent
+            # Extent calculation (Multi-Task Area Extractor with edge fallback)
             gray = np.array(pil.convert("L"))
             edges = np.sum(gray < 80) / max(1, gray.size) * 100.0
             severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
-            extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
+            if mtl_extent is not None:
+                extent = round(min(95.0, max(15.0, mtl_extent)), 1)
+            else:
+                extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
 
             cat_str = CATEGORY_MAP.get(defect, "Performance")
             if cat_str == "Structural":
@@ -178,8 +174,8 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
                 "severity": severity,
                 "extent": extent,
                 "priority_score": priority_score,
-                "model_mode": "ConvNeXt-Tiny (Default CNN)",
-                "fallback_used": False,
+                "latency_ms": latency_ms,
+                "model_name": "Two-Model Parallel Pipeline (ConvNeXt Classifier + MTL Area Extractor)"
             }
             _prediction_cache[cache_key] = formatted
             return formatted
@@ -234,12 +230,11 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
     tfm = get_transform(224)
 
     models_to_evaluate = [
-        ("convnext_tiny", "ConvNeXt-Tiny (Modern CNN + Focal Loss)", "convnext_tiny"),
+        ("convnext_tiny", "ConvNeXt-Tiny (Modern Pure CNN)", "convnext_tiny"),
         ("mtl_dual_branch", "Multi-Task Learning (MTL Dual-Branch)", "mtl_dual_branch"),
         ("swin_t", "Swin Transformer (Shifted-Window Attention)", "swin_t"),
         ("baseline", "EfficientNet-B0 (Baseline PyTorch)", "baseline"),
         ("quantized_int8", "INT8 Quantized Engine (Ultra-Fast CPU)", "quantized_int8"),
-        ("multimodal_fusion", "Multi-Modal Bi-Encoder (Visual + Text)", "multimodal_fusion"),
     ]
 
     evaluated_outputs = []
@@ -260,14 +255,10 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         device = m_obj["device"]
         x = tfm(pil).unsqueeze(0).to(device)
 
-        from model import MultiModalInfraPulse, MultiTaskInfraPulse
+        from model import MultiTaskInfraPulse
         start_t = time.perf_counter()
         with torch.inference_mode():
-            if isinstance(model, MultiModalInfraPulse):
-                tokens = tokenize_text_to_tensor(description, vocab_size=500, device=device)
-                logits = model(x, text_tokens=tokens)
-                mtl_extent = None
-            elif isinstance(model, MultiTaskInfraPulse):
+            if isinstance(model, MultiTaskInfraPulse):
                 mtl_out = model(x, return_all=True)
                 logits = mtl_out["logits"]
                 mtl_extent = float(mtl_out["extent_ratio"].item())

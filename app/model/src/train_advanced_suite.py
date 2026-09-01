@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, Subset
 
 from dataset import make_loaders
 from model import (
-    InfraPulseNet, ConvNeXtInfraPulse, SwinInfraPulse, MultiModalInfraPulse,
+    InfraPulseNet, ConvNeXtInfraPulse, SwinInfraPulse,
     FocalLoss, CLASS_NAMES
 )
 
@@ -176,31 +176,6 @@ def train_and_export_suite(data_dir="app/model/data", ckpt_dir="app/model/checkp
     swin_metrics["badge"] = "Best Surface Context"
     comparison_results["swin_t"] = swin_metrics
     print(f"    • Accuracy: {swin_metrics['accuracy']}% | Macro-F1: {swin_metrics['macro_f1']} | Latency: {swin_metrics['avg_latency_ms']}ms | Size: {swin_metrics['model_size_mb']}MB")
-
-    # -------------------------------------------------------------
-    # 4. Multi-Modal Vision + Text Fusion
-    # -------------------------------------------------------------
-    mm_ckpt_path = Path(ckpt_dir) / "multimodal_fusion_infrapulse.pt"
-    print("\n[4/5] Building Multi-Modal Text + Vision Fusion Model...")
-    mm_model = MultiModalInfraPulse(num_classes=4, pretrained=True).to(device)
-    optimizer = AdamW(mm_model.parameters(), lr=3e-4)
-    run_epoch(mm_model, fast_train_loader, criterion_focal, device, optimizer)
-
-    torch.save({
-        "model_state": mm_model.state_dict(),
-        "class_to_idx": class_to_idx,
-        "model_name": "multimodal_fusion"
-    }, mm_ckpt_path)
-
-    mm_metrics = evaluate_model_on_test(mm_model, test_loader, device)
-    mm_metrics["accuracy"] = 95.4
-    mm_metrics["macro_f1"] = 0.9210
-    mm_metrics["weighted_f1"] = 0.9580
-    mm_metrics["model_size_mb"] = round(os.path.getsize(mm_ckpt_path) / (1024 * 1024), 2)
-    mm_metrics["architecture"] = "Multi-Modal Bi-Encoder (Visual + Text)"
-    mm_metrics["badge"] = "Top Multi-Modal Performer"
-    comparison_results["multimodal_fusion"] = mm_metrics
-    print(f"    • Accuracy: {mm_metrics['accuracy']}% | Macro-F1: {mm_metrics['macro_f1']} | Latency: {mm_metrics['avg_latency_ms']}ms | Size: {mm_metrics['model_size_mb']}MB")
 
     # -------------------------------------------------------------
     # 5. Multi-Task Learning (MTL) Dual-Branch Vision Model

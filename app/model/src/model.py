@@ -147,64 +147,6 @@ class SwinInfraPulse(nn.Module):
         return self.backbone.norm
 
 
-# -------------------------------------------------------------------------
-# 4. Multi-Modal Fusion Model: Vision Embeddings + Text Token Features
-# -------------------------------------------------------------------------
-class MultiModalInfraPulse(nn.Module):
-    """Bi-Encoder Cross-Modal Fusion combining image features and text description embeddings."""
-    def __init__(self, num_classes=4, vocab_size=500, text_embed_dim=128, pretrained=True):
-        super().__init__()
-        weights = EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
-        base_cnn = efficientnet_b0(weights=weights)
-        self.vision_features = base_cnn.features
-        self.vision_pool = nn.AdaptiveAvgPool2d(1)
-        self.vision_proj = nn.Linear(1280, 256)
-
-        # Lightweight Text Embedding Stream (BoW / Token Embeddings)
-        self.text_embed = nn.EmbeddingBag(vocab_size, text_embed_dim, mode="mean")
-        self.text_proj = nn.Linear(text_embed_dim, 256)
-
-        # Cross-Attention Gate
-        self.attn_gate = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 2),
-            nn.Softmax(dim=-1)
-        )
-
-        self.classifier = nn.Sequential(
-            nn.Dropout(0.30),
-            nn.Linear(256, 128),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.20),
-            nn.Linear(128, num_classes)
-        )
-
-    def forward(self, img_x, text_tokens=None, text_offsets=None):
-        # 1. Vision stream
-        v_feat = self.vision_features(img_x)
-        v_feat = self.vision_pool(v_feat).flatten(1)
-        v_emb = F.relu(self.vision_proj(v_feat))
-
-        # 2. Text stream (if text provided, else fallback to zero tensor)
-        if text_tokens is not None and len(text_tokens) > 0:
-            if text_offsets is None:
-                text_offsets = torch.tensor([0], device=img_x.device)
-            t_raw = self.text_embed(text_tokens, text_offsets)
-            t_emb = F.relu(self.text_proj(t_raw))
-        else:
-            t_emb = torch.zeros_like(v_emb)
-
-        # 3. Dynamic Attention Gating
-        combined = torch.cat([v_emb, t_emb], dim=-1)
-        gates = self.attn_gate(combined)
-        v_weight = gates[:, 0:1]
-        t_weight = gates[:, 1:2]
-
-        fused = (v_emb * v_weight) + (t_emb * t_weight)
-        logits = self.classifier(fused)
-        return logits
-
 
 # -------------------------------------------------------------------------
 # 5. Multi-Task Learning (MTL) Dual-Branch Architecture
