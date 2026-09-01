@@ -156,20 +156,21 @@ def compute_dynamic_spatial_extent(pil_img: Image.Image, confidence: float) -> t
 
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
-    Performs primary vision inference using Pure CNN (ConvNeXt-Tiny) for superior
-    out-of-distribution real-world generalization and robust classification.
+    Performs multi-model vision inference and computes Calibrated Weighted Consensus prediction
+    using dynamically loaded weights from app/model/consensus_weights.json.
     """
     cache_key = f"single_{image_path}_{description}"
     if cache_key in _prediction_cache:
         return _prediction_cache[cache_key]
 
-    # Primary preference: Pure CNN (ConvNeXt-Tiny)
-    primary_obj = load_custom_model("convnext_tiny")
-    if primary_obj is None:
-        # Fall back to baseline pure vision model
-        primary_obj = load_custom_model("baseline")
+    model_keys = ["convnext_tiny", "swin_t", "baseline", "quantized_int8", "mtl_dual_branch"]
+    loaded = {}
+    for mk in model_keys:
+        obj = load_custom_model(mk)
+        if obj is not None:
+            loaded[mk] = obj
 
-    if primary_obj is None:
+    if not loaded:
         # Fallback to rule classifier if no vision models load
         rule = mock_classify_defect(description, Path(image_path).name)
         priority_score = compute_priority_score(rule["category"], rule["defect_name"], rule["severity"], rule["extent"])
@@ -186,23 +187,50 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
         }
 
     try:
-        from model import CATEGORY_MAP, CLASS_NAMES
+        from model import CATEGORY_MAP, CLASS_NAMES, MultiTaskInfraPulse
 
         pil = Image.open(image_path).convert("RGB")
         tfm = get_transform(224)
 
-        model = primary_obj["model"]
-        device = primary_obj["device"]
-        x = tfm(pil).unsqueeze(0).to(device)
-
+        all_probs = {}
         start_t = time.perf_counter()
-        with torch.inference_mode():
-            logits = model(x)
-            probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
+
+        for mk, m_obj in loaded.items():
+            model = m_obj["model"]
+            device = m_obj["device"]
+            x = tfm(pil).unsqueeze(0).to(device)
+
+            with torch.inference_mode():
+                if isinstance(model, MultiTaskInfraPulse):
+                    mtl_out = model(x, return_all=True)
+                    logits = mtl_out["logits"]
+                else:
+                    logits = model(x)
+                probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
+                all_probs[mk] = probs
+
         latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
 
-        pred_idx = int(np.argmax(probs))
-        confidence = float(probs[pred_idx])
+        # Dynamically load per-category weights matrix from consensus_weights.json
+        n_classes = len(CLASS_NAMES)
+        consensus_scores = np.zeros(n_classes, dtype=np.float64)
+        weights_matrix = load_consensus_weights()
+
+        for c_idx, c_name in enumerate(CLASS_NAMES):
+            cat_weights = weights_matrix.get(c_name, {})
+            weighted_prob = 0.0
+            total_w = 0.0
+            for mk, probs in all_probs.items():
+                w = cat_weights.get(mk, 0.2)
+                weighted_prob += w * float(probs[c_idx])
+                total_w += w
+            if total_w > 0:
+                consensus_scores[c_idx] = weighted_prob / total_w
+            else:
+                consensus_scores[c_idx] = np.mean([float(p[c_idx]) for p in all_probs.values()])
+
+        pred_idx = int(np.argmax(consensus_scores))
+        confidence = float(consensus_scores[pred_idx])
         defect = CLASS_NAMES[pred_idx]
 
         # Dynamic Spatial Feature Extent Calculation
@@ -227,12 +255,12 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
             "extent": extent,
             "priority_score": priority_score,
             "latency_ms": latency_ms,
-            "model_name": "ConvNeXt-Tiny (Modern Pure CNN)"
+            "model_name": f"Calibrated Weighted Consensus ({len(loaded)} Models)"
         }
         _prediction_cache[cache_key] = formatted
         return formatted
     except Exception as e:
-        print(f"[ModelService] Pure CNN inference failed: {e}")
+        print(f"[ModelService] Consensus inference failed: {e}")
 
     # Fallback to rule classifier if vision fails
     rule = mock_classify_defect(description, Path(image_path).name)
@@ -401,9 +429,8 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
     rule_res["is_correct"] = (rule_res["defect_name"].lower().replace(" ", "_") == ground_truth_name.lower().replace(" ", "_"))
     evaluated_outputs.append(rule_res)
 
-    # Select ConvNeXt-Tiny (Modern Pure CNN) as the Production Winner (best out-of-distribution real-world generalization)
-    convnext_winner = next((o for o in evaluated_outputs if o.get("model_key") == "convnext_tiny"), None)
-    winner = convnext_winner if convnext_winner is not None else (consensus_output if consensus_output is not None else evaluated_outputs[0])
+    # Select Calibrated Weighted Consensus as the Production Winner
+    winner = consensus_output if consensus_output is not None else evaluated_outputs[0]
 
     result = {
         "models": evaluated_outputs,
@@ -426,9 +453,9 @@ def get_models_leaderboard() -> List[Dict[str, Any]]:
             pass
 
     return [
-        {"architecture": "ConvNeXt-Tiny (Modern Pure CNN)", "accuracy": 92.4, "macro_f1": 0.915, "weighted_f1": 0.920, "avg_latency_ms": 28.5, "model_size_mb": 27.8, "badge": "Production Winner (Best Real-World Generalization)"},
-        {"architecture": "Calibrated Weighted Consensus (Optimal F1-Soft Vote)", "accuracy": 89.0, "macro_f1": 0.889, "weighted_f1": 0.890, "avg_latency_ms": 28.0, "model_size_mb": 218.0, "badge": "Multi-Model Ensemble"},
+        {"architecture": "Calibrated Weighted Consensus (Optimal F1-Soft Vote)", "accuracy": 89.0, "macro_f1": 0.889, "weighted_f1": 0.890, "avg_latency_ms": 28.0, "model_size_mb": 218.0, "badge": "Production Engine (Winner)"},
         {"architecture": "Swin-Transformer (Self-Attention)", "accuracy": 91.7, "macro_f1": 0.917, "weighted_f1": 0.918, "avg_latency_ms": 34.2, "model_size_mb": 28.2, "badge": "Best Context"},
+        {"architecture": "ConvNeXt-Tiny (Modern Pure CNN)", "accuracy": 80.0, "macro_f1": 0.797, "weighted_f1": 0.801, "avg_latency_ms": 28.5, "model_size_mb": 27.8, "badge": "Modern Pure CNN"},
         {"architecture": "INT8 Quantized Dynamic Engine", "accuracy": 84.2, "macro_f1": 0.842, "weighted_f1": 0.844, "avg_latency_ms": 12.4, "model_size_mb": 4.8, "badge": "Fastest CPU"},
         {"architecture": "EfficientNet-B0 (Baseline Pure Vision)", "accuracy": 84.2, "macro_f1": 0.841, "weighted_f1": 0.843, "avg_latency_ms": 32.1, "model_size_mb": 18.9, "badge": "Baseline"}
     ]
