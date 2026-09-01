@@ -257,7 +257,6 @@ InfraPulse/
 │   │   └── uploads/            # Uploaded defect images
 │   └── templates/              # Jinja2 HTML templates
 ├── docs/
-│   ├── InfraPulse.pdf          # Problem statement specification
 │   ├── DESIGN_DOCUMENT.md      # High-Level and Low-Level Design Document
 │   └── DOCUMENTATION_REPORT.md # Technical documentation report
 └── tests/
