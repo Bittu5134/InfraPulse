@@ -133,7 +133,6 @@ async def staff_queue_page(
 async def export_queue_csv(
     request: Request,
     status_filter: Optional[str] = Query(None, alias="status"),
-    category: Optional[str] = Query(None),
     min_severity: Optional[float] = Query(None),
     sort_by: str = Query("priority_desc"),
     search: Optional[str] = Query(None),
@@ -141,10 +140,11 @@ async def export_queue_csv(
     db: AsyncSession = Depends(get_db)
 ):
     staff = await require_staff(request, db)
+    # Always export all categories across Structural, Functional, and Performance domains
     complaints = await get_staff_tickets_filtered(
         db,
         status_filter=status_filter,
-        category_filter=category,
+        category_filter=None,
         min_severity=min_severity,
         search_query=search,
         sort_by=sort_by,

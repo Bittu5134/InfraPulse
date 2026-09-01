@@ -93,17 +93,37 @@
 
             <div class="divider divider-horizontal my-2 mx-0"></div>
 
-            <!-- Staff Portal -->
-            <a href="/staff" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
-                <i class="fa-solid fa-user-shield"></i>
-                <span>{% if current_staff %}Staff Dashboard{% else %}Staff Login{% endif %}</span>
-            </a>
+            <!-- Staff Portal & Staff Logout -->
+            {% if current_staff %}
+                <a href="/staff/queue" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Staff Dashboard</span>
+                </a>
+                <a href="/staff/logout" class="btn btn-ghost btn-sm text-error" title="Logout Staff">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            {% else %}
+                <a href="/staff/login" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Staff Login</span>
+                </a>
+            {% endif %}
 
             <!-- Admin Portal -->
-            <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-                <span>{% if current_admin %}Admin Dashboard{% else %}Admin Login{% endif %}</span>
-            </a>
+            {% if current_admin %}
+                <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                <a href="/admin/logout" class="btn btn-ghost btn-sm text-error" title="Logout Admin">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            {% else %}
+                <a href="/admin/login" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Admin Login</span>
+                </a>
+            {% endif %}
         </div>
     </div>
 

@@ -18,17 +18,23 @@
             </div>
         </div>
 
-        <!-- Active Category Count Widgets -->
-        <div class="flex flex-wrap gap-2 text-xs">
-            <div class="badge badge-error gap-1 p-3">
-                <i class="fa-solid fa-building"></i> Structural: <strong>{{ struct_count }}</strong>
+        <div class="flex items-center gap-3">
+            <!-- Active Category Count Widgets -->
+            <div class="flex flex-wrap gap-2 text-xs">
+                <div class="badge badge-error gap-1 p-3">
+                    <i class="fa-solid fa-building"></i> Structural: <strong>{{ struct_count }}</strong>
+                </div>
+                <div class="badge badge-warning gap-1 p-3">
+                    <i class="fa-solid fa-droplet"></i> Functional: <strong>{{ func_count }}</strong>
+                </div>
+                <div class="badge badge-info gap-1 p-3">
+                    <i class="fa-solid fa-paint-roller"></i> Performance: <strong>{{ perf_count }}</strong>
+                </div>
             </div>
-            <div class="badge badge-warning gap-1 p-3">
-                <i class="fa-solid fa-droplet"></i> Functional: <strong>{{ func_count }}</strong>
-            </div>
-            <div class="badge badge-info gap-1 p-3">
-                <i class="fa-solid fa-paint-roller"></i> Performance: <strong>{{ perf_count }}</strong>
-            </div>
+
+            <a href="/staff/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Logout Staff">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout Staff
+            </a>
         </div>
     </div>
 
@@ -102,9 +108,9 @@
                 
                 <div class="divider divider-horizontal my-0"></div>
 
-                <!-- CSV Export Button -->
-                <a href="/staff/export/csv?status={{ current_status }}&category={{ current_category }}&sort_by={{ sort_by }}&search={{ search_query }}" class="btn btn-sm btn-outline btn-accent gap-1" title="Export Priority Queue to CSV">
-                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                <!-- CSV Export Button (Exports ALL Categories) -->
+                <a href="/staff/export/csv?include_resolved=true" class="btn btn-sm btn-outline btn-accent gap-1" title="Export All Priority Queue Categories to CSV">
+                    <i class="fa-solid fa-file-csv"></i> Export All Categories CSV
                 </a>
             </div>
         </form>
