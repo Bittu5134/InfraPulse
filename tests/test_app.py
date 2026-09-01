@@ -179,3 +179,23 @@ async def test_benchmark_page():
         assert "Multi-Model" in resp.text
         assert "Leaderboard" in resp.text
         assert "ConvNeXt" in resp.text or "EfficientNet" in resp.text
+
+@pytest.mark.asyncio
+async def test_custom_playground_page_and_analysis():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+        # 1. GET Playground page
+        get_resp = await client.get("/test/playground")
+        assert get_resp.status_code == 200
+        assert "Multi-Model Interactive Playground" in get_resp.text
+
+        # 2. POST Custom analysis
+        fake_file = create_test_png()
+        post_resp = await client.post(
+            "/test/playground",
+            data={"description": "Large concrete spalling with visible cracks"},
+            files={"photo": ("custom_sample.png", fake_file, "image/png")}
+        )
+        assert post_resp.status_code == 200
+        assert "Clear Winner Model" in post_resp.text
+        assert "Individual Model Outputs" in post_resp.text

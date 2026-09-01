@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Model Interactive Playground - InfraPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Navigation Tabs -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-flask-vial text-[#f38020]"></i>
+                <span>Multi-Model Interactive Playground</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Upload any custom infrastructure photo and enter optional resident notes to evaluate predictions across all 6 model architectures simultaneously.
+            </p>
+        </div>
+
+        <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 p-1 text-xs font-semibold">
+            <a href="/test" class="px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <i class="fa-solid fa-table-list mr-1"></i> Holdout Dataset Benchmarks
+            </a>
+            <a href="/test/playground" class="px-3 py-1.5 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm">
+                <i class="fa-solid fa-sliders mr-1 text-[#f38020]"></i> Custom Image Playground
+            </a>
+        </div>
+    </div>
+
+    <!-- Executive Leaderboard Summary Banner -->
+    <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-4 sm:p-5">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800/80">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Model Architecture Family</span>
+                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#c2410c] dark:text-[#f97316]">5 Architectures + Ensemble</span>
+            </div>
+            <span class="text-[11px] text-slate-400">Tested on 241 Unseen Holdout Samples</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {% for meta in leaderboard %}
+            <div class="p-3 rounded-lg border {% if 'ConvNeXt' in meta.architecture %}border-orange-300 dark:border-orange-800/80 bg-orange-50/40 dark:bg-orange-950/20{% else %}border-slate-200/70 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40{% endif %} flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ meta.architecture }}</span>
+                    </div>
+                    <div class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{{ meta.badge }}</div>
+                </div>
+                <div class="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-900 dark:text-white">{{ meta.accuracy }}%</span>
+                    <span class="text-[11px] text-slate-500 font-mono">{{ meta.avg_latency_ms }}ms</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    {% if error %}
+    <div class="text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3.5 rounded-lg border border-rose-200 dark:border-rose-800/60 flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-sm"></i>
+        <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Input Section: Photo Upload & Description -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Upload & Prompt Controls -->
+        <div class="lg:col-span-5 space-y-4">
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-5 space-y-4">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#f38020]"></i>
+                        <span>Upload Test Sample</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Select any local image or drop a photo to evaluate.
+                    </p>
+                </div>
+
+                <form action="/test/playground" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs">
+                    
+                    <!-- File Input Box -->
+                    <div class="space-y-1.5">
+                        <label class="block font-medium text-slate-700 dark:text-slate-300">Defect Image File *</label>
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#f38020] dark:hover:border-[#f38020] rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-900/40">
+                            <input type="file" id="photo-input" name="photo" accept="image/*" class="hidden" required />
+                            <div id="drop-prompt" class="space-y-2">
+                                <i class="fa-solid fa-image text-2xl text-slate-400"></i>
+                                <div class="text-xs text-slate-600 dark:text-slate-400">
+                                    <span class="font-semibold text-[#f38020]">Click to browse</span> or drag and drop photo
+                                </div>
+                                <div class="text-[11px] text-slate-400">JPG, PNG, WEBP supported</div>
+                            </div>
+                            <div id="preview-container" class="hidden space-y-2">
+                                <img id="image-preview" src="#" alt="Preview" class="max-h-48 mx-auto rounded-lg shadow-sm object-cover border border-slate-200 dark:border-slate-700" />
+                                <div id="file-name" class="text-[11px] font-mono text-slate-500"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Markdown / Text Description -->
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-medium text-slate-700 dark:text-slate-300">Problem Description (Optional)</label>
+                            <span class="text-[10px] text-slate-400">Enables Multi-Modal Cross-Attention</span>
+                        </div>
+                        <textarea id="description-input" name="description" rows="3" placeholder="e.g. Deep concrete fracture on the 3rd floor ceiling with exposed corroded reinforcement bars..." class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-3 focus:outline-none focus:ring-1 focus:ring-orange-500">{{ result.description if result else '' }}</textarea>
+                    </div>
+
+                    <!-- Quick Sample Presets -->
+                    <div class="space-y-1.5">
+                        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Quick Prompt Presets:</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" onclick="setPreset('Heavy concrete spalling with visible oxidized steel rebar on supporting column.')" class="px-2 py-1 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-orange-50 hover:text-[#c2410c] dark:hover:bg-orange-950/60 dark:hover:text-[#f97316] transition-colors">
+                                Spalling Example
+                            </button>
+                            <button type="button" onclick="setPreset('Large stagnant water puddle leaking from ceiling pipe creating floor puddle.')" class="px-2 py-1 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-orange-50 hover:text-[#c2410c] dark:hover:bg-orange-950/60 dark:hover:text-[#f97316] transition-colors">
+                                Water Leak Example
+                            </button>
+                            <button type="button" onclick="setPreset('Cracked ceramic tiles with loose grout on main corridor floor.')" class="px-2 py-1 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-orange-50 hover:text-[#c2410c] dark:hover:bg-orange-950/60 dark:hover:text-[#f97316] transition-colors">
+                                Cracked Tiles Example
+                            </button>
+                            <button type="button" onclick="setPreset('Extensive peeling paint and surface flaking on exterior corridor wall.')" class="px-2 py-1 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-orange-50 hover:text-[#c2410c] dark:hover:bg-orange-950/60 dark:hover:text-[#f97316] transition-colors">
+                                Peeling Paint Example
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <button type="submit" id="analyze-btn" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Run Multi-Model Prediction</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Results Dashboard -->
+        <div class="lg:col-span-7 space-y-4">
+            {% if result %}
+            
+            <!-- Winner Highlight Header -->
+            <div class="rounded-xl border border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/60 dark:bg-emerald-950/30 p-4 sm:p-5 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded bg-emerald-600 text-white tracking-wider">
+                                Clear Winner Model
+                            </span>
+                            <h3 class="text-sm font-bold text-emerald-950 dark:text-emerald-200">{{ result.winner.model_name }}</h3>
+                        </div>
+                        <p class="text-xs text-emerald-800 dark:text-emerald-300 mt-1">
+                            {{ result.winner.reason }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-emerald-950 dark:text-emerald-200">{{ result.winner.confidence }}% Conf</div>
+                            <div class="text-[11px] text-emerald-700 dark:text-emerald-400">{{ result.winner.latency_ms }} ms latency</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uploaded Image & Description Overview Card -->
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-4 flex flex-col sm:flex-row items-center gap-4">
+                <img src="{{ result.image_url }}" alt="Uploaded Sample" class="w-28 h-28 object-cover rounded-lg border border-slate-200 dark:border-slate-700 shrink-0" />
+                <div class="space-y-1 text-xs w-full">
+                    <div class="font-semibold text-slate-800 dark:text-slate-200 truncate">{{ result.filename }}</div>
+                    {% if result.description %}
+                    <div class="text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 text-[11px] italic">
+                        "{{ result.description }}"
+                    </div>
+                    {% else %}
+                    <div class="text-slate-400 italic text-[11px]">No text description provided (Pure Computer Vision Evaluation).</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Model Grid Cards -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+                    <span>Individual Model Outputs ({{ result.models|length }} Architectures)</span>
+                    <span class="text-[11px] font-normal text-slate-500">Includes Ensemble & Rule Baselines</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for m in result.models %}
+                    <div class="rounded-xl border {% if m.model_name == result.winner.model_name %}border-emerald-300 dark:border-emerald-700 bg-emerald-50/20 dark:bg-emerald-950/10 shadow-sm{% else %}border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]{% endif %} p-4 flex flex-col justify-between space-y-3">
+                        
+                        <div>
+                            <div class="flex items-center justify-between gap-1 mb-1">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ m.model_name }}</span>
+                                {% if m.model_name == result.winner.model_name %}
+                                <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Winner</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-sm font-extrabold text-slate-900 dark:text-white">{{ m.defect_name }}</span>
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full {% if m.category_str == 'Structural' %}bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300{% elif m.category_str == 'Functional' %}bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300{% endif %}">
+                                    {{ m.category_str }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs">
+                            <div>
+                                <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+                                    <span>Confidence</span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">{{ m.confidence }}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-[#f38020] h-1.5 rounded-full" style="width: {{ m.confidence }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-center text-[11px] pt-1">
+                                <div class="bg-slate-50 dark:bg-slate-900/60 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                    <div class="text-[10px] text-slate-400">Severity</div>
+                                    <div class="font-bold text-slate-800 dark:text-slate-200">{{ m.severity }}%</div>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/60 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                    <div class="text-[10px] text-slate-400">Extent</div>
+                                    <div class="font-bold text-slate-800 dark:text-slate-200">{{ m.extent }}%</div>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/60 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                    <div class="text-[10px] text-slate-400">Priority</div>
+                                    <div class="font-bold text-[#f38020]">{{ m.priority_score }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 font-mono">
+                            <span>Latency: {{ m.latency_ms }} ms</span>
+                            <span class="text-[10px] font-sans bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{{ m.model_mode }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% else %}
+            
+            <!-- Empty State Placeholder -->
+            <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-800 p-12 text-center space-y-3 bg-white/50 dark:bg-[#111827]/40">
+                <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#f38020] flex items-center justify-center mx-auto text-lg">
+                    <i class="fa-solid fa-microscope"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Awaiting Sample Input</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+                        Upload a photo from the left panel to trigger side-by-side inference across ConvNeXt-Tiny, Multi-Modal Bi-Encoder, Swin-T, and INT8 Quantized engines.
+                    </p>
+                </div>
+            </div>
+
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function setPreset(text) {
+        document.getElementById('description-input').value = text;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropZone = document.getElementById('drop-zone');
+        const photoInput = document.getElementById('photo-input');
+        const dropPrompt = document.getElementById('drop-prompt');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const fileName = document.getElementById('file-name');
+
+        if (dropZone && photoInput) {
+            dropZone.addEventListener('click', () => photoInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-orange-500', 'bg-orange-50/20');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50/20');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50/20');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    photoInput.files = e.dataTransfer.files;
+                    showPreview(e.dataTransfer.files[0]);
+                }
+            });
+
+            photoInput.addEventListener('change', (e) => {
+                if (photoInput.files && photoInput.files[0]) {
+                    showPreview(photoInput.files[0]);
+                }
+            });
+        }
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                fileName.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+                dropPrompt.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

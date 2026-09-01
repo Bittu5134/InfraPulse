@@ -240,9 +240,14 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         device = m_obj["device"]
         x = tfm(pil).unsqueeze(0).to(device)
 
+        from model import MultiModalInfraPulse
         start_t = time.perf_counter()
         with torch.inference_mode():
-            logits = model(x)
+            if isinstance(model, MultiModalInfraPulse):
+                tokens = tokenize_text_to_tensor(description, vocab_size=500, device=device)
+                logits = model(x, text_tokens=tokens)
+            else:
+                logits = model(x)
             probs = torch.softmax(logits, dim=1)[0]
         latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
 
