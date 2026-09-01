@@ -1,60 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}Create Account - InfraPulse{% endblock %}
+{% block title %}Register - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto">
-    <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body">
-            <h2 class="card-title text-2xl font-bold justify-center mb-1">
-                <i class="fa-solid fa-user-plus text-primary"></i> Create Account
-            </h2>
-            <p class="text-xs text-center text-base-content/70 mb-4">
-                Register a user account to create & track maintenance tickets.
-            </p>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 sm:p-8 space-y-5">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Create User Account</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Register to submit and track facility maintenance requests</p>
+        </div>
 
-            {% if error %}
-            <div class="alert alert-error text-xs mb-4">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ error }}</span>
+        {% if error %}
+        <div class="text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-lg border border-rose-200 dark:border-rose-800/60">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/user/register" method="POST" class="space-y-4 text-xs">
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Full Name *</label>
+                <input type="text" name="name" placeholder="John Doe" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
             </div>
-            {% endif %}
 
-            <form action="/user/register" method="POST" class="space-y-4">
-                {% if next %}
-                    <input type="hidden" name="next" value="{{ next }}" />
-                {% endif %}
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
-                    <input type="text" name="name" placeholder="e.g. Rahul Sharma" class="input input-bordered w-full text-sm" required />
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Email Address *</span></label>
-                    <input type="email" name="email" placeholder="e.g. rahul@example.com" class="input input-bordered w-full text-sm" required />
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Phone Number</span></label>
-                    <input type="tel" name="phone" placeholder="e.g. 9876543210" class="input input-bordered w-full text-sm" />
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Password *</span></label>
-                    <input type="password" name="password" placeholder="e.g. password" class="input input-bordered w-full text-sm" required />
-                </div>
-
-                <div class="form-control mt-6">
-                    <button type="submit" class="btn btn-primary w-full gap-2">
-                        <i class="fa-solid fa-user-check"></i> Register Account
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center mt-4">
-                <a href="/user/login{% if next %}?next={{ next }}{% endif %}" class="text-xs link link-hover">Already have an account? Sign in</a>
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Email Address *</label>
+                <input type="email" name="email" placeholder="john@example.com" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
             </div>
+
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Phone Number</label>
+                <input type="tel" name="phone" placeholder="+91 9876543210" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Password *</label>
+                <input type="password" name="password" placeholder="••••••••" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+            </div>
+
+            <button type="submit" class="w-full px-4 py-2.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors mt-2">
+                Register Account
+            </button>
+        </form>
+
+        <div class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
+            Already registered? <a href="/user/login" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Sign In</a>
         </div>
     </div>
 </div>

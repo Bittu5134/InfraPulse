@@ -1,51 +1,57 @@
 {% extends "base.html" %}
 
-{% block title %}Maintenance Queue - Staff Portal{% endblock %}
+{% block title %}Maintenance Queue - Staff Portal - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Staff Header Card -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-3xl">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-clipboard-check"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-extrabold">Staff Maintenance Portal</h2>
-                <p class="text-xs text-base-content/70">
-                    Logged in as <strong>{{ current_staff.name }}</strong> ({{ current_staff.domain.value }} Department)
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-slate-900 dark:text-white">Staff Maintenance Portal</h1>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        {{ current_staff.domain.value }} Squad
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Operator: <strong class="text-slate-700 dark:text-slate-300">{{ current_staff.name }}</strong> ({{ current_staff.email }})
                 </p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <!-- Active Category Count Badges -->
-            <div class="flex flex-wrap gap-2 text-xs">
-                <div class="badge badge-error gap-1 p-3">
-                    <i class="fa-solid fa-building"></i> Structural: <strong>{{ struct_count }}</strong>
-                </div>
-                <div class="badge badge-warning gap-1 p-3">
-                    <i class="fa-solid fa-droplet"></i> Functional: <strong>{{ func_count }}</strong>
-                </div>
-                <div class="badge badge-info gap-1 p-3">
-                    <i class="fa-solid fa-paint-roller"></i> Performance: <strong>{{ perf_count }}</strong>
-                </div>
+            <!-- Active Category Counts -->
+            <div class="flex items-center gap-2 text-xs">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Structural: <strong>{{ struct_count }}</strong>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Functional: <strong>{{ func_count }}</strong>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span> Performance: <strong>{{ perf_count }}</strong>
+                </span>
             </div>
 
-            <a href="/staff/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Sign Out">
-                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            <a href="/staff/logout" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors" title="Sign Out">
+                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                <span>Sign Out</span>
             </a>
         </div>
     </div>
 
-    <!-- Filter & Search Bar -->
-    <div class="card bg-base-100 shadow-sm border border-base-300 p-5">
+    <!-- Filter & Control Panel -->
+    <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
         <form action="/staff/queue" method="GET" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <!-- Status Filter -->
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Status</span></label>
-                    <select name="status" class="select select-bordered select-sm w-full">
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
+                    <select name="status" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                         {% for opt in status_options %}
                             <option value="{{ opt }}" {% if current_status == opt %}selected{% endif %}>
                                 {{ opt }}{% if opt == 'All' %} Statuses{% endif %}
@@ -55,9 +61,9 @@
                 </div>
 
                 <!-- Category Filter -->
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Category</span></label>
-                    <select name="category" class="select select-bordered select-sm w-full">
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</label>
+                    <select name="category" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                         {% for opt in category_options %}
                             <option value="{{ opt }}" {% if current_category == opt %}selected{% endif %}>
                                 {{ opt }}{% if opt == 'All' %} Categories{% endif %}
@@ -67,9 +73,9 @@
                 </div>
 
                 <!-- Sorting Option -->
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Sort By</span></label>
-                    <select name="sort_by" class="select select-bordered select-sm w-full">
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sort Order</label>
+                    <select name="sort_by" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                         <option value="priority_desc" {% if sort_by == 'priority_desc' %}selected{% endif %}>Priority (High to Low)</option>
                         <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (Newest First)</option>
                         <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (Oldest First)</option>
@@ -78,40 +84,50 @@
                 </div>
 
                 <!-- Minimum Severity Filter -->
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Min Severity</span></label>
-                    <select name="min_severity" class="select select-bordered select-sm w-full">
-                        <option value="0" {% if min_severity == 0 %}selected{% endif %}>All Severities (1-10)</option>
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Min Severity</label>
+                    <select name="min_severity" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <option value="0" {% if min_severity == 0 %}selected{% endif %}>All Severities</option>
                         <option value="5" {% if min_severity == 5 %}selected{% endif %}>Medium+ (≥ 5.0)</option>
                         <option value="7.5" {% if min_severity == 7.5 %}selected{% endif %}>Urgent (≥ 7.5)</option>
                     </select>
                 </div>
 
                 <!-- Include Resolved Checkbox -->
-                <div class="form-control justify-end pb-1">
-                    <label class="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="include_resolved" value="true" class="checkbox checkbox-primary checkbox-sm" {% if include_resolved %}checked{% endif %} />
-                        <span class="label-text text-xs font-semibold">Show Resolved</span>
+                <div class="flex items-end pb-1.5">
+                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" name="include_resolved" value="true" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 h-4 w-4" {% if include_resolved %}checked{% endif %} />
+                        <span>Include Resolved</span>
                     </label>
                 </div>
             </div>
 
-            <!-- Search Bar, Export CSV & Actions -->
-            <div class="flex flex-wrap gap-2 items-center pt-2 border-t border-base-200">
-                <div class="flex-1 min-w-48">
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID, user, email, or address..." class="input input-bordered input-sm w-full" />
+            <!-- Search, Action & CSV Export -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex-1 min-w-[240px]">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID, Requester, or Address..." class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 pl-8 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary gap-1">
-                    <i class="fa-solid fa-filter"></i> Filter
-                </button>
-                <a href="/staff/queue" class="btn btn-sm btn-ghost">Reset</a>
-                
-                <div class="divider divider-horizontal my-0"></div>
 
-                <!-- Export CSV Button -->
-                <a href="/staff/export/csv?include_resolved=true" class="btn btn-sm btn-outline btn-accent gap-1" title="Export tickets to CSV file">
-                    <i class="fa-solid fa-file-csv"></i> Export CSV
-                </a>
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                        <i class="fa-solid fa-filter text-xs"></i>
+                        <span>Filter</span>
+                    </button>
+                    <a href="/staff/queue" class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        Reset
+                    </a>
+
+                    <div class="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+                    <!-- Export CSV Button -->
+                    <a href="/staff/export/csv?include_resolved=true" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors" title="Export tickets to CSV">
+                        <i class="fa-solid fa-file-csv text-xs"></i>
+                        <span>Export CSV</span>
+                    </a>
+                </div>
             </div>
         </form>
     </div>

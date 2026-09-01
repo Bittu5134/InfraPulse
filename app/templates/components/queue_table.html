@@ -1,105 +1,131 @@
-<div class="overflow-x-auto">
+<div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
     {% if not complaints %}
-    <div class="text-center py-12 bg-base-100 rounded-2xl border border-dashed border-base-300">
-        <i class="fa-solid fa-clipboard-check text-5xl text-success/40 mb-3"></i>
-        <h3 class="text-xl font-bold">Queue is Clear</h3>
-        <p class="text-sm text-base-content/60">No pending tickets matching selected filters.</p>
+    <div class="text-center py-16 px-4">
+        <i class="fa-solid fa-clipboard-check text-4xl text-slate-300 dark:text-slate-700 mb-3"></i>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">No Tickets in Queue</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">There are currently no active tickets matching the selected filters.</p>
     </div>
     {% else %}
-    <table class="table table-zebra w-full bg-base-100 shadow-md rounded-2xl overflow-hidden border border-base-300">
-        <thead class="bg-base-200 text-base-content">
+    <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-800">
+        <thead class="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <tr>
-                <th class="w-16 text-center">Rank</th>
-                <th>Ticket & Photo</th>
-                <th>Category & Defect</th>
-                <th>Requester</th>
-                <th class="text-center">Priority</th>
-                <th>Assigned Staff</th>
-                <th>Status</th>
-                <th class="text-right">Actions</th>
+                <th scope="col" class="py-3 px-4 w-14 text-center">Rank</th>
+                <th scope="col" class="py-3 px-4">Ticket</th>
+                <th scope="col" class="py-3 px-4">Category & Defect</th>
+                <th scope="col" class="py-3 px-4">Requester Contact</th>
+                <th scope="col" class="py-3 px-4 text-center">Priority</th>
+                <th scope="col" class="py-3 px-4">Assigned Squad</th>
+                <th scope="col" class="py-3 px-4">Status</th>
+                <th scope="col" class="py-3 px-4 text-right">Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
             {% for item in complaints %}
-            <tr class="hover">
-                <td class="font-mono font-bold text-center">
-                    <span class="badge badge-sm {% if loop.index == 1 %}badge-primary{% elif loop.index <= 3 %}badge-secondary{% else %}badge-neutral{% endif %} font-mono">
-                        #{{ loop.index }}
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                <!-- Rank -->
+                <td class="py-3 px-4 text-center font-mono font-bold">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-[11px] {% if loop.index == 1 %}bg-indigo-600 text-white{% elif loop.index <= 3 %}bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300{% else %}bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400{% endif %}">
+                        {{ loop.index }}
                     </span>
                 </td>
-                <td>
-                    <div class="space-y-1">
-                        <a href="/ticket/{{ item.id }}" class="font-mono text-xs font-bold text-primary hover:underline block">
-                            #{{ item.id }}
+
+                <!-- Ticket ID & Thumbnail -->
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-3">
+                        <a href="/ticket/{{ item.id }}" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 flex-shrink-0 bg-slate-100 dark:bg-slate-800">
+                            <img src="{{ item.photo_path }}" alt="Photo" class="object-cover w-full h-full" />
                         </a>
-                        <div class="avatar">
-                            <div class="w-14 h-14 rounded-xl border border-base-300 overflow-hidden">
-                                <a href="/ticket/{{ item.id }}">
-                                    <img src="{{ item.photo_path }}" alt="Photo" class="object-cover w-full h-full" />
-                                </a>
-                            </div>
+                        <div>
+                            <a href="/ticket/{{ item.id }}" class="font-mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                #{{ item.id }}
+                            </a>
+                            <div class="text-[10px] text-slate-400">{{ item.created_at.strftime('%b %d, %H:%M') }}</div>
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div class="flex items-center gap-2 mb-1">
+
+                <!-- Category & Defect -->
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-1.5 mb-1">
                         {% if item.category == "Structural" %}
-                            <span class="badge badge-error badge-sm font-bold"><i class="fa-solid fa-building text-xs mr-1"></i> Structural</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                                Structural
+                            </span>
                         {% elif item.category == "Functional" %}
-                            <span class="badge badge-warning badge-sm font-bold"><i class="fa-solid fa-droplet text-xs mr-1"></i> Functional</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                Functional
+                            </span>
                         {% elif item.category == "Performance" %}
-                            <span class="badge badge-info badge-sm font-bold"><i class="fa-solid fa-paint-roller text-xs mr-1"></i> Performance</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
+                                Performance
+                            </span>
                         {% else %}
-                            <span class="badge badge-ghost badge-sm">Unclassified</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                Unclassified
+                            </span>
                         {% endif %}
-                        <a href="/ticket/{{ item.id }}" class="font-bold text-sm hover:text-primary">{{ item.defect_name or "Pending Analysis" }}</a>
+                        <a href="/ticket/{{ item.id }}" class="font-medium text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">{{ item.defect_name or "Pending Analysis" }}</a>
                     </div>
-                    <div class="text-xs text-base-content/70 italic max-w-xs truncate">"{{ item.description }}"</div>
-                    <div class="text-xs text-base-content/50 mt-1">
-                        Severity: {{ item.severity }}/10 | Extent: {{ item.extent }}%
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs truncate">"{{ item.description }}"</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">
+                        Severity: {{ item.severity }}/10 • Extent: {{ item.extent }}%
                     </div>
                 </td>
-                <td>
-                    <div class="font-semibold text-sm">{{ item.user_name }}</div>
-                    <div class="text-xs text-base-content/70"><i class="fa-solid fa-envelope text-xs"></i> {{ item.user_email }}</div>
-                    {% if item.user_phone %}
-                        <div class="text-xs text-base-content/70"><i class="fa-solid fa-phone text-xs"></i> {{ item.user_phone }}</div>
-                    {% endif %}
-                    <div class="text-xs text-base-content/70"><i class="fa-solid fa-location-dot text-error text-xs"></i> {{ item.address }}</div>
+
+                <!-- Requester Contact -->
+                <td class="py-3 px-4">
+                    <div class="font-medium text-slate-900 dark:text-white">{{ item.user_name }}</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">{{ item.user_email }}</div>
+                    <div class="text-[10px] text-slate-400 truncate max-w-[180px]">{{ item.address }}</div>
                 </td>
-                <td class="text-center">
-                    <div class="font-mono text-lg font-extrabold text-primary">
+
+                <!-- Priority Score -->
+                <td class="py-3 px-4 text-center">
+                    <div class="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400">
                         {{ item.priority_score }}
                     </div>
                 </td>
-                <td>
+
+                <!-- Assigned Staff -->
+                <td class="py-3 px-4">
                     {% if item.assigned_staff_name %}
-                        <span class="badge badge-secondary badge-sm gap-1">
-                            <i class="fa-solid fa-user-check"></i> {{ item.assigned_staff_name }}
+                        <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                            <i class="fa-solid fa-user-check text-[10px] text-indigo-500"></i> {{ item.assigned_staff_name }}
                         </span>
                     {% else %}
-                        <span class="text-xs text-base-content/50 italic">Unassigned</span>
+                        <span class="text-[11px] text-slate-400 italic">Unassigned</span>
                     {% endif %}
                 </td>
-                <td>
+
+                <!-- Status Badge -->
+                <td class="py-3 px-4">
                     {% if item.status == "Submitted" %}
-                        <span class="badge badge-warning badge-sm"><i class="fa-solid fa-clock text-xs mr-1"></i> Submitted</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                            Submitted
+                        </span>
                     {% elif item.status == "Assigned" %}
-                        <span class="badge badge-info badge-sm"><i class="fa-solid fa-user-check text-xs mr-1"></i> Assigned</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                            Assigned
+                        </span>
                     {% elif item.status == "In Progress" %}
-                        <span class="badge badge-primary badge-sm"><i class="fa-solid fa-spinner text-xs mr-1"></i> In Progress</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                            In Progress
+                        </span>
                     {% elif item.status == "Resolved" %}
-                        <span class="badge badge-success badge-sm"><i class="fa-solid fa-check text-xs mr-1"></i> Resolved</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                            Resolved
+                        </span>
                     {% endif %}
                 </td>
-                <td class="text-right">
+
+                <!-- Quick Actions -->
+                <td class="py-3 px-4 text-right">
                     {% if current_staff %}
                         {% if not item.category or item.category == current_staff.domain %}
-                            <!-- Action Buttons for Matching Staff Domain -->
-                            <div class="flex items-center justify-end gap-1">
+                            <div class="inline-flex items-center gap-1">
                                 {% if item.assigned_staff_id != current_staff.id %}
                                     <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
-                                        <button type="submit" class="btn btn-square btn-xs btn-primary" title="Assign to Me">
+                                        <button type="submit" class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-xs transition-colors" title="Assign to Me">
                                             <i class="fa-solid fa-hand"></i>
                                         </button>
                                     </form>
@@ -107,21 +133,21 @@
 
                                 <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
                                     <input type="hidden" name="status" value="In Progress" />
-                                    <button type="submit" class="btn btn-square btn-xs btn-outline btn-info {% if item.status == 'In Progress' %}btn-active{% endif %}" title="Mark In Progress">
+                                    <button type="submit" class="w-7 h-7 inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs transition-colors {% if item.status == 'In Progress' %}bg-slate-200 dark:bg-slate-700{% endif %}" title="Mark In Progress">
                                         <i class="fa-solid fa-spinner"></i>
                                     </button>
                                 </form>
 
                                 <form action="/staff/status/{{ item.id }}" method="POST" class="inline">
                                     <input type="hidden" name="status" value="Resolved" />
-                                    <button type="submit" class="btn btn-square btn-xs btn-success {% if item.status == 'Resolved' %}btn-active{% endif %}" title="Mark Resolved">
-                                        <i class="fa-solid fa-circle-check"></i>
+                                    <button type="submit" class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs transition-colors {% if item.status == 'Resolved' %}opacity-50{% endif %}" title="Mark Resolved">
+                                        <i class="fa-solid fa-check"></i>
                                     </button>
                                 </form>
                             </div>
                         {% else %}
-                            <span class="badge badge-ghost text-xs opacity-60" title="Domain Restricted: Managed by {{ item.category.value }} Squad">
-                                <i class="fa-solid fa-lock text-xs mr-1"></i> {{ item.category.value }} Only
+                            <span class="inline-flex items-center gap-1 text-[10px] text-slate-400 font-medium" title="Assigned to {{ item.category.value }} Squad">
+                                <i class="fa-solid fa-lock text-[9px]"></i> {{ item.category.value }}
                             </span>
                         {% endif %}
                     {% endif %}

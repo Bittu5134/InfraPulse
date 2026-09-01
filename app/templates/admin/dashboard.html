@@ -4,189 +4,122 @@
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Admin Header Card -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
+    <!-- Admin Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-neutral/10 text-neutral flex items-center justify-center text-3xl">
+            <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-user-gear"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-extrabold">Admin Portal</h2>
-                <p class="text-xs text-base-content/70">
-                    Logged in as <strong>{{ current_admin.name }}</strong> ({{ current_admin.email }})
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">System Administration</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Administrator: <strong class="text-slate-700 dark:text-slate-300">{{ current_admin.name }}</strong> ({{ current_admin.email }})
                 </p>
             </div>
         </div>
         <div>
-            <a href="/admin/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Sign Out">
-                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            <a href="/admin/logout" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors" title="Sign Out">
+                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                <span>Sign Out</span>
             </a>
         </div>
     </div>
 
-    <!-- Overview Stats Cards -->
+    <!-- Summary Metrics -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
-            <div class="stat-figure text-primary"><i class="fa-solid fa-ticket text-3xl"></i></div>
-            <div class="stat-title text-xs">Total Tickets</div>
-            <div class="stat-value font-mono text-primary">{{ metrics.tickets }}</div>
+        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Complaints</div>
+            <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ metrics.tickets }}</div>
         </div>
 
-        <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
-            <div class="stat-figure text-warning"><i class="fa-solid fa-clock text-3xl"></i></div>
-            <div class="stat-title text-xs">Active Tickets</div>
-            <div class="stat-value font-mono text-warning">{{ metrics.pending }}</div>
+        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Pending</div>
+            <div class="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{{ metrics.pending }}</div>
         </div>
 
-        <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
-            <div class="stat-figure text-secondary"><i class="fa-solid fa-user-shield text-3xl"></i></div>
-            <div class="stat-title text-xs">Staff Members</div>
-            <div class="stat-value font-mono text-secondary">{{ metrics.staff }}</div>
+        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Staff Operators</div>
+            <div class="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">{{ metrics.staff }}</div>
         </div>
 
-        <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
-            <div class="stat-figure text-info"><i class="fa-solid fa-users text-3xl"></i></div>
-            <div class="stat-title text-xs">Users</div>
-            <div class="stat-value font-mono text-info">{{ metrics.users }}</div>
+        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Registered Users</div>
+            <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ metrics.users }}</div>
         </div>
     </div>
 
-    <!-- Staff Management Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Add Staff Form -->
-        <div class="card bg-base-100 shadow-md border border-base-300 h-fit">
-            <div class="card-body p-6">
-                <h3 class="card-title text-xl font-bold mb-2">
-                    <i class="fa-solid fa-user-plus text-primary"></i> Add Staff Member
-                </h3>
-                <form action="/admin/staff/create" method="POST" class="space-y-4">
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs font-semibold">Staff Name *</span></label>
-                        <input type="text" name="name" placeholder="e.g. John Doe" class="input input-bordered input-sm w-full" required />
-                    </div>
+    <!-- Staff Management Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Create Staff Form -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4 h-fit">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-indigo-500"></i> Add Staff Member
+            </h3>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs font-semibold">Email *</span></label>
-                        <input type="email" name="email" placeholder="e.g. john@infrapulse.org" class="input input-bordered input-sm w-full" required />
-                    </div>
+            <form action="/admin/staff/create" method="POST" class="space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Staff Name *</label>
+                    <input type="text" name="name" placeholder="Full Name" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs font-semibold">Domain Category *</span></label>
-                        <select name="domain" class="select select-bordered select-sm w-full" required>
-                            {% for cat in categories %}
-                                <option value="{{ cat }}">{{ cat }} Category</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Email *</label>
+                    <input type="email" name="email" placeholder="staff@infrapulse.org" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs font-semibold">Password *</span></label>
-                        <input type="password" name="password" placeholder="••••••••" class="input input-bordered input-sm w-full" required />
-                    </div>
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Department Domain *</label>
+                    <select name="domain" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }} Department</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                    <div class="card-actions justify-end mt-4">
-                        <button type="submit" class="btn btn-primary btn-sm w-full gap-2">
-                            <i class="fa-solid fa-plus-circle"></i> Create Staff Account
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Password *</label>
+                    <input type="password" name="password" placeholder="••••••••" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
+
+                <button type="submit" class="w-full px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors mt-2">
+                    Create Account
+                </button>
+            </form>
         </div>
 
         <!-- Staff List Table -->
-        <div class="lg:col-span-2 card bg-base-100 shadow-md border border-base-300">
-            <div class="card-body p-6">
-                <h3 class="card-title text-xl font-bold mb-4">
-                    <i class="fa-solid fa-user-shield text-secondary"></i> Active Staff
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full text-xs">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Domain</th>
-                                <th class="text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for s in staff_members %}
-                            <tr>
-                                <td class="font-bold text-sm">{{ s.name }}</td>
-                                <td>{{ s.email }}</td>
-                                <td>
-                                    {% if s.domain.value == 'Structural' %}
-                                        <span class="badge badge-error badge-sm font-bold">Structural</span>
-                                    {% elif s.domain.value == 'Functional' %}
-                                        <span class="badge badge-warning badge-sm font-bold">Functional</span>
-                                    {% else %}
-                                        <span class="badge badge-info badge-sm font-bold">Performance</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-right">
-                                    <form action="/admin/staff/delete/{{ s.id }}" method="POST" onsubmit="return confirm('Remove staff member?');">
-                                        <button type="submit" class="btn btn-xs btn-error btn-outline">
-                                            <i class="fa-solid fa-trash"></i> Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- All Tickets Oversight Table -->
-    <div class="card bg-base-100 shadow-md border border-base-300">
-        <div class="card-body p-6">
-            <h3 class="card-title text-xl font-bold mb-4">
-                <i class="fa-solid fa-list-check text-neutral"></i> Maintenance Tickets Oversight
+        <div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-user-shield text-indigo-500"></i> Active Squad Members
             </h3>
+
             <div class="overflow-x-auto">
-                <table class="table table-zebra w-full text-xs">
-                    <thead>
+                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                         <tr>
-                            <th>Ticket ID</th>
-                            <th>Defect & Category</th>
-                            <th>Requester</th>
-                            <th>Location</th>
-                            <th>Priority</th>
-                            <th>Assigned Staff</th>
-                            <th>Status</th>
-                            <th class="text-right">Action</th>
+                            <th class="py-2.5 px-3">Name</th>
+                            <th class="py-2.5 px-3">Email</th>
+                            <th class="py-2.5 px-3">Department</th>
+                            <th class="py-2.5 px-3 text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for t in tickets_list %}
-                        <tr>
-                            <td class="font-mono font-bold">
-                                <a href="/ticket/{{ t.id }}" class="text-primary hover:underline">#{{ t.id }}</a>
-                            </td>
-                            <td>
-                                <div class="font-bold">{{ t.defect_name or "Pending" }}</div>
-                                <div class="text-xs opacity-70">{{ t.category.value if t.category else "Unclassified" }}</div>
-                            </td>
-                            <td>{{ t.user_email }}</td>
-                            <td>{{ t.address }}</td>
-                            <td class="font-bold font-mono text-primary">{{ t.priority_score }}</td>
-                            <td>{{ t.assigned_staff_name or "Unassigned" }}</td>
-                            <td>
-                                {% if t.status.value == "Submitted" %}
-                                    <span class="badge badge-warning badge-xs">Submitted</span>
-                                {% elif t.status.value == "Assigned" %}
-                                    <span class="badge badge-info badge-xs">Assigned</span>
-                                {% elif t.status.value == "In Progress" %}
-                                    <span class="badge badge-primary badge-xs">In Progress</span>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        {% for s in staff_members %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">{{ s.name }}</td>
+                            <td class="py-2.5 px-3">{{ s.email }}</td>
+                            <td class="py-2.5 px-3">
+                                {% if s.domain.value == 'Structural' %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">Structural</span>
+                                {% elif s.domain.value == 'Functional' %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Functional</span>
                                 {% else %}
-                                    <span class="badge badge-success badge-xs">Resolved</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">Performance</span>
                                 {% endif %}
                             </td>
-                            <td class="text-right">
-                                <form action="/admin/ticket/delete/{{ t.id }}" method="POST" onsubmit="return confirm('Delete ticket?');">
-                                    <button type="submit" class="btn btn-xs btn-outline btn-error">Delete</button>
+                            <td class="py-2.5 px-3 text-right">
+                                <form action="/admin/staff/delete/{{ s.id }}" method="POST" onsubmit="return confirm('Remove staff member?');">
+                                    <button type="submit" class="text-rose-600 dark:text-rose-400 hover:underline text-xs">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -194,6 +127,63 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- All Complaints Oversight Table -->
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-slate-400"></i> All Maintenance Complaints
+        </h3>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <tr>
+                        <th class="py-2.5 px-3">Ticket ID</th>
+                        <th class="py-2.5 px-3">Defect & Category</th>
+                        <th class="py-2.5 px-3">Requester</th>
+                        <th class="py-2.5 px-3">Location</th>
+                        <th class="py-2.5 px-3">Priority</th>
+                        <th class="py-2.5 px-3">Assigned Staff</th>
+                        <th class="py-2.5 px-3">Status</th>
+                        <th class="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    {% for t in tickets_list %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                        <td class="py-2.5 px-3 font-mono font-semibold">
+                            <a href="/ticket/{{ t.id }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">#{{ t.id }}</a>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <div class="font-medium text-slate-900 dark:text-white">{{ t.defect_name or "Pending" }}</div>
+                            <div class="text-[10px] text-slate-400">{{ t.category.value if t.category else "Unclassified" }}</div>
+                        </td>
+                        <td class="py-2.5 px-3">{{ t.user_email }}</td>
+                        <td class="py-2.5 px-3 truncate max-w-[150px]">{{ t.address }}</td>
+                        <td class="py-2.5 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ t.priority_score }}</td>
+                        <td class="py-2.5 px-3">{{ t.assigned_staff_name or "Unassigned" }}</td>
+                        <td class="py-2.5 px-3">
+                            {% if t.status.value == "Submitted" %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Submitted</span>
+                            {% elif t.status.value == "Assigned" %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">Assigned</span>
+                            {% elif t.status.value == "In Progress" %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">In Progress</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Resolved</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-2.5 px-3 text-right">
+                            <form action="/admin/ticket/delete/{{ t.id }}" method="POST" onsubmit="return confirm('Delete ticket record?');">
+                                <button type="submit" class="text-rose-600 dark:text-rose-400 hover:underline text-xs">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

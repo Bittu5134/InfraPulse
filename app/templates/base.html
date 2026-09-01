@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Infrastructure Maintenance Portal{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Infrastructure Operations Portal{% endblock %}</title>
     
-    <!-- Local DaisyUI & Tailwind CSS (Zero External CDN Dependency) -->
-    <link href="/static/vendor/daisyui/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- Local Tailwind CSS Engine -->
     <script src="/static/vendor/tailwind/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Enterprise Custom Stylesheet & Font Stack -->
+    <link rel="stylesheet" href="/static/css/enterprise.css">
     
     <!-- Local FontAwesome Icons -->
     <link rel="stylesheet" href="/static/vendor/fontawesome/all.min.css">
@@ -15,122 +40,134 @@
     <script>
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
         }
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
         }
         initTheme();
     </script>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-base-200 text-base-content flex flex-col font-sans">
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Header Navbar -->
-    <div class="navbar bg-base-100 shadow-sm border-b border-base-300 px-4 md:px-8">
-        <div class="flex-1">
-            <a href="/" class="btn btn-ghost text-xl font-extrabold flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved text-primary text-2xl"></i>
-                <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold text-2xl tracking-tight">InfraPulse</span>
-            </a>
-        </div>
-        
-        <div class="flex-none flex items-center gap-2 sm:gap-3">
-            <!-- Theme Toggle Button -->
-            <button onclick="toggleTheme()" class="btn btn-ghost btn-circle" title="Toggle Theme">
-                <i class="fa-solid fa-moon text-lg hidden [html[data-theme=light]_&]:block"></i>
-                <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
-            </button>
+    <!-- Enterprise Top Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Identity -->
+            <div class="flex items-center gap-6">
+                <a href="/" class="flex items-center gap-2.5 text-slate-900 dark:text-white font-semibold tracking-tight text-lg group">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-500/30 group-hover:bg-indigo-500 transition-colors">
+                        <i class="fa-solid fa-shield-halved text-sm"></i>
+                    </div>
+                    <span>InfraPulse</span>
+                    <span class="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Enterprise</span>
+                </a>
+            </div>
+            
+            <!-- Navigation Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
+                    <i class="fa-solid fa-moon text-sm hidden dark:block"></i>
+                    <i class="fa-solid fa-sun text-sm block dark:hidden"></i>
+                </button>
 
-            <!-- Notification Center -->
-            {% if current_user or current_staff or current_admin %}
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle relative" title="Notifications">
-                    <i class="fa-solid fa-bell text-lg"></i>
-                    <span id="notif-count-badge" class="badge badge-sm badge-error absolute -top-1 -right-1 hidden">0</span>
-                </div>
-                <div tabindex="0" class="dropdown-content z-30 card card-compact w-80 p-2 shadow-2xl bg-base-100 border border-base-300">
-                    <div class="card-body">
-                        <div class="flex justify-between items-center border-b border-base-200 pb-2">
-                            <h3 class="font-bold text-sm flex items-center gap-1">
-                                <i class="fa-solid fa-bell text-primary"></i> Notifications
-                            </h3>
-                            <button onclick="markAllNotificationsRead()" class="btn btn-xs btn-ghost text-xs">Mark all read</button>
+                <!-- Notification Dropdown -->
+                {% if current_user or current_staff or current_admin %}
+                <div class="relative" id="notif-dropdown-wrapper">
+                    <button onclick="document.getElementById('notif-panel').classList.toggle('hidden')" class="relative w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Notifications">
+                        <i class="fa-solid fa-bell text-sm"></i>
+                        <span id="notif-count-badge" class="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-600 text-white hidden">0</span>
+                    </button>
+
+                    <div id="notif-panel" class="hidden absolute right-0 mt-2 w-80 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2 mb-2">
+                            <span class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="fa-solid fa-bell text-indigo-500"></i> Notifications
+                            </span>
+                            <button onclick="markAllNotificationsRead()" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline">Mark all read</button>
                         </div>
-                        <div id="notif-list-container" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
-                            <div class="text-center py-4 text-base-content/50 italic">No new notifications</div>
+                        <div id="notif-list-container" class="space-y-1.5 max-h-64 overflow-y-auto text-xs">
+                            <div class="text-center py-4 text-slate-400 italic">No notifications</div>
                         </div>
                     </div>
                 </div>
+                {% endif %}
+
+                <!-- Primary Action -->
+                {% if request.url.path != '/' %}
+                    <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Create Ticket</span>
+                    </a>
+                {% endif %}
+
+                <!-- User Portal Links -->
+                {% if current_user %}
+                    <a href="/user/dashboard" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                        <i class="fa-solid fa-ticket text-indigo-500"></i>
+                        <span>My Tickets</span>
+                    </a>
+                {% else %}
+                    <a href="/user/login" class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        Sign In
+                    </a>
+                {% endif %}
+
+                <div class="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+                <!-- Staff & Admin Links -->
+                {% if current_staff %}
+                    <a href="/staff/queue" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                        <i class="fa-solid fa-user-shield text-xs"></i>
+                        <span>Staff Portal</span>
+                    </a>
+                {% else %}
+                    <a href="/staff/login" class="px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        Staff
+                    </a>
+                {% endif %}
+
+                {% if current_admin %}
+                    <a href="/admin" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <i class="fa-solid fa-screwdriver-wrench text-xs"></i>
+                        <span>Admin</span>
+                    </a>
+                {% else %}
+                    <a href="/admin/login" class="px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        Admin
+                    </a>
+                {% endif %}
             </div>
-            {% endif %}
-
-            <!-- Create Ticket button on navbar only when NOT on home page -->
-            {% if request.url.path != '/' %}
-                <a href="/user/submit" class="btn btn-primary btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-plus-circle"></i>
-                    <span>Create Ticket</span>
-                </a>
-            {% endif %}
-
-            {% if current_user %}
-                <a href="/user/dashboard" class="btn btn-outline btn-primary btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-ticket"></i>
-                    <span class="hidden sm:inline">My Tickets</span>
-                </a>
-            {% else %}
-                <a href="/user/login" class="btn btn-ghost btn-sm sm:btn-md gap-1">
-                    <i class="fa-solid fa-user"></i>
-                    <span class="hidden sm:inline">User Login</span>
-                </a>
-            {% endif %}
-
-            <div class="divider divider-horizontal my-2 mx-0"></div>
-
-            <!-- Staff Portal -->
-            {% if current_staff %}
-                <a href="/staff/queue" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <span>Staff Portal</span>
-                </a>
-            {% else %}
-                <a href="/staff/login" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <span>Staff Login</span>
-                </a>
-            {% endif %}
-
-            <!-- Admin Portal -->
-            {% if current_admin %}
-                <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-                    <span>Admin Portal</span>
-                </a>
-            {% else %}
-                <a href="/admin/login" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-                    <span>Admin Login</span>
-                </a>
-            {% endif %}
         </div>
-    </div>
+    </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="footer footer-center p-6 bg-base-100 text-base-content border-t border-base-300 mt-auto">
-        <aside class="space-y-1">
-            <div class="flex items-center justify-center gap-2 font-bold text-base">
-                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Defect Maintenance Tool
+    <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/50 py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-700 dark:text-slate-300">InfraPulse Operations</span>
+                <span class="text-slate-400">•</span>
+                <span>Defect Prioritization & Maintenance Dispatch</span>
             </div>
-            <p class="text-xs text-base-content/50">© 2026 InfraPulse</p>
-        </aside>
+            <div>© 2026 InfraPulse Platform</div>
+        </div>
     </footer>
 
     {% if current_user or current_staff or current_admin %}
@@ -152,15 +189,15 @@
                 }
                 
                 if (data.notifications.length === 0) {
-                    container.innerHTML = `<div class="text-center py-4 text-base-content/50 italic">No notifications</div>`;
+                    container.innerHTML = `<div class="text-center py-4 text-slate-400 italic">No notifications</div>`;
                     return;
                 }
                 
                 container.innerHTML = data.notifications.map(n => `
-                    <a href="${n.link_url || '#'}" class="block p-2 rounded-lg ${n.is_read ? 'bg-base-200/50' : 'bg-primary/10 border border-primary/20'} hover:bg-base-200 transition space-y-1">
-                        <div class="font-bold text-xs ${n.is_read ? 'text-base-content/80' : 'text-primary'}">${n.title}</div>
-                        <div class="text-base-content/70">${n.message}</div>
-                        <div class="text-xs text-base-content/50 text-right">${n.created_at}</div>
+                    <a href="${n.link_url || '#'}" class="block p-2.5 rounded-lg ${n.is_read ? 'bg-slate-50 dark:bg-slate-800/40 text-slate-500' : 'bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-800/50 text-slate-800 dark:text-slate-200'} hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <div class="font-semibold text-xs text-indigo-600 dark:text-indigo-400 mb-0.5">${n.title}</div>
+                        <div class="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">${n.message}</div>
+                        <div class="text-[10px] text-slate-400 text-right mt-1">${n.created_at}</div>
                     </a>
                 `).join('');
             } catch(e) {}

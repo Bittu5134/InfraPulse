@@ -4,65 +4,40 @@
 
 {% block content %}
 <div class="max-w-md mx-auto space-y-6">
-    <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body p-6">
-            <h2 class="card-title text-2xl font-bold justify-center mb-1">
-                <i class="fa-solid fa-screwdriver-wrench text-neutral"></i> Admin Portal Login
-            </h2>
-            <p class="text-xs text-center text-base-content/70 mb-6">
-                Administrative access for staff management and system oversight.
-            </p>
-
-            {% if error %}
-            <div class="alert alert-error text-xs mb-4">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ error }}</span>
-            </div>
-            {% endif %}
-
-            <form action="/admin/login" method="POST" class="space-y-4">
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Admin Email</span></label>
-                    <input type="email" name="email" placeholder="e.g., admin@infrapulse.org" class="input input-bordered w-full text-sm" required />
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" placeholder="e.g., admin123" class="input input-bordered w-full text-sm" required />
-                </div>
-
-                <div class="form-control mt-6">
-                    <button type="submit" class="btn btn-neutral w-full gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i> Login to Admin Dashboard
-                    </button>
-                </div>
-            </form>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 sm:p-8 space-y-5">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Admin Portal Sign In</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">System administrator authentication and governance</p>
         </div>
+
+        {% if error %}
+        <div class="text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-lg border border-rose-200 dark:border-rose-800/60">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/admin/login" method="POST" class="space-y-4 text-xs">
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Admin Email</label>
+                <input type="email" name="email" placeholder="admin@infrapulse.org" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Password</label>
+                <input type="password" name="password" placeholder="••••••••" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+            </div>
+
+            <button type="submit" class="w-full px-4 py-2.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors mt-2">
+                Sign In to Admin Portal
+            </button>
+        </form>
     </div>
 
-    <!-- Formatted Demo Admin Credentials Hint Box -->
-    <div class="card bg-base-100 border border-base-300 shadow-sm p-4">
-        <h4 class="text-xs font-bold text-base-content/70 uppercase tracking-wider mb-2 flex items-center gap-1">
-            <i class="fa-solid fa-key text-warning"></i> Demo Admin Account
-        </h4>
-        <div class="overflow-x-auto">
-            <table class="table table-xs w-full text-xs">
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Email</th>
-                        <th>Password</th>
-                    </tr>
-                </thead>
-                <tbody class="font-mono">
-                    <tr>
-                        <td class="font-sans font-semibold">Administrator</td>
-                        <td>admin@infrapulse.org</td>
-                        <td>admin123</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <!-- Default Admin Credentials Reference -->
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+        <span class="font-semibold text-slate-700 dark:text-slate-300 block text-[11px] uppercase tracking-wider">Default Admin Credentials</span>
+        <div>Email: <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px]">admin@infrapulse.org</code></div>
+        <div>Password: <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px]">admin123</code></div>
     </div>
 </div>
 {% endblock %}

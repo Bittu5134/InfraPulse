@@ -1,70 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}InfraPulse - Infrastructure Defect & Maintenance System{% endblock %}
+{% block title %}InfraPulse - Infrastructure Operations & Priority Maintenance{% endblock %}
 
 {% block content %}
 <div class="space-y-12">
-    <!-- Hero Section -->
-    <div class="hero py-16 px-6 bg-base-100 rounded-3xl shadow-lg border border-base-300 relative overflow-hidden">
-        <div class="hero-content text-center max-w-3xl">
-            <div class="space-y-6">
-                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                    Infrastructure Defect Reporting & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Maintenance</span>
-                </h1>
-                <p class="text-base text-base-content/80 max-w-xl mx-auto leading-relaxed">
-                    Report infrastructure defects such as concrete spalling, stagnant water, cracked tiles, or paint peeling. Our priority engine automatically categorizes severity and organizes tickets for maintenance squads.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2 max-w-md mx-auto">
-                    <a href="/user/submit" class="btn btn-primary btn-lg shadow-md gap-2 flex-1">
-                        <i class="fa-solid fa-plus-circle text-xl"></i> Create Ticket
-                    </a>
-                </div>
+    <!-- Hero Header -->
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 sm:p-12 shadow-sm">
+        <div class="max-w-3xl space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span>Operational Defect Prioritization Engine</span>
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+                Facility Defect Reporting & Priority Maintenance Dispatch
+            </h1>
+            
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                Automated triage system for campus infrastructure. Submissions are processed to compute objective priority metrics, routed to Structural, Functional, or Performance queues, and tracked to resolution.
+            </p>
+            
+            <div class="flex flex-wrap gap-3 pt-2">
+                <a href="/user/submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Submit Maintenance Ticket</span>
+                </a>
+                <a href="/user/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                    <i class="fa-solid fa-ticket text-slate-400"></i>
+                    <span>Track Active Tickets</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- 3 Step Workflow -->
-    <div class="space-y-6">
-        <div class="text-center space-y-1">
-            <h2 class="text-2xl font-bold tracking-tight">How It Works</h2>
-            <p class="text-xs text-base-content/70">Three-step automated defect resolution workflow</p>
+    <!-- 3 Step Operational Pipeline -->
+    <div class="space-y-4">
+        <div>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">System Workflow</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Automated triage and dispatch cycle</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="card bg-base-100 shadow-sm border border-base-300">
-                <div class="card-body text-center p-6 space-y-2">
-                    <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto text-2xl font-extrabold">
-                        1
-                    </div>
-                    <h3 class="font-bold text-lg">Report Defect</h3>
-                    <p class="text-xs text-base-content/70">
-                        Upload a photo of the defect, describe the issue, and provide your location.
-                    </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-700 dark:text-slate-300">
+                    01
                 </div>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Defect Ingestion</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Users submit photographic evidence along with exact location details and defect descriptions.
+                </p>
             </div>
 
-            <div class="card bg-base-100 shadow-sm border border-base-300">
-                <div class="card-body text-center p-6 space-y-2">
-                    <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto text-2xl font-extrabold">
-                        2
-                    </div>
-                    <h3 class="font-bold text-lg">Priority Queue</h3>
-                    <p class="text-xs text-base-content/70">
-                        Defects are automatically classified into Structural, Functional, or Performance queues and ranked by risk.
-                    </p>
+            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                    02
                 </div>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Priority Routing</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    The priority engine computes risk scores from severity, extent, and category weights to order queues.
+                </p>
             </div>
 
-            <div class="card bg-base-100 shadow-sm border border-base-300">
-                <div class="card-body text-center p-6 space-y-2">
-                    <div class="w-14 h-14 rounded-2xl bg-success/10 text-success flex items-center justify-center mx-auto text-2xl font-extrabold">
-                        3
-                    </div>
-                    <h3 class="font-bold text-lg">Staff Resolution</h3>
-                    <p class="text-xs text-base-content/70">
-                        Maintenance staff claim tickets, update progress, and resolve the defect.
-                    </p>
+            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    03
                 </div>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Squad Resolution</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Assigned staff transition tickets through lifecycle stages until verified resolution.
+                </p>
             </div>
         </div>
     </div>

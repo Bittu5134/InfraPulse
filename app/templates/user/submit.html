@@ -4,66 +4,65 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="card bg-base-100 shadow-xl border border-base-300">
-        <div class="card-body">
-            <h2 class="card-title text-2xl font-bold mb-2">
-                <i class="fa-solid fa-file-circle-plus text-primary"></i> Create Maintenance Ticket
-            </h2>
-            <p class="text-xs text-base-content/70 mb-6">
-                Fill in the details below and upload a photo of the defect. The AI priority engine will automatically analyze the image, classify the defect category, and rank your ticket.
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 sm:p-8 space-y-6">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Submit Maintenance Report</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Provide defect details and attach a photograph. The priority engine will compute severity and assign the ticket to the appropriate queue.
             </p>
-
-            {% if error %}
-            <div class="alert alert-error text-xs mb-4">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ error }}</span>
-            </div>
-            {% endif %}
-
-            <form action="/user/submit" method="POST" enctype="multipart/form-data" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Full Name *</span></label>
-                        <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="e.g. Rahul Sharma" class="input input-bordered w-full text-sm" required />
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Email Address *</span></label>
-                        <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. rahul@example.com" class="input input-bordered w-full text-sm" required />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Phone Number</span></label>
-                        <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="e.g. 9876543210" class="input input-bordered w-full text-sm" />
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Location / Address *</span></label>
-                        <input type="text" name="address" placeholder="e.g. Hall 4, Room 208" class="input input-bordered w-full text-sm" required />
-                    </div>
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Defect Description *</span></label>
-                    <textarea name="description" placeholder="e.g. Concrete spalling on ceiling beam, puddle near corridor, cracked floor tiles..." class="textarea textarea-bordered h-28 w-full text-sm" required></textarea>
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Defect Photograph *</span></label>
-                    <input type="file" name="photo" accept="image/*" class="file-input file-input-bordered file-input-primary w-full text-sm" required />
-                    <label class="label"><span class="label-text-alt text-base-content/60">Supported formats: JPG, PNG, WEBP.</span></label>
-                </div>
-
-                <div class="card-actions justify-end mt-6">
-                    <a href="/" class="btn btn-ghost btn-sm">Cancel</a>
-                    <button type="submit" class="btn btn-primary gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Ticket
-                    </button>
-                </div>
-            </form>
         </div>
+
+        {% if error %}
+        <div class="text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-lg border border-rose-200 dark:border-rose-800/60">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form action="/user/submit" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Full Name *</label>
+                    <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="e.g. Alex Morgan" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Email Address *</label>
+                    <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. alex@example.com" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Phone Number</label>
+                    <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="e.g. +91 9876543210" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block font-medium text-slate-700 dark:text-slate-300">Location / Address *</label>
+                    <input type="text" name="address" placeholder="e.g. Block B, 3rd Floor Corridor" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Problem Description *</label>
+                <textarea name="description" rows="3" placeholder="Describe the physical condition (e.g. spalling rebar on ceiling, stagnant water leaking from pipe, loose floor tiles)..." class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-3 focus:outline-none focus:ring-1 focus:ring-indigo-500" required></textarea>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-medium text-slate-700 dark:text-slate-300">Defect Photograph *</label>
+                <input type="file" name="photo" accept="image/*" class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950 dark:file:text-indigo-300 hover:file:bg-indigo-100 border border-slate-200 dark:border-slate-700 rounded-lg p-1" required />
+                <span class="text-[11px] text-slate-400">Supported formats: JPG, PNG, WEBP (auto-converted to standard format).</span>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <a href="/" class="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</a>
+                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                    <span>Submit Ticket</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
