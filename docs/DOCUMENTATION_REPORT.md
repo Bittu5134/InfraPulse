@@ -1,83 +1,88 @@
-# Documentation Report - InfraPulse
+# Technical Documentation Report - InfraPulse
 
 **Problem Statement**: Photo-Based Defect Detection & Priority Maintenance System  
 **System Name**: InfraPulse  
-**Target Environment**: Python Web Application (FastAPI, SQLite, Jinja2, Tailwind CSS, DaisyUI)  
+**Target Environment**: Python Web Application (FastAPI, SQLite, PyTorch, Jinja2, Tailwind CSS)  
+**Version**: 3.0.0  
 
 ---
 
-## 1. System Overview and Architecture
+## 1. System Overview and Implementation Scope
 
-InfraPulse is an automated web system designed for maintenance defect reporting, priority queue ranking, domain-based staff routing, and ticket lifecycle tracking.
+InfraPulse is an automated web platform designed for facility maintenance defect reporting, objective priority queue ranking, domain-based squad dispatch, and full lifecycle tracking.
 
-### System Components:
-1. **User Registration and Submission**: Ingests user complaints containing defect photographs, requester contact details, location, and description.
-2. **Defect Priority Engine**: Categorizes defects into one of three domains (Structural, Functional, Performance) and calculates priority scores.
-3. **Department Priority Queues**: Routes tickets to dedicated queues (Structural, Functional, Performance) sorted by priority score.
-4. **Staff Maintenance Interface**: Enables staff members to assign tickets, update status (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`), and export queue records to CSV.
-5. **Notification and Privacy Controls**: In-app notifications for status updates and masking of personal contact details on public ticket views.
-
----
-
-## 2. Defect Detection and Classification Logic
-
-Upon receiving a photograph, the system identifies the defect type and maps it to a category:
-
-| Defect Type | Category | Category Weight ($W_{\text{cat}}$) | Defect Boost ($B_{\text{defect}}$) |
-| :--- | :--- | :---: | :---: |
-| **Spalling** | **Structural** | `1.5` | `2.0` |
-| **Stagnant Water** | **Functional** | `1.2` | `1.5` |
-| **Cracked Tiles** | **Performance** | `1.0` | `1.2` |
-| **Paint Peeling** | **Performance** | `1.0` | `1.0` |
-
-*Note*: Within the Performance category, Cracked Tiles is given a higher priority boost than Paint Peeling in accordance with the specification.
+### Core Problem Statement Deliverables:
+1. **User Defect Submission**: Multi-format photo intake with location and description metadata.
+2. **Tri-Category Classification**: Routing into **Structural**, **Functional**, and **Performance** departments.
+3. **Mathematical Priority Formulation**: Dynamic computation of priority scores using the weighted formula.
+4. **Queue Dispatch & Status Lifecycle**: Step-by-step state transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`) with removal of resolved tickets from active queues.
+5. **Role-Based Portals**: Dedicated interfaces for Users, Department Staff, and System Administrators.
 
 ---
 
-## 3. Priority Ranking Methodology
+## 2. Extra Features & Quality of Life (QoL) Enhancements
 
-Complaints within each department queue are sorted by priority score:
+| Category | Feature | Technical Implementation | Benefit |
+| :--- | :--- | :--- | :--- |
+| **Computer Vision** | **PyTorch Vision Model** | EfficientNet-B0 transfer learning with custom head | True pixel-level defect analysis instead of text heuristics |
+| **Explainability** | **GradCAM++ Localization** | Attention heatmap & Canny edge density extraction | Objective calculation of physical severity (0–100%) and extent (0–100%) |
+| **Evaluation** | **Model Benchmark Center** | Paginated `/test` route with in-memory caching | Side-by-side evaluation against holdout datasets without CPU/RAM overload |
+| **User Experience** | **WYSIWYG Markdown Editor** | Toolbar + live preview + `bleach` sanitizer | Rich multi-line formatted defect descriptions (lists, tables, code) |
+| **Collaboration** | **Live Discussion Feed** | In-app polling with Web Audio API sound chime | Real-time communication between requesters and operators |
+| **Notification** | **In-App Notification Center** | Navbar dropdown with live unread badge polling | Instant alerts on ticket assignments and status updates |
+| **Security & RBAC** | **Domain Restriction** | `HTTP 403 Forbidden` checks on cross-category actions | Enforces departmental jurisdiction and prevents accidental reassignment |
+| **Data Privacy** | **Contact Masking** | Conditional Jinja2 rendering based on session auth | Protects user email and phone numbers on public views |
+| **Reporting** | **Enterprise CSV Export** | Streaming CSV generator across all category queues | Easy reporting and data extraction for facility managers |
+| **Design** | **Ergonomic Theme** | Cloudflare-inspired palette with light/dark toggle | High eye comfort with low-glare neutral backgrounds |
+| **Portability** | **100% Offline Assets** | Self-hosted Tailwind JS & FontAwesome webfonts | Operates without internet or external CDN dependencies |
+| **DevOps** | **Docker & Compose** | Multi-stage Dockerfile with volume persistence | One-command production deployment |
 
+---
+
+## 3. Defect Detection and Priority Ranking Methodology
+
+### Priority Scoring Formulation:
 $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
 
-Where:
-- $\text{Severity} \in [1.0, 10.0]$: Severity rating of the defect.
-- $\text{Extent} \in [0\%, 100\%]$: Defect coverage percentage.
-- $B_{\text{defect}}$: Priority boost based on defect type.
-- $W_{\text{cat}}$: Category weight coefficient (1.5 for Structural, 1.2 for Functional, 1.0 for Performance).
-
-### Lifecycle Transitions:
-- **Active Queue**: Ordered by $\text{Priority Score} \downarrow$, then $\text{Created Date} \uparrow$.
-- **Status Flow**: `Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`.
-- **Queue Removal**: Tickets marked `Resolved` are removed from the active queue standing calculation.
+### Parameter Hierarchy:
+- **Category Weights ($W_{\text{cat}}$)**:
+  - **Structural** = `1.5` (Critical structural safety)
+  - **Functional** = `1.2` (Operational disruptions / health hazards)
+  - **Performance** = `1.0` (Aesthetic / surface wear)
+- **Defect Boosts ($B_{\text{defect}}$)**:
+  - **Spalling** = `+2.0` (Highest priority)
+  - **Stagnant Water** = `+1.5` (High priority)
+  - **Cracked Tiles** = `+1.2` (Medium priority, ranked above paint peeling)
+  - **Paint Peeling** = `+1.0` (Standard priority)
 
 ---
 
-## 4. REST API Integration
+## 4. Machine Learning & Model Performance
 
-External classification models can supply defect attributes via the REST API endpoint:
+### Test Set Benchmark (241 Holdout Images):
+- **Overall Accuracy**: **88.8%**
+- **Weighted F1-Score**: **0.89**
+- **Macro F1-Score**: **0.814**
 
-```http
-POST /api/v1/complaints/{complaint_id}/classify
-Content-Type: application/json
-
-{
-  "defect_name": "Spalling",
-  "category": "Structural",
-  "severity": 8.5,
-  "extent": 45.0
-}
+#### Confusion Matrix:
+```text
+Actual \ Predicted     Cracked Tiles   Paint Peeling   Spalling   Stagnant Water
+--------------------------------------------------------------------------------
+Cracked Tiles (83)          76               0             4            3
+Paint Peeling (78)           6              65             3            4
+Spalling (75)                1               5            68            1
+Stagnant Water (5)           0               0             0            5
 ```
 
 ---
 
-## 5. Limitations and Improvement Opportunities
+## 5. Verification and Quality Assurance
 
-### Current Strengths:
-- Deterministic priority scoring based on mathematical formulation.
-- Domain-level permission enforcement preventing unauthorized cross-category edits.
-- Automatic image format normalization to PNG format.
+The system includes automated end-to-end unit and integration tests covering:
+1. Priority mathematical scoring hierarchy compliance.
+2. User account registration, authentication, and photo defect submission.
+3. Staff domain authorization and ticket self-assignment.
+4. Administrative staff provisioning and system governance.
+5. Model benchmark `/test` route rendering and lazy-loaded evaluation.
 
-### Future Improvements:
-1. **Multi-Defect Detection**: Handling images with multiple defects by evaluating combined risk factors.
-2. **Surface Measurement**: Using dimensional calibration to compute physical defect surface area.
+All automated tests execute cleanly via `pytest` with 100% pass rate.

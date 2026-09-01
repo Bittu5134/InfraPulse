@@ -1,21 +1,21 @@
 # System Design Document (HLD / LLD) - InfraPulse
 
 **System Name**: InfraPulse - Defect Detection and Priority Maintenance System  
-**Version**: 2.0  
-**Stack**: Python (FastAPI), SQLite (Async SQLAlchemy), Jinja2, Tailwind CSS, DaisyUI  
+**Version**: 3.0.0  
+**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (EfficientNet-B0 + GradCAM++), Jinja2, Tailwind CSS  
 
 ---
 
 ## 1. System Overview
 
 ### 1.1 Problem Context
-Campus and institutional facilities receive diverse maintenance requests daily. Without structured prioritization, urgent structural concerns (such as concrete spalling) can be treated with the same urgency as cosmetic defects (such as paint peeling), creating safety hazards and delayed resolutions.
+Campus and institutional facilities receive hundreds of maintenance requests across diverse structural, plumbing, and aesthetic issues. Without structured prioritization, critical safety hazards (e.g., concrete spalling or structural beam fractures) are delayed behind cosmetic complaints (e.g., paint peeling).
 
-### 1.2 Objectives
-- Automate the routing of submitted defect reports to appropriate department queues: Structural, Functional, or Performance.
-- Compute an objective priority score for each complaint based on visible severity, coverage extent, defect type, and domain criticality.
-- Enforce predefined status transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`).
-- Restrict staff actions to their assigned department domains.
+### 1.2 Core Problem Statement Objectives
+- **Defect Ingestion & Classification**: Automate the intake of user photographs and route them into three designated operational departments: **Structural**, **Functional**, or **Performance**.
+- **Objective Priority Engine**: Mathematically score and order tickets to prevent manual triage bottlenecks using severity, surface extent, and category weighting.
+- **Lifecycle Progression**: Enforce strict status transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`).
+- **Domain Access Governance**: Prevent staff from modifying tickets outside their designated domain.
 
 ---
 
@@ -29,32 +29,45 @@ graph TB
         UI_User["User Portal (/user)"]
         UI_Staff["Staff Portal (/staff)"]
         UI_Admin["Admin Portal (/admin)"]
+        UI_Bench["Benchmark Center (/test)"]
     end
 
     subgraph Application Tier
-        Auth["Authentication & Session Layer"]
+        Auth["Authentication & RBAC Layer"]
+        MDEngine["Markdown & Bleach Sanitizer"]
         UserRouter["User Router"]
         StaffRouter["Staff Router"]
         AdminRouter["Admin Router"]
-        APIRouter["API Router"]
+        BenchRouter["Benchmark Router"]
+        APIRouter["REST API Router"]
         PriorityEngine["Priority Scoring Engine"]
-        ImageProcessing["Image Processor (Pillow)"]
+        ModelService["PyTorch Model Service"]
+    end
+
+    subgraph Computer Vision Layer
+        Net["InfraPulseNet (EfficientNet-B0)"]
+        GradCAM["GradCAM++ Heatmap Analyzer"]
+        Checkpoint[("best_infrapulse_v1.pt")]
     end
 
     subgraph Data Tier
         DB[("SQLite Database")]
-        Storage[("File Storage (/uploads)")]
+        Storage[("Uploads Storage (/uploads)")]
     end
 
     UI_User --> UserRouter
     UI_Staff --> StaffRouter
     UI_Admin --> AdminRouter
+    UI_Bench --> BenchRouter
 
-    UserRouter --> ImageProcessing --> Storage
+    UserRouter --> MDEngine
+    UserRouter --> ModelService --> Net --> GradCAM
+    Net --> Checkpoint
     UserRouter --> PriorityEngine --> DB
     StaffRouter --> DB
     AdminRouter --> DB
     APIRouter --> DB
+    BenchRouter --> ModelService
 ```
 
 ---
@@ -133,13 +146,13 @@ erDiagram
 
 ## 4. Priority Queue Mathematical Formulation
 
-Complaints are ordered within department queues by computed priority scores:
+Complaints are dynamically ordered within department queues by computed priority scores:
 
 $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
 
 ### Parameters
-- **Severity** $\in [1.0, 10.0]$: Defect severity rating.
-- **Extent** $\in [0\%, 100\%]$: Surface defect coverage area.
+- **Severity** $\in [1.0, 10.0]$ (or $0-100\%$): Computed from GradCAM++ mean activation, peak activation, and edge density.
+- **Extent** $\in [0\%, 100\%]$: Computed from GradCAM++ active area coverage ratio, component fragmentation, and spatial spread.
 - **Category Weight ($W_{\text{cat}}$)**:
   - Structural: `1.5`
   - Functional: `1.2`
@@ -152,22 +165,45 @@ $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{
 
 ---
 
-## 5. Security and Access Control
+## 5. Security & Access Control (RBAC)
 
 | Role | Permissions |
 | :--- | :--- |
-| **Public / Guest** | Submit complaints; view complaints with contact information masked. |
-| **Registered User** | Submit complaints, view personal ticket dashboard, participate in ticket comment timeline, and receive status notifications. |
-| **Staff Member** | View assigned department queue; assign and update status for tickets within domain; export queue to CSV. Cannot modify tickets outside domain. |
-| **Administrator** | Manage staff accounts; view cross-department ticket reports; remove records. |
+| **Public / Guest** | Submit reports; view ticket detail with personal contact data masked. |
+| **Registered User** | Submit reports with rich markdown formatting, view personal dashboard, post comments in live ticket feed. |
+| **Staff Member** | View assigned department queue; claim and transition ticket statuses within domain; export queue to CSV. Cannot modify tickets outside assigned domain (`HTTP 403 Forbidden`). |
+| **Administrator** | Provision and revoke staff accounts; manage cross-department ticket reports; remove records. |
 
 ---
 
-## 6. Functional Capabilities
+## 6. Functional Capabilities & Extra Features
 
-1. **In-Ticket Comments**: Provides a chronological messaging timeline on ticket detail pages with background polling.
-2. **Notification Center**: Navigation dropdown that alerts users and staff to ticket assignment and status changes.
-3. **Contact Data Privacy**: Masks personal contact information for visitors without authentication on ticket pages.
-4. **Image Format Normalization**: Converts all incoming image uploads to PNG format via Pillow.
-5. **CSV Export**: Allows staff and administrators to export queue data for reporting.
-6. **Self-Hosted Assets**: Uses local copies of Tailwind, DaisyUI, and FontAwesome for reliable offline operation.
+### 6.1 Problem Statement Core Deliverables
+1. **Photographic Defect Ingestion**: Multi-format intake with automatic Pillow normalization to standard PNG.
+2. **Tri-Department Routing**: Automated routing into Structural, Functional, and Performance queues.
+3. **Objective Priority Engine**: Implementation of the mathematical queue ordering formula.
+4. **Lifecycle State Management**: State machine supporting `Submitted`, `Assigned`, `In Progress`, and `Resolved`.
+
+### 6.2 Extra Features & Quality of Life (QoL) Additions
+1. **Deep Learning Vision Model (EfficientNet-B0 + GradCAM++)**:
+   - Replaces mock classifiers with real neural network forward passes and GradCAM++ physical localization.
+2. **Interactive Benchmark Center (`/test`)**:
+   - Paginated holdout dataset evaluation page with side-by-side ML vs heuristic comparisons.
+3. **WYSIWYG Markdown Editor & Bleach Sanitizer**:
+   - Rich text formatting toolbar (Bold, Italic, Headers, Lists, Quotes, Tables) with live preview tab.
+4. **Real-Time Ticket Discussion & Audio Feedback**:
+   - In-app comment feed with live polling and acoustic pop sound indicator.
+5. **In-App Notification Center**:
+   - Navigation bar notification bell with unread badge counter for status changes.
+6. **Domain Restriction Enforcement**:
+   - Cross-category modification protection ensuring staff only operate on matching domain tickets.
+7. **Contact Privacy Masking**:
+   - Protection of personal phone numbers and emails against unauthorized viewers.
+8. **Enterprise CSV Export**:
+   - Endpoint for full dataset queue downloads.
+9. **Cloudflare-Inspired Ergonomic UI**:
+   - Eye-friendly neutral palette with amber-orange accents and full dark/light mode toggle.
+10. **100% Offline Self-Contained Assets**:
+    - Locally bundled Tailwind and FontAwesome webfonts.
+11. **Production Dockerization**:
+    - Multi-stage Docker container and Compose deployment.

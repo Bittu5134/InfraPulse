@@ -16,7 +16,7 @@ from app.priority_queue import (
     mock_classify_defect
 )
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+from app.templates_config import templates
 
 router = APIRouter(prefix="/api/v1", tags=["ML Model Integration & REST API"])
 

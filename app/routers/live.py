@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import Complaint, CategoryEnum
 from app.priority_queue import get_category_live_queue, get_queue_position
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+from app.templates_config import templates
 
 router = APIRouter(prefix="/live", tags=["HTMX Live Sync"])
 

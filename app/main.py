@@ -7,14 +7,12 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import select
-
 from app.config import UPLOAD_DIR, BASE_DIR, SECRET_KEY
 from app.database import init_db, AsyncSessionLocal
 from app.models import User, Staff, Admin, CategoryEnum
 from app.auth import hash_password, get_current_user, get_current_staff, get_current_admin
+from app.templates_config import templates
 from app.routers import user, staff, admin, api, live, test_bench
-
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
 async def seed_demo_accounts():
     async with AsyncSessionLocal() as session:

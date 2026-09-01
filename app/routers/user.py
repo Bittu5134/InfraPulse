@@ -13,7 +13,7 @@ from app.models import User, Complaint, TicketComment, CategoryEnum, StatusEnum,
 from app.auth import hash_password, verify_password, get_current_user, get_current_staff, get_current_admin, require_user
 from app.priority_queue import compute_priority_score, get_queue_position, mock_classify_defect
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+from app.templates_config import templates
 
 router = APIRouter(tags=["User Portal"])
 

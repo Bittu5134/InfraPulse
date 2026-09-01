@@ -12,8 +12,9 @@ from app.database import get_db
 from app.auth import get_current_user, get_current_staff, get_current_admin
 from app.model_service import predict_single_image, run_rule_based_classifier
 
+from app.templates_config import templates
+
 router = APIRouter(tags=["Model Benchmark"])
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
 DATA_DIR = BASE_DIR / "app" / "model" / "data"
 

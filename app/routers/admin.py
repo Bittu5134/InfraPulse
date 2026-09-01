@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models import Admin, User, Staff, Complaint, CategoryEnum, StatusEnum
 from app.auth import hash_password, verify_password, get_current_admin, get_current_user, get_current_staff, require_admin
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+from app.templates_config import templates
 
 router = APIRouter(prefix="/admin", tags=["Admin Portal"])
 

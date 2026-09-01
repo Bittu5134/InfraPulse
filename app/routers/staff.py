@@ -13,7 +13,7 @@ from app.models import Staff, Complaint, CategoryEnum, StatusEnum
 from app.auth import verify_password, get_current_staff, get_current_user, require_staff, get_current_admin
 from app.priority_queue import get_staff_tickets_filtered
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+from app.templates_config import templates
 
 router = APIRouter(prefix="/staff", tags=["Staff Portal"])
 
