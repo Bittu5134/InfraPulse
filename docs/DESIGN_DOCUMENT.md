@@ -2,7 +2,7 @@
 
 **System Name**: InfraPulse - Defect Detection and Priority Maintenance System  
 **Version**: 3.0.0  
-**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (EfficientNet-B0 + GradCAM++), Jinja2, Tailwind CSS  
+**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (EfficientNet-B0 + GradCAM++), Jinja2, Tailwind CSS, EasyMDE  
 
 ---
 
@@ -170,40 +170,34 @@ $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{
 | Role | Permissions |
 | :--- | :--- |
 | **Public / Guest** | Submit reports; view ticket detail with personal contact data masked. |
-| **Registered User** | Submit reports with rich markdown formatting, view personal dashboard, post comments in live ticket feed. |
+| **Registered User** | Submit reports with EasyMDE rich markdown formatting, view personal dashboard, post comments in live ticket feed. |
 | **Staff Member** | View assigned department queue; claim and transition ticket statuses within domain; export queue to CSV. Cannot modify tickets outside assigned domain (`HTTP 403 Forbidden`). |
 | **Administrator** | Provision and revoke staff accounts; manage cross-department ticket reports; remove records. |
 
 ---
 
-## 6. Functional Capabilities & Extra Features
+## 6. Comprehensive Non-PS Features & Quality of Life (QoL) Architecture
 
-### 6.1 Problem Statement Core Deliverables
-1. **Photographic Defect Ingestion**: Multi-format intake with automatic Pillow normalization to standard PNG.
-2. **Tri-Department Routing**: Automated routing into Structural, Functional, and Performance queues.
-3. **Objective Priority Engine**: Implementation of the mathematical queue ordering formula.
-4. **Lifecycle State Management**: State machine supporting `Submitted`, `Assigned`, `In Progress`, and `Resolved`.
+### 6.1 Computer Vision & Explainability
+- **PyTorch Vision Backbone**: EfficientNet-B0 fine-tuned on infrastructure defects (88.8% test accuracy, 0.89 F1).
+- **GradCAM++ Visual Explanations**: Target layer `backbone.features[-1]` computes spatial class activation maps.
+- **Dynamic Defect Quantification**: Mathematical translation of activation heatmaps into physical Severity & Extent percentages.
+- **Live Dataset Benchmark (`/test`)**: Paginated benchmark route comparing deep learning vs baseline heuristic classifiers on holdout test datasets with in-memory inference caching.
 
-### 6.2 Extra Features & Quality of Life (QoL) Additions
-1. **Deep Learning Vision Model (EfficientNet-B0 + GradCAM++)**:
-   - Replaces mock classifiers with real neural network forward passes and GradCAM++ physical localization.
-2. **Interactive Benchmark Center (`/test`)**:
-   - Paginated holdout dataset evaluation page with side-by-side ML vs heuristic comparisons.
-3. **WYSIWYG Markdown Editor & Bleach Sanitizer**:
-   - Rich text formatting toolbar (Bold, Italic, Headers, Lists, Quotes, Tables) with live preview tab.
-4. **Real-Time Ticket Discussion & Audio Feedback**:
-   - In-app comment feed with live polling and acoustic pop sound indicator.
-5. **In-App Notification Center**:
-   - Navigation bar notification bell with unread badge counter for status changes.
-6. **Domain Restriction Enforcement**:
-   - Cross-category modification protection ensuring staff only operate on matching domain tickets.
-7. **Contact Privacy Masking**:
-   - Protection of personal phone numbers and emails against unauthorized viewers.
-8. **Enterprise CSV Export**:
-   - Endpoint for full dataset queue downloads.
-9. **Cloudflare-Inspired Ergonomic UI**:
-   - Eye-friendly neutral palette with amber-orange accents and full dark/light mode toggle.
-10. **100% Offline Self-Contained Assets**:
-    - Locally bundled Tailwind and FontAwesome webfonts.
-11. **Production Dockerization**:
-    - Multi-stage Docker container and Compose deployment.
+### 6.2 Rich Text & UX Ergonomics
+- **EasyMDE WYSIWYG Editor**: Embedded markdown editing suite with side-by-side live preview and full-screen modes.
+- **Server-Side Safe Sanitizer**: Markdown-to-HTML parser with `bleach` tag whitelisting preventing XSS vectors.
+- **Cloudflare-Inspired Theme**: Soft eye-friendly neutral slate with Cloudflare orange accents and dark mode persistence.
+
+### 6.3 Real-Time Interactivity & Alerts
+- **Bidirectional Ticket Discussion**: Threaded comment feed with asynchronous background polling.
+- **Web Audio API Feedback**: Acoustic audio pop chime played upon receiving incoming comments.
+- **Global In-App Notification Center**: Real-time polling with unread badge counter and deep linking.
+
+### 6.4 Governance, Data & Privacy
+- **Cross-Domain Jurisdiction Protection**: Strict backend enforcement (`HTTP 403`) preventing cross-department modifications.
+- **Contact Privacy Redaction**: Automatic phone and email masking for unauthorized public viewers.
+- **Enterprise CSV Export**: Streaming CSV downloads with granular department and severity filters.
+- **100% Offline Static Assets**: Bundled vendor dependencies (Tailwind, FontAwesome, EasyMDE) for air-gapped intranet environments.
+- **Automated Pillow Image Normalization**: Converts multi-format inputs (WEBP/JPG/BMP) to secure, standard PNGs.
+- **Docker Compose Containerization**: Multi-stage Docker deployment with automated database seeding on boot.
