@@ -4,7 +4,208 @@ InfraPulse is an automated infrastructure defect triage and maintenance prioriti
 
 ---
 
-## 1. Problem Statement Requirements (Core Deliverables)
+## 1. System Architecture & Workflows
+
+### 1.1 High-Level Architecture
+
+```mermaid
+graph TD
+    subgraph Client Tier
+        U["👤 User Portal (/user)"]
+        S["👷 Staff Portal (/staff)"]
+        A["🛡️ Admin Portal (/admin)"]
+        B["🧪 Benchmark Center (/test)"]
+    end
+
+    subgraph Application Tier
+        Router["⚡ FastAPI Core Application"]
+        Auth["🔑 Session Auth & RBAC Guard"]
+        MDEngine["📝 EasyMDE & Bleach Sanitizer"]
+        ModelService["🧠 Model Service Singleton"]
+        PriorityEngine["📐 Mathematical Priority Engine"]
+        NotificationService["🔔 In-App Notification Service"]
+    end
+
+    subgraph Computer Vision Tier (Problem Statement Core)
+        Net["🔬 InfraPulseNet (EfficientNet-B0)"]
+        GradCAM["🔥 GradCAM++ Explainability Engine"]
+        Weights[("📦 best_infrapulse_v1.pt (18.9 MB)")]
+    end
+
+    subgraph Data Tier
+        DB[("🗄️ SQLite Database (Async SQLAlchemy)")]
+        Storage[("🖼️ Upload Storage (/uploads)")]
+    end
+
+    U -->|Submit Defect & Details| Router
+    S -->|Claim & Progress Tickets| Router
+    A -->|Staff Provisioning & Governance| Router
+    B -->|Holdout Test Benchmarking| Router
+
+    Router --> Auth
+    Router --> MDEngine
+    Router --> ModelService
+    ModelService --> Net
+    Net --> GradCAM
+    Net --> Weights
+
+    Router --> PriorityEngine
+    PriorityEngine --> DB
+    Router --> NotificationService
+    NotificationService --> DB
+    Router --> Storage
+```
+
+---
+
+### 1.2 End-to-End Defect Ingestion & Dispatch Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Resident as 👤 User / Resident
+    participant App as ⚡ FastAPI Application
+    participant ML as 🧠 PyTorch & GradCAM++ Engine
+    participant Engine as 📐 Priority Scoring Engine
+    participant DB as 🗄️ SQLite Database
+    actor Staff as 👷 Department Crew
+
+    Resident->>App: Submits photo, location & Markdown description
+    App->>App: Sanitizes markdown via Bleach & normalizes photo (PNG)
+    App->>ML: Passes photo to InfraPulseInference
+    ML->>ML: Computes Softmax Probabilities (EfficientNet-B0)
+    ML->>ML: Extracts GradCAM++ Heatmap & Canny Edge Contours
+    ML-->>App: Returns Predicted Defect, Category, Severity (%) & Extent (%)
+    App->>Engine: Computes Priority Score (Formula)
+    Engine-->>App: Priority Score (e.g., 548.20)
+    App->>DB: Stores Ticket in designated Department Queue (Submitted)
+    App-->>Resident: Returns Ticket Confirmation (#INF-XXXXXXXXXX) & Live Queue Rank
+    Staff->>App: Views Department Queue (Sorted by Priority Score Descending)
+    Staff->>App: Claims Ticket (Self-Assign)
+    App->>DB: Updates Status to Assigned & Generates User Notification
+    Staff->>App: Completes Work & Marks Ticket as Resolved
+    App->>DB: Updates Status to Resolved (Removed from Active Queue)
+```
+
+---
+
+### 1.3 Ticket Lifecycle State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Submitted: User submits defect photo & details
+    Submitted --> Assigned: Staff member self-assigns ticket
+    Assigned --> In_Progress: Maintenance work commences
+    In_Progress --> Resolved: Defect repaired & validated
+    Resolved --> [*]: Ticket removed from active priority queue
+```
+
+---
+
+### 1.4 Database Entity-Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    USERS ||--o{ COMPLAINTS : submits
+    USERS ||--o{ NOTIFICATIONS : receives
+    STAFF ||--o{ COMPLAINTS : assigned_to
+    STAFF ||--o{ NOTIFICATIONS : receives
+    COMPLAINTS ||--o{ TICKET_COMMENTS : contains
+
+    USERS {
+        int id PK
+        string name
+        string email UK
+        string phone
+        string password_hash
+        timestamp created_at
+    }
+
+    STAFF {
+        int id PK
+        string name
+        string email UK
+        string domain
+        string password_hash
+        timestamp created_at
+    }
+
+    ADMINS {
+        int id PK
+        string name
+        string email UK
+        string password_hash
+        timestamp created_at
+    }
+
+    COMPLAINTS {
+        bigint id PK
+        int user_id FK
+        string user_name
+        string user_email
+        string user_phone
+        text address
+        text description
+        string photo_path
+        string category
+        string defect_name
+        float severity
+        float extent
+        float priority_score
+        int assigned_staff_id FK
+        string status
+        timestamp created_at
+    }
+
+    TICKET_COMMENTS {
+        int id PK
+        bigint ticket_id FK
+        string sender_name
+        string sender_role
+        text message
+        timestamp created_at
+    }
+
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK
+        int staff_id FK
+        string title
+        string message
+        string link_url
+        boolean is_read
+        timestamp created_at
+    }
+```
+
+---
+
+### 1.5 Defect Category & Queue Routing Hierarchy
+
+```mermaid
+graph LR
+    subgraph Defect Inputs
+        D1["🧱 Concrete Spalling"]
+        D2["💧 Stagnant Water / Leaks"]
+        D3["🔲 Cracked Floor Tiles"]
+        D4["🎨 Peeling Wall Paint"]
+    end
+
+    subgraph Department Queues
+        Q1["🏢 Structural Department Queue<br/><b>Weight: 1.5 | Boost: +2.0</b>"]
+        Q2["🚰 Functional Department Queue<br/><b>Weight: 1.2 | Boost: +1.5</b>"]
+        Q3["🛠️ Performance Department Queue<br/><b>Weight: 1.0 | Boost: +1.2 / +1.0</b>"]
+    end
+
+    D1 -->|Critical Structural Hazard| Q1
+    D2 -->|Service Disruption & Health Hazard| Q2
+    D3 -->|Aesthetic & Floor Integrity| Q3
+    D4 -->|Cosmetic Surface Wear| Q3
+```
+
+---
+
+## 2. Problem Statement Requirements (Core Deliverables)
 
 The platform fully implements the end-to-end defect detection, triage, scoring, and dispatch workflows specified in the Problem Statement:
 
@@ -39,7 +240,7 @@ The platform fully implements the end-to-end defect detection, triage, scoring, 
 
 ---
 
-## 2. Extra Features & Quality of Life (QoL) Enhancements
+## 3. Extra Features & Quality of Life (QoL) Enhancements
 
 Beyond the baseline specifications, InfraPulse incorporates the following 14 production-grade capabilities:
 
@@ -92,55 +293,6 @@ Beyond the baseline specifications, InfraPulse incorporates the following 14 pro
     - Pillow pipeline that validates image headers, strips malicious payloads, and converts incoming WEBP/JPEG/BMP photos into standardized PNG representations.
 14. **Multi-Stage Production Docker & Automated Seeding**:
     - Optimized multi-stage `Dockerfile` and `docker-compose.yml` with automated database seeding on boot.
-
----
-
-## 3. Architecture Diagram
-
-```mermaid
-graph TD
-    subgraph Client Tier
-        U[User Portal]
-        S[Staff Portal]
-        A[Admin Portal]
-        B[Benchmark Center /test]
-    end
-
-    subgraph Application Tier
-        Router[FastAPI Application]
-        Auth[Session Auth & RBAC]
-        MDEngine[Markdown & Bleach Sanitizer]
-        ModelService[PyTorch Model Service]
-        PriorityEngine[Priority Calculation Engine]
-        NotificationService[Notification Engine]
-    end
-
-    subgraph ML & Computer Vision (Problem Statement Core)
-        Net[EfficientNet-B0 Backbone]
-        GradCAM[GradCAM++ Heatmap Analyzer]
-        Weights[(best_infrapulse_v1.pt)]
-    end
-
-    subgraph Storage Tier
-        DB[(SQLite Database)]
-        Uploads[(Static Upload Storage)]
-    end
-
-    U --> Router
-    S --> Router
-    A --> Router
-    B --> Router
-    Router --> Auth
-    Router --> MDEngine
-    Router --> ModelService
-    ModelService --> Net
-    Net --> GradCAM
-    Net --> Weights
-    Router --> PriorityEngine
-    PriorityEngine --> DB
-    Router --> NotificationService
-    NotificationService --> DB
-```
 
 ---
 

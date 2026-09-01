@@ -27,33 +27,33 @@ Campus and institutional facilities receive hundreds of maintenance requests acr
 ```mermaid
 graph TB
     subgraph Client Tier
-        UI_User["User Portal (/user)"]
-        UI_Staff["Staff Portal (/staff)"]
-        UI_Admin["Admin Portal (/admin)"]
-        UI_Bench["Benchmark Center (/test)"]
+        UI_User["👤 User Portal (/user)"]
+        UI_Staff["👷 Staff Portal (/staff)"]
+        UI_Admin["🛡️ Admin Portal (/admin)"]
+        UI_Bench["🧪 Benchmark Center (/test)"]
     end
 
     subgraph Application Tier
-        Auth["Authentication & RBAC Layer"]
-        MDEngine["Markdown & Bleach Sanitizer"]
+        Auth["🔑 Authentication & RBAC Layer"]
+        MDEngine["📝 Markdown & Bleach Sanitizer"]
         UserRouter["User Router"]
         StaffRouter["Staff Router"]
         AdminRouter["Admin Router"]
         BenchRouter["Benchmark Router"]
         APIRouter["REST API Router"]
-        PriorityEngine["Priority Scoring Engine"]
-        ModelService["PyTorch Model Service"]
+        PriorityEngine["📐 Priority Scoring Engine"]
+        ModelService["🧠 PyTorch Model Service"]
     end
 
     subgraph Computer Vision Layer (Problem Statement Core)
-        Net["InfraPulseNet (EfficientNet-B0)"]
-        GradCAM["GradCAM++ Heatmap Analyzer"]
-        Checkpoint[("best_infrapulse_v1.pt")]
+        Net["🔬 InfraPulseNet (EfficientNet-B0)"]
+        GradCAM["🔥 GradCAM++ Heatmap Analyzer"]
+        Checkpoint[("📦 best_infrapulse_v1.pt")]
     end
 
     subgraph Data Tier
-        DB[("SQLite Database")]
-        Storage[("Uploads Storage (/uploads)")]
+        DB[("🗄️ SQLite Database")]
+        Storage[("🖼️ Uploads Storage (/uploads)")]
     end
 
     UI_User --> UserRouter
@@ -73,9 +73,53 @@ graph TB
 
 ---
 
+### 2.2 End-to-End Defect Ingestion & Dispatch Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Resident as 👤 User / Resident
+    participant App as ⚡ FastAPI Application
+    participant ML as 🧠 PyTorch & GradCAM++ Engine
+    participant Engine as 📐 Priority Scoring Engine
+    participant DB as 🗄️ SQLite Database
+    actor Staff as 👷 Department Crew
+
+    Resident->>App: Submits photo, location & Markdown description
+    App->>App: Sanitizes markdown via Bleach & normalizes photo (PNG)
+    App->>ML: Passes photo to InfraPulseInference
+    ML->>ML: Computes Softmax Probabilities (EfficientNet-B0)
+    ML->>ML: Extracts GradCAM++ Heatmap & Canny Edge Contours
+    ML-->>App: Returns Predicted Defect, Category, Severity (%) & Extent (%)
+    App->>Engine: Computes Priority Score (Formula)
+    Engine-->>App: Priority Score (e.g., 548.20)
+    App->>DB: Stores Ticket in designated Department Queue (Submitted)
+    App-->>Resident: Returns Ticket Confirmation (#INF-XXXXXXXXXX) & Live Queue Rank
+    Staff->>App: Views Department Queue (Sorted by Priority Score Descending)
+    Staff->>App: Claims Ticket (Self-Assign)
+    App->>DB: Updates Status to Assigned & Generates User Notification
+    Staff->>App: Completes Work & Marks Ticket as Resolved
+    App->>DB: Updates Status to Resolved (Removed from Active Queue)
+```
+
+---
+
+### 2.3 Ticket Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Submitted: User submits defect photo & details
+    Submitted --> Assigned: Staff member self-assigns ticket
+    Assigned --> In_Progress: Maintenance work commences
+    In_Progress --> Resolved: Defect repaired & validated
+    Resolved --> [*]: Ticket removed from active priority queue
+```
+
+---
+
 ## 3. Low-Level Design (LLD)
 
-### 3.1 Data Schema
+### 3.1 Database Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
@@ -99,6 +143,14 @@ erDiagram
         string name
         string email UK
         string domain
+        string password_hash
+        datetime created_at
+    }
+
+    ADMINS {
+        int id PK
+        string name
+        string email UK
         string password_hash
         datetime created_at
     }
@@ -141,6 +193,31 @@ erDiagram
         boolean is_read
         datetime created_at
     }
+```
+
+---
+
+### 3.2 Defect Routing & Category Matrix
+
+```mermaid
+graph LR
+    subgraph Defect Inputs
+        D1["🧱 Concrete Spalling"]
+        D2["💧 Stagnant Water / Leaks"]
+        D3["🔲 Cracked Floor Tiles"]
+        D4["🎨 Peeling Wall Paint"]
+    end
+
+    subgraph Department Queues
+        Q1["🏢 Structural Department Queue<br/><b>Weight: 1.5 | Boost: +2.0</b>"]
+        Q2["🚰 Functional Department Queue<br/><b>Weight: 1.2 | Boost: +1.5</b>"]
+        Q3["🛠️ Performance Department Queue<br/><b>Weight: 1.0 | Boost: +1.2 / +1.0</b>"]
+    end
+
+    D1 -->|Critical Structural Hazard| Q1
+    D2 -->|Service Disruption & Health Hazard| Q2
+    D3 -->|Aesthetic & Floor Integrity| Q3
+    D4 -->|Cosmetic Surface Wear| Q3
 ```
 
 ---

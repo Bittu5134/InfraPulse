@@ -11,7 +11,7 @@
 
 InfraPulse is an automated web platform designed for facility maintenance defect reporting, objective priority queue ranking, domain-based squad dispatch, and full lifecycle tracking.
 
-### Core Problem Statement Deliverables:
+### 1.1 Core Problem Statement Deliverables:
 1. **Deep Learning Vision Model (`InfraPulseNet`)**:
    - PyTorch EfficientNet-B0 architecture fine-tuned on infrastructure defect datasets.
    - Evaluated on holdout test datasets achieving **88.8% accuracy** and **0.89 weighted F1-score**.
@@ -28,6 +28,40 @@ InfraPulse is an automated web platform designed for facility maintenance defect
    - Step-by-step state transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`) with automatic removal of resolved tickets from active queues.
 6. **Role-Based Portals**:
    - Dedicated interfaces for Users, Department Staff, and System Administrators.
+
+---
+
+### 1.2 System Workflows & Lifecycle Diagrams
+
+```mermaid
+stateDiagram-v2
+    [*] --> Submitted: User submits defect photo & details
+    Submitted --> Assigned: Staff member self-assigns ticket
+    Assigned --> In_Progress: Maintenance work commences
+    In_Progress --> Resolved: Defect repaired & validated
+    Resolved --> [*]: Ticket removed from active priority queue
+```
+
+```mermaid
+graph LR
+    subgraph Defect Inputs
+        D1["🧱 Concrete Spalling"]
+        D2["💧 Stagnant Water / Leaks"]
+        D3["🔲 Cracked Floor Tiles"]
+        D4["🎨 Peeling Wall Paint"]
+    end
+
+    subgraph Department Queues
+        Q1["🏢 Structural Department Queue<br/><b>Weight: 1.5 | Boost: +2.0</b>"]
+        Q2["🚰 Functional Department Queue<br/><b>Weight: 1.2 | Boost: +1.5</b>"]
+        Q3["🛠️ Performance Department Queue<br/><b>Weight: 1.0 | Boost: +1.2 / +1.0</b>"]
+    end
+
+    D1 -->|Critical Structural Hazard| Q1
+    D2 -->|Service Disruption & Health Hazard| Q2
+    D3 -->|Aesthetic & Floor Integrity| Q3
+    D4 -->|Cosmetic Surface Wear| Q3
+```
 
 ---
 
@@ -71,7 +105,85 @@ Stagnant Water (5)           0               0             0            5
 
 ---
 
-## 4. Verification and Quality Assurance
+## 4. Database Architecture
+
+```mermaid
+erDiagram
+    USERS ||--o{ COMPLAINTS : submits
+    USERS ||--o{ NOTIFICATIONS : receives
+    STAFF ||--o{ COMPLAINTS : assigned_to
+    STAFF ||--o{ NOTIFICATIONS : receives
+    COMPLAINTS ||--o{ TICKET_COMMENTS : contains
+
+    USERS {
+        int id PK
+        string name
+        string email UK
+        string phone
+        string password_hash
+        timestamp created_at
+    }
+
+    STAFF {
+        int id PK
+        string name
+        string email UK
+        string domain
+        string password_hash
+        timestamp created_at
+    }
+
+    ADMINS {
+        int id PK
+        string name
+        string email UK
+        string password_hash
+        timestamp created_at
+    }
+
+    COMPLAINTS {
+        bigint id PK
+        int user_id FK
+        string user_name
+        string user_email
+        string user_phone
+        text address
+        text description
+        string photo_path
+        string category
+        string defect_name
+        float severity
+        float extent
+        float priority_score
+        int assigned_staff_id FK
+        string status
+        timestamp created_at
+    }
+
+    TICKET_COMMENTS {
+        int id PK
+        bigint ticket_id FK
+        string sender_name
+        string sender_role
+        text message
+        timestamp created_at
+    }
+
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK
+        int staff_id FK
+        string title
+        string message
+        string link_url
+        boolean is_read
+        timestamp created_at
+    }
+```
+
+---
+
+## 5. Verification and Quality Assurance
 
 The system includes automated end-to-end unit and integration tests covering:
 1. Priority mathematical scoring hierarchy compliance.
