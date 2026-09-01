@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Master Ticket Control Panel - Staff Portal{% endblock %}
+{% block title %}Maintenance Queue - Staff Portal{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Staff Header -->
+    <!-- Staff Header Card -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-3xl">
                 <i class="fa-solid fa-clipboard-check"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-extrabold">Master Staff Control Panel</h2>
+                <h2 class="text-3xl font-extrabold">Staff Maintenance Portal</h2>
                 <p class="text-xs text-base-content/70">
                     Logged in as <strong>{{ current_staff.name }}</strong> ({{ current_staff.domain.value }} Department)
                 </p>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <!-- Active Category Count Widgets -->
+            <!-- Active Category Count Badges -->
             <div class="flex flex-wrap gap-2 text-xs">
                 <div class="badge badge-error gap-1 p-3">
                     <i class="fa-solid fa-building"></i> Structural: <strong>{{ struct_count }}</strong>
@@ -32,19 +32,19 @@
                 </div>
             </div>
 
-            <a href="/staff/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Logout Staff">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout Staff
+            <a href="/staff/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Sign Out">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
             </a>
         </div>
     </div>
 
-    <!-- Advanced Ticket Filter & Controls Panel -->
+    <!-- Filter & Search Bar -->
     <div class="card bg-base-100 shadow-sm border border-base-300 p-5">
         <form action="/staff/queue" method="GET" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <!-- Status Filter -->
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Status Filter</span></label>
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Status</span></label>
                     <select name="status" class="select select-bordered select-sm w-full">
                         {% for opt in status_options %}
                             <option value="{{ opt }}" {% if current_status == opt %}selected{% endif %}>
@@ -56,7 +56,7 @@
 
                 <!-- Category Filter -->
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Category Type</span></label>
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Category</span></label>
                     <select name="category" class="select select-bordered select-sm w-full">
                         {% for opt in category_options %}
                             <option value="{{ opt }}" {% if current_category == opt %}selected{% endif %}>
@@ -68,9 +68,9 @@
 
                 <!-- Sorting Option -->
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Sorting Order</span></label>
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Sort By</span></label>
                     <select name="sort_by" class="select select-bordered select-sm w-full">
-                        <option value="priority_desc" {% if sort_by == 'priority_desc' %}selected{% endif %}>Priority Score (High → Low)</option>
+                        <option value="priority_desc" {% if sort_by == 'priority_desc' %}selected{% endif %}>Priority (High to Low)</option>
                         <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (Newest First)</option>
                         <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (Oldest First)</option>
                         <option value="severity_desc" {% if sort_by == 'severity_desc' %}selected{% endif %}>Severity (Highest First)</option>
@@ -79,11 +79,11 @@
 
                 <!-- Minimum Severity Filter -->
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text text-xs font-semibold">Min Severity Score</span></label>
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Min Severity</span></label>
                     <select name="min_severity" class="select select-bordered select-sm w-full">
                         <option value="0" {% if min_severity == 0 %}selected{% endif %}>All Severities (1-10)</option>
                         <option value="5" {% if min_severity == 5 %}selected{% endif %}>Medium+ (≥ 5.0)</option>
-                        <option value="7.5" {% if min_severity == 7.5 %}selected{% endif %}>High Urgency (≥ 7.5)</option>
+                        <option value="7.5" {% if min_severity == 7.5 %}selected{% endif %}>Urgent (≥ 7.5)</option>
                     </select>
                 </div>
 
@@ -91,26 +91,26 @@
                 <div class="form-control justify-end pb-1">
                     <label class="label cursor-pointer justify-start gap-2">
                         <input type="checkbox" name="include_resolved" value="true" class="checkbox checkbox-primary checkbox-sm" {% if include_resolved %}checked{% endif %} />
-                        <span class="label-text text-xs font-semibold">Show Resolved Tickets</span>
+                        <span class="label-text text-xs font-semibold">Show Resolved</span>
                     </label>
                 </div>
             </div>
 
-            <!-- Search Bar, Export CSV & Apply Button -->
+            <!-- Search Bar, Export CSV & Actions -->
             <div class="flex flex-wrap gap-2 items-center pt-2 border-t border-base-200">
-                <div class="flex-1 min-w-[200px]">
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID (e.g. 8492019482), User Name, Email, or Address..." class="input input-bordered input-sm w-full" />
+                <div class="flex-1 min-w-48">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Ticket ID, user, email, or address..." class="input input-bordered input-sm w-full" />
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary gap-1">
-                    <i class="fa-solid fa-filter"></i> Apply Filters
+                    <i class="fa-solid fa-filter"></i> Filter
                 </button>
                 <a href="/staff/queue" class="btn btn-sm btn-ghost">Reset</a>
                 
                 <div class="divider divider-horizontal my-0"></div>
 
-                <!-- CSV Export Button (Exports ALL Categories) -->
-                <a href="/staff/export/csv?include_resolved=true" class="btn btn-sm btn-outline btn-accent gap-1" title="Export All Priority Queue Categories to CSV">
-                    <i class="fa-solid fa-file-csv"></i> Export All Categories CSV
+                <!-- Export CSV Button -->
+                <a href="/staff/export/csv?include_resolved=true" class="btn btn-sm btn-outline btn-accent gap-1" title="Export tickets to CSV file">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
                 </a>
             </div>
         </form>

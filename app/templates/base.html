@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="night">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Infrastructure Maintenance Portal{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Defect Maintenance Portal{% endblock %}</title>
     
-    <!-- DaisyUI & Tailwind CSS via CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Local DaisyUI & Tailwind CSS (No CDN / Fully Self-Hosted) -->
+    <link href="/static/vendor/daisyui/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="/static/vendor/tailwind/tailwind.js"></script>
     
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local FontAwesome Icons -->
+    <link rel="stylesheet" href="/static/vendor/fontawesome/all.min.css">
     
     <script>
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const savedTheme = localStorage.getItem('theme') || 'night';
             document.documentElement.setAttribute('data-theme', savedTheme);
         }
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            const newTheme = currentTheme === 'night' ? 'corporate' : 'night';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         }
@@ -30,9 +30,9 @@
 <body class="min-h-screen bg-base-200 text-base-content flex flex-col font-sans">
 
     <!-- Header Navbar -->
-    <div class="navbar bg-base-100 shadow-sm border-b border-base-300 px-4 md:px-8">
+    <header class="navbar bg-base-100 shadow-sm border-b border-base-300 px-4 md:px-8 sticky top-0 z-30">
         <div class="flex-1">
-            <a href="/" class="btn btn-ghost text-xl font-extrabold flex items-center gap-2">
+            <a href="/" class="btn btn-ghost text-xl font-bold flex items-center gap-2">
                 <i class="fa-solid fa-shield-halved text-primary text-2xl"></i>
                 <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold text-2xl tracking-tight">InfraPulse</span>
             </a>
@@ -41,18 +41,18 @@
         <div class="flex-none flex items-center gap-2 sm:gap-3">
             <!-- Theme Toggle Button -->
             <button onclick="toggleTheme()" class="btn btn-ghost btn-circle" title="Toggle Theme">
-                <i class="fa-solid fa-moon text-lg hidden [html[data-theme=light]_&]:block"></i>
-                <i class="fa-solid fa-sun text-lg hidden [html[data-theme=dark]_&]:block text-warning"></i>
+                <i class="fa-solid fa-moon text-lg hidden [html[data-theme=corporate]_&]:block"></i>
+                <i class="fa-solid fa-sun text-lg hidden [html[data-theme=night]_&]:block text-warning"></i>
             </button>
 
-            <!-- Notification Center (For Logged In Users / Staff / Admins) -->
+            <!-- Notification Center -->
             {% if current_user or current_staff or current_admin %}
             <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle relative" title="Notification Center">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle relative" title="Notifications">
                     <i class="fa-solid fa-bell text-lg"></i>
                     <span id="notif-count-badge" class="badge badge-sm badge-error absolute -top-1 -right-1 hidden">0</span>
                 </div>
-                <div tabindex="0" class="dropdown-content z-[30] card card-compact w-80 p-2 shadow-2xl bg-base-100 border border-base-300">
+                <div tabindex="0" class="dropdown-content z-40 card card-compact w-80 p-2 shadow-2xl bg-base-100 border border-base-300">
                     <div class="card-body">
                         <div class="flex justify-between items-center border-b border-base-200 pb-2">
                             <h3 class="font-bold text-sm flex items-center gap-1">
@@ -61,7 +61,7 @@
                             <button onclick="markAllNotificationsRead()" class="btn btn-xs btn-ghost text-xs">Mark all read</button>
                         </div>
                         <div id="notif-list-container" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
-                            <div class="text-center py-4 text-base-content/50 italic">No new notifications</div>
+                            <div class="text-center py-4 text-base-content/50 italic">No notifications</div>
                         </div>
                     </div>
                 </div>
@@ -79,12 +79,12 @@
             {% if current_user %}
                 <a href="/user/dashboard" class="btn btn-outline btn-primary btn-sm sm:btn-md gap-2">
                     <i class="fa-solid fa-ticket"></i>
-                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="hidden sm:inline">My Tickets</span>
                 </a>
             {% else %}
                 <a href="/user/login" class="btn btn-ghost btn-sm sm:btn-md gap-1">
                     <i class="fa-solid fa-user"></i>
-                    <span class="hidden sm:inline">User Login</span>
+                    <span class="hidden sm:inline">Sign In</span>
                 </a>
             {% endif %}
 
@@ -94,7 +94,7 @@
             {% if current_staff %}
                 <a href="/staff/queue" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
                     <i class="fa-solid fa-user-shield"></i>
-                    <span>Staff Dashboard</span>
+                    <span>Staff Portal</span>
                 </a>
             {% else %}
                 <a href="/staff/login" class="btn btn-secondary btn-outline btn-sm sm:btn-md gap-2">
@@ -107,7 +107,7 @@
             {% if current_admin %}
                 <a href="/admin" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
-                    <span>Admin Dashboard</span>
+                    <span>Admin Portal</span>
                 </a>
             {% else %}
                 <a href="/admin/login" class="btn btn-neutral btn-outline btn-sm sm:btn-md gap-2">
@@ -116,7 +116,7 @@
                 </a>
             {% endif %}
         </div>
-    </div>
+    </header>
 
     <!-- Main Content Area -->
     <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
@@ -127,9 +127,9 @@
     <footer class="footer footer-center p-6 bg-base-100 text-base-content border-t border-base-300 mt-auto">
         <aside class="space-y-1">
             <div class="flex items-center justify-center gap-2 font-bold text-base">
-                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Defect Maintenance Tool
+                <i class="fa-solid fa-shield-halved text-primary"></i> InfraPulse Maintenance System
             </div>
-            <p class="text-xs text-base-content/50">© 2026 InfraPulse</p>
+            <p class="text-xs text-base-content/50">Infrastructure Defect & Priority Maintenance</p>
         </aside>
     </footer>
 
@@ -160,7 +160,7 @@
                     <a href="${n.link_url || '#'}" class="block p-2 rounded-lg ${n.is_read ? 'bg-base-200/50' : 'bg-primary/10 border border-primary/20'} hover:bg-base-200 transition space-y-1">
                         <div class="font-bold text-xs ${n.is_read ? 'text-base-content/80' : 'text-primary'}">${n.title}</div>
                         <div class="text-base-content/70">${n.message}</div>
-                        <div class="text-[10px] text-base-content/50 text-right">${n.created_at}</div>
+                        <div class="text-xs text-base-content/50 text-right">${n.created_at}</div>
                     </a>
                 `).join('');
             } catch(e) {}

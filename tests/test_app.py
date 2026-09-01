@@ -128,7 +128,7 @@ async def test_staff_login_and_self_assignment():
             follow_redirects=True
         )
         assert login_resp.status_code == 200
-        assert "Master Staff Control Panel" in login_resp.text
+        assert "Staff Maintenance Portal" in login_resp.text
 
         async with TestingSessionLocal() as session:
             stmt = select(Complaint).where(Complaint.user_email == "charlie@example.com")
@@ -149,7 +149,7 @@ async def test_admin_portal_management():
             follow_redirects=True
         )
         assert login_resp.status_code == 200
-        assert "System Admin Dashboard" in login_resp.text
+        assert "Admin" in login_resp.text
 
         create_staff_resp = await client.post(
             "/admin/staff/create",

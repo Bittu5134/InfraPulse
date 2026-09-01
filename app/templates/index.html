@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}InfraPulse - Defect Maintenance System{% endblock %}
+{% block title %}InfraPulse - Infrastructure Defect & Maintenance System{% endblock %}
 
 {% block content %}
 <div class="space-y-12">
@@ -9,10 +9,10 @@
         <div class="hero-content text-center max-w-3xl">
             <div class="space-y-6">
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                    Smart Defect Detection & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Maintenance</span>
+                    Infrastructure Defect Reporting & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority Maintenance</span>
                 </h1>
                 <p class="text-base text-base-content/80 max-w-xl mx-auto leading-relaxed">
-                    Submit photos of infrastructure defects (spalling, stagnant water, cracked tiles, paint peeling). The priority engine automatically classifies severity and ranks tickets for maintenance teams.
+                    Report infrastructure defects such as concrete spalling, stagnant water, cracked tiles, or paint peeling. Our priority engine automatically categorizes severity and organizes tickets for maintenance squads.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2 max-w-md mx-auto">
                     <a href="/user/submit" class="btn btn-primary btn-lg shadow-md gap-2 flex-1">
@@ -23,11 +23,11 @@
         </div>
     </div>
 
-    <!-- 3 Step Guide -->
+    <!-- 3 Step Workflow -->
     <div class="space-y-6">
         <div class="text-center space-y-1">
-            <h2 class="text-2xl font-bold tracking-tight">System Workflow</h2>
-            <p class="text-xs text-base-content/70">Automated classification & priority queueing process</p>
+            <h2 class="text-2xl font-bold tracking-tight">How It Works</h2>
+            <p class="text-xs text-base-content/70">Three-step automated defect resolution workflow</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -48,9 +48,9 @@
                     <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto text-2xl font-extrabold">
                         2
                     </div>
-                    <h3 class="font-bold text-lg">AI Priority Queueing</h3>
+                    <h3 class="font-bold text-lg">Priority Queue</h3>
                     <p class="text-xs text-base-content/70">
-                        Defects are automatically categorized into Structural, Functional, or Performance queues and ranked by priority score.
+                        Defects are automatically classified into Structural, Functional, or Performance queues and ranked by risk.
                     </p>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                     </div>
                     <h3 class="font-bold text-lg">Staff Resolution</h3>
                     <p class="text-xs text-base-content/70">
-                        Maintenance staff self-assign tickets, update status, and resolve defects.
+                        Maintenance staff claim tickets, update progress, and resolve the defect.
                     </p>
                 </div>
             </div>

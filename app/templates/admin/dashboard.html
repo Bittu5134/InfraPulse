@@ -1,30 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - InfraPulse{% endblock %}
+{% block title %}Admin Portal - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Admin Header -->
+    <!-- Admin Header Card -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-2xl bg-neutral/10 text-neutral flex items-center justify-center text-3xl">
                 <i class="fa-solid fa-user-gear"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-extrabold">System Admin Dashboard</h2>
+                <h2 class="text-3xl font-extrabold">Admin Portal</h2>
                 <p class="text-xs text-base-content/70">
                     Logged in as <strong>{{ current_admin.name }}</strong> ({{ current_admin.email }})
                 </p>
             </div>
         </div>
         <div>
-            <a href="/admin/logout" class="btn btn-outline btn-error btn-sm gap-1">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout Admin
+            <a href="/admin/logout" class="btn btn-outline btn-error btn-sm gap-1" title="Sign Out">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
             </a>
         </div>
     </div>
 
-    <!-- Overview Metrics Cards -->
+    <!-- Overview Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
             <div class="stat-figure text-primary"><i class="fa-solid fa-ticket text-3xl"></i></div>
@@ -34,7 +34,7 @@
 
         <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
             <div class="stat-figure text-warning"><i class="fa-solid fa-clock text-3xl"></i></div>
-            <div class="stat-title text-xs">Active Pending</div>
+            <div class="stat-title text-xs">Active Tickets</div>
             <div class="stat-value font-mono text-warning">{{ metrics.pending }}</div>
         </div>
 
@@ -46,7 +46,7 @@
 
         <div class="stat bg-base-100 shadow-md rounded-2xl border border-base-300">
             <div class="stat-figure text-info"><i class="fa-solid fa-users text-3xl"></i></div>
-            <div class="stat-title text-xs">Registered Users</div>
+            <div class="stat-title text-xs">Users</div>
             <div class="stat-value font-mono text-info">{{ metrics.users }}</div>
         </div>
     </div>
@@ -57,22 +57,22 @@
         <div class="card bg-base-100 shadow-md border border-base-300 h-fit">
             <div class="card-body p-6">
                 <h3 class="card-title text-xl font-bold mb-2">
-                    <i class="fa-solid fa-user-plus text-primary"></i> Add New Staff Member
+                    <i class="fa-solid fa-user-plus text-primary"></i> Add Staff Member
                 </h3>
                 <form action="/admin/staff/create" method="POST" class="space-y-4">
                     <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Staff Name *</span></label>
-                        <input type="text" name="name" placeholder="John Doe" class="input input-bordered w-full" required />
+                        <label class="label py-1"><span class="label-text text-xs font-semibold">Staff Name *</span></label>
+                        <input type="text" name="name" placeholder="e.g. John Doe" class="input input-bordered input-sm w-full" required />
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Email *</span></label>
-                        <input type="email" name="email" placeholder="john@infrapulse.org" class="input input-bordered w-full" required />
+                        <label class="label py-1"><span class="label-text text-xs font-semibold">Email *</span></label>
+                        <input type="email" name="email" placeholder="e.g. john@infrapulse.org" class="input input-bordered input-sm w-full" required />
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Domain Department *</span></label>
-                        <select name="domain" class="select select-bordered w-full" required>
+                        <label class="label py-1"><span class="label-text text-xs font-semibold">Domain Category *</span></label>
+                        <select name="domain" class="select select-bordered select-sm w-full" required>
                             {% for cat in categories %}
                                 <option value="{{ cat }}">{{ cat }} Category</option>
                             {% endfor %}
@@ -80,12 +80,12 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span class="label-text font-semibold">Password *</span></label>
-                        <input type="password" name="password" placeholder="••••••••" class="input input-bordered w-full" required />
+                        <label class="label py-1"><span class="label-text text-xs font-semibold">Password *</span></label>
+                        <input type="password" name="password" placeholder="••••••••" class="input input-bordered input-sm w-full" required />
                     </div>
 
                     <div class="card-actions justify-end mt-4">
-                        <button type="submit" class="btn btn-primary w-full gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-full gap-2">
                             <i class="fa-solid fa-plus-circle"></i> Create Staff Account
                         </button>
                     </div>
@@ -97,7 +97,7 @@
         <div class="lg:col-span-2 card bg-base-100 shadow-md border border-base-300">
             <div class="card-body p-6">
                 <h3 class="card-title text-xl font-bold mb-4">
-                    <i class="fa-solid fa-user-shield text-secondary"></i> Active Staff Members
+                    <i class="fa-solid fa-user-shield text-secondary"></i> Active Staff
                 </h3>
                 <div class="overflow-x-auto">
                     <table class="table table-zebra w-full text-xs">
@@ -105,7 +105,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Domain Department</th>
+                                <th>Domain</th>
                                 <th class="text-right">Action</th>
                             </tr>
                         </thead>
@@ -143,7 +143,7 @@
     <div class="card bg-base-100 shadow-md border border-base-300">
         <div class="card-body p-6">
             <h3 class="card-title text-xl font-bold mb-4">
-                <i class="fa-solid fa-list-check text-neutral"></i> All Submitted Maintenance Tickets
+                <i class="fa-solid fa-list-check text-neutral"></i> Maintenance Tickets Oversight
             </h3>
             <div class="overflow-x-auto">
                 <table class="table table-zebra w-full text-xs">
@@ -151,21 +151,23 @@
                         <tr>
                             <th>Ticket ID</th>
                             <th>Defect & Category</th>
-                            <th>Requester Email</th>
+                            <th>Requester</th>
                             <th>Location</th>
                             <th>Priority</th>
                             <th>Assigned Staff</th>
                             <th>Status</th>
-                            <th class="text-right">Admin Action</th>
+                            <th class="text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in tickets_list %}
                         <tr>
-                            <td class="font-mono font-bold">#INF-{{ t.id }}</td>
+                            <td class="font-mono font-bold">
+                                <a href="/ticket/{{ t.id }}" class="text-primary hover:underline">#{{ t.id }}</a>
+                            </td>
                             <td>
                                 <div class="font-bold">{{ t.defect_name or "Pending" }}</div>
-                                <div class="text-[10px] opacity-70">{{ t.category.value if t.category else "Unclassified" }}</div>
+                                <div class="text-xs opacity-70">{{ t.category.value if t.category else "Unclassified" }}</div>
                             </td>
                             <td>{{ t.user_email }}</td>
                             <td>{{ t.address }}</td>

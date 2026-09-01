@@ -2,8 +2,8 @@
     {% if not complaints %}
     <div class="text-center py-12 bg-base-100 rounded-2xl border border-dashed border-base-300">
         <i class="fa-solid fa-clipboard-check text-5xl text-success/40 mb-3"></i>
-        <h3 class="text-xl font-bold">Queue is Clear!</h3>
-        <p class="text-sm text-base-content/60">No pending tickets matching criteria.</p>
+        <h3 class="text-xl font-bold">Queue is Clear</h3>
+        <p class="text-sm text-base-content/60">No pending tickets matching selected filters.</p>
     </div>
     {% else %}
     <table class="table table-zebra w-full bg-base-100 shadow-md rounded-2xl overflow-hidden border border-base-300">
@@ -12,18 +12,18 @@
                 <th class="w-16 text-center">Rank</th>
                 <th>Ticket & Photo</th>
                 <th>Category & Defect</th>
-                <th>Requester Contact</th>
+                <th>Requester</th>
                 <th class="text-center">Priority</th>
                 <th>Assigned Staff</th>
                 <th>Status</th>
-                <th class="text-right">Quick Actions</th>
+                <th class="text-right">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for item in complaints %}
             <tr class="hover">
                 <td class="font-mono font-bold text-center">
-                    <span class="badge badge-lg {% if loop.index == 1 %}badge-primary{% elif loop.index <= 3 %}badge-secondary{% else %}badge-neutral{% endif %} font-mono">
+                    <span class="badge badge-sm {% if loop.index == 1 %}badge-primary{% elif loop.index <= 3 %}badge-secondary{% else %}badge-neutral{% endif %} font-mono">
                         #{{ loop.index }}
                     </span>
                 </td>
@@ -44,18 +44,18 @@
                 <td>
                     <div class="flex items-center gap-2 mb-1">
                         {% if item.category == "Structural" %}
-                            <span class="badge badge-error badge-sm font-bold"><i class="fa-solid fa-building text-[10px] mr-1"></i> Structural</span>
+                            <span class="badge badge-error badge-sm font-bold"><i class="fa-solid fa-building text-xs mr-1"></i> Structural</span>
                         {% elif item.category == "Functional" %}
-                            <span class="badge badge-warning badge-sm font-bold"><i class="fa-solid fa-droplet text-[10px] mr-1"></i> Functional</span>
+                            <span class="badge badge-warning badge-sm font-bold"><i class="fa-solid fa-droplet text-xs mr-1"></i> Functional</span>
                         {% elif item.category == "Performance" %}
-                            <span class="badge badge-info badge-sm font-bold"><i class="fa-solid fa-paint-roller text-[10px] mr-1"></i> Performance</span>
+                            <span class="badge badge-info badge-sm font-bold"><i class="fa-solid fa-paint-roller text-xs mr-1"></i> Performance</span>
                         {% else %}
                             <span class="badge badge-ghost badge-sm">Unclassified</span>
                         {% endif %}
                         <a href="/ticket/{{ item.id }}" class="font-bold text-sm hover:text-primary">{{ item.defect_name or "Pending Analysis" }}</a>
                     </div>
                     <div class="text-xs text-base-content/70 italic max-w-xs truncate">"{{ item.description }}"</div>
-                    <div class="text-[11px] text-base-content/50 mt-1">
+                    <div class="text-xs text-base-content/50 mt-1">
                         Severity: {{ item.severity }}/10 | Extent: {{ item.extent }}%
                     </div>
                 </td>
@@ -95,7 +95,7 @@
                 <td class="text-right">
                     {% if current_staff %}
                         {% if not item.category or item.category == current_staff.domain %}
-                            <!-- 3 Quick Action Icon Buttons for Matching Staff Domain -->
+                            <!-- Action Buttons for Matching Staff Domain -->
                             <div class="flex items-center justify-end gap-1">
                                 {% if item.assigned_staff_id != current_staff.id %}
                                     <form action="/staff/assign/{{ item.id }}" method="POST" class="inline">
@@ -121,7 +121,7 @@
                             </div>
                         {% else %}
                             <span class="badge badge-ghost text-xs opacity-60" title="Domain Restricted: Managed by {{ item.category.value }} Squad">
-                                <i class="fa-solid fa-lock text-[10px] mr-1"></i> {{ item.category.value }} Only
+                                <i class="fa-solid fa-lock text-xs mr-1"></i> {{ item.category.value }} Only
                             </span>
                         {% endif %}
                     {% endif %}
