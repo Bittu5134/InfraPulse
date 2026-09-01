@@ -89,21 +89,33 @@ def load_custom_model(model_key: str):
         print(f"[ModelService] Could not load model {model_key}: {e}")
         return None
 
+def tokenize_text_to_tensor(text: str, vocab_size: int = 500, device: torch.device = torch.device("cpu")):
+    """Converts user markdown / ticket description text into token embeddings."""
+    if not text or not text.strip():
+        return None
+    words = [w.lower() for w in text.split() if len(w) > 2]
+    if not words:
+        return None
+    token_ids = [abs(hash(w)) % vocab_size for w in words]
+    return torch.tensor(token_ids, dtype=torch.long, device=device)
+
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
-    Runs primary ML inference on a given image with in-memory caching.
+    Runs primary ML inference using the default Multi-Modal Bi-Encoder model
+    (combining photographic features with resident text description), with fallback
+    hierarchy to ConvNeXt-Tiny and EfficientNet-B0.
     """
     cache_key = f"{image_path}_{age_hours}_{description}"
     if cache_key in _prediction_cache:
         return _prediction_cache[cache_key]
 
-    # Try ConvNeXt or Baseline
-    model_obj = load_custom_model("convnext_tiny") or load_custom_model("baseline")
+    # Primary Default: Multi-Modal Bi-Encoder; Secondary: ConvNeXt-Tiny; Tertiary: Baseline EfficientNet
+    model_obj = load_custom_model("multimodal_fusion") or load_custom_model("convnext_tiny") or load_custom_model("baseline")
 
     if model_obj is not None:
         try:
             from priority import analyze_heatmap, compute_priority
-            from model import CATEGORY_MAP
+            from model import CATEGORY_MAP, MultiModalInfraPulse
 
             pil = Image.open(image_path).convert("RGB")
             original_rgb = np.array(pil)
@@ -114,7 +126,11 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
             x = tfm(pil).unsqueeze(0).to(device)
 
             with torch.inference_mode():
-                logits = model(x)
+                if isinstance(model, MultiModalInfraPulse):
+                    tokens = tokenize_text_to_tensor(description, vocab_size=500, device=device)
+                    logits = model(x, text_tokens=tokens)
+                else:
+                    logits = model(x)
                 probs = torch.softmax(logits, dim=1)[0]
                 pred_idx = int(torch.argmax(probs).item())
                 confidence = float(probs[pred_idx].item())
@@ -146,7 +162,7 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
                 "severity": severity,
                 "extent": extent,
                 "priority_score": priority_score,
-                "model_mode": "PyTorch ML",
+                "model_mode": "Multi-Modal Bi-Encoder (Default)",
                 "fallback_used": False,
             }
             _prediction_cache[cache_key] = formatted

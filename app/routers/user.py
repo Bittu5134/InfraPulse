@@ -162,9 +162,9 @@ async def handle_complaint_submit(
             context={"current_user": user, "error": f"Invalid image file. Could not process image: {str(e)}"}
         )
 
-    # Run deep learning vision inference on uploaded defect photo
+    # Run deep learning vision inference on uploaded defect photo with description
     from app.model_service import predict_single_image
-    pred = predict_single_image(str(file_path))
+    pred = predict_single_image(str(file_path), description=description.strip())
     
     defect_name = pred["defect_name"]
     category = pred["category"]
