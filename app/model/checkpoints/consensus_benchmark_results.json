@@ -1,0 +1,32 @@
+{
+  "total_samples": 241,
+  "accuracy": 91.29,
+  "macro_f1": 0.9112,
+  "weighted_f1": 0.9121,
+  "per_category": {
+    "cracked_tiles": {
+      "precision": 89.89,
+      "recall": 96.39,
+      "f1": 0.9302,
+      "samples": 83
+    },
+    "paint_peeling": {
+      "precision": 94.2,
+      "recall": 83.33,
+      "f1": 0.8844,
+      "samples": 78
+    },
+    "spalling": {
+      "precision": 90.91,
+      "recall": 93.33,
+      "f1": 0.9211,
+      "samples": 75
+    },
+    "stagnant_water": {
+      "precision": 83.33,
+      "recall": 100.0,
+      "f1": 0.9091,
+      "samples": 5
+    }
+  }
+}

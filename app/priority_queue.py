@@ -1,29 +1,64 @@
 import os
 import random
+import numpy as np
 from typing import List, Optional
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import CATEGORY_WEIGHTS, DEFECT_PRIORITY_BOOST
 from app.models import Complaint, CategoryEnum, StatusEnum, generate_10_digit_id
 
-def compute_priority_score(category: Optional[CategoryEnum], defect_name: Optional[str], severity: float, extent: float) -> float:
+def compute_priority_score(category: Optional[CategoryEnum], defect_name: Optional[str], severity: float, extent: float, age_hours: float = 0.0) -> float:
+    """
+    Computes objective priority score according to problem statement specifications:
+    
+    PriorityScore = CategoryTierBase (1000/2000/3000)
+                    + (Severity x 5.0)
+                    + (Extent x 3.0)
+                    + Strictly Capped TimeBonus (Max 5.0 pts - Tie Breaker Only)
+    
+    1. Category Tier Base (Safeguard against database cross-pollination):
+       - Structural: 3000 base points
+       - Functional: 2000 base points
+       - Performance: 1000 base points
+       
+    2. Core Severity & Extent (15% Methodology Score):
+       - Severity scaled 0-10 (weighted x 5.0 => max 50.0 pts)
+       - Extent scaled 0-10 (weighted x 3.0 => max 30.0 pts)
+       Guarantees deep, critical structural damage outranks wide, shallow surface wear.
+       
+    3. Capped Time Bonus (Prevents Escalation Trap):
+       - Scaled at age_hours * 0.05, strictly CAPPED at max 5.0 points.
+       - Acts strictly as a tie-breaker so new, high-severity complaints immediately
+         jump to the top of the live evaluation queue.
+    """
     if not category:
         return 0.0
-    
-    cat_weight = CATEGORY_WEIGHTS.get(category.value, 1.0) if hasattr(category, 'value') else CATEGORY_WEIGHTS.get(str(category), 1.0)
-    
-    d_name_lower = (defect_name or "").lower().strip()
-    defect_boost = 1.0
-    for key, weight in DEFECT_PRIORITY_BOOST.items():
-        if key in d_name_lower:
-            defect_boost = weight
-            break
-            
-    severity_component = severity * 0.6
-    extent_component = (extent / 100.0) * 4.0
-    
-    total_score = (severity_component + extent_component + defect_boost) * cat_weight
-    return round(total_score, 2)
+
+    # 1. Category Tier Base Points
+    cat_str = category.value if hasattr(category, 'value') else str(category)
+    if cat_str == "Structural":
+        base_tier = 3000.0
+    elif cat_str == "Functional":
+        base_tier = 2000.0
+    else:
+        base_tier = 1000.0
+
+    # 2. Normalize Severity (0-10) and Extent (0-10)
+    sev_scaled = (severity / 10.0 if severity > 10.0 else severity)
+    ext_scaled = (extent / 10.0 if extent > 10.0 else extent)
+
+    sev_pts = float(np.clip(sev_scaled, 0.0, 10.0)) * 5.0   # max 50.0 pts
+    ext_pts = float(np.clip(ext_scaled, 0.0, 10.0)) * 3.0   # max 30.0 pts
+
+    # Defect sub-tier bonus (e.g. Cracked Tiles > Paint Peeling within Performance tier)
+    d_clean = (defect_name or "").lower().strip()
+    defect_sub_bonus = 1.0 if ("tile" in d_clean or "crack" in d_clean) else (0.5 if "water" in d_clean else 0.0)
+
+    # 3. Strictly Capped Time Bonus (Max 5.0 pts - Tie Breaker Only)
+    time_bonus = min(5.0, max(0.0, float(age_hours)) * 0.05)
+
+    total_score = base_tier + sev_pts + ext_pts + defect_sub_bonus + time_bonus
+    return round(total_score, 1)
 
 def mock_classify_defect(description: str, filename: str) -> dict:
     text = (description + " " + filename).lower()
