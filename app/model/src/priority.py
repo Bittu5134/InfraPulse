@@ -113,31 +113,31 @@ def compute_priority(
     age_hours=0.0
 ):
     """
-    PriorityScore =
-        TypeTier * 1000
-        + Severity * 5
-        + Extent * 3
-        + TimeBonus
+    PriorityScore = CategoryTierBase (1000/2000/3000)
+                    + (Severity x 5.0)
+                    + (Extent x 3.0)
+                    + Strictly Capped TimeBonus (Max 5.0 pts - Tie Breaker Only)
 
-    Severity and Extent expected on [0,100].
-
-    cracked_tiles gets +1000 so it cannot rank below paint_peeling
-    because severity+extent maximum contribution is 800.
+    - Category Tier Base: Structural (3000), Functional (2000), Performance (1000)
+    - Severity (0-10) x 5.0 + Extent (0-10) x 3.0
+    - Time Bonus: max 5.0 points (acts strictly as a tie-breaker so new high-severity tickets outrank old minor tickets).
     """
+    cat_tiers = {
+        "spalling": 3000.0,
+        "stagnant_water": 2000.0,
+        "cracked_tiles": 1000.0,
+        "paint_peeling": 1000.0
+    }
+    d_clean = (defect_class or "").lower().strip().replace(" ", "_")
+    base_tier = cat_tiers.get(d_clean, 1000.0)
 
-    tier = TYPE_TIER.get(defect_class, 0)
+    sev_scaled = (severity / 10.0 if severity > 10.0 else severity)
+    ext_scaled = (extent / 10.0 if extent > 10.0 else extent)
 
-    severity = float(np.clip(severity, 0.0, 100.0))
-    extent = float(np.clip(extent, 0.0, 100.0))
+    sev_pts = float(np.clip(sev_scaled, 0.0, 10.0)) * 5.0   # max 50.0 pts
+    ext_pts = float(np.clip(ext_scaled, 0.0, 10.0)) * 3.0   # max 30.0 pts
 
-    # Slow starvation-prevention term
-    time_bonus = max(0.0, float(age_hours)) * 0.1
+    # Capped Time Bonus: max 5.0 pts
+    time_bonus = min(5.0, max(0.0, float(age_hours)) * 0.05)
 
-    score = (
-        tier * 1000.0
-        + severity * 5.0
-        + extent * 3.0
-        + time_bonus
-    )
-
-    return float(score)
+    return float(round(base_tier + sev_pts + ext_pts + time_bonus, 1))
