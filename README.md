@@ -2,7 +2,7 @@
 
 InfraPulse is an automated infrastructure defect triage and maintenance prioritization system. It processes photographic defect evidence through deep learning vision models, categorizes reports into department queues (Structural, Functional, Performance), computes dynamic priority scores using GradCAM++ localization metrics, and manages ticket status progression across user, staff, and admin portals.
 
-The default production classifier is a **Multi-Modal Bi-Encoder Network** (combining visual representations with resident text descriptions via cross-attention gating), supported by an active multi-model benchmark suite (**ConvNeXt-Tiny**, **Swin Transformer**, **EfficientNet-B0**, and **INT8 Quantized Dynamic Engine**).
+The default production classifier is **`ConvNeXtInfraPulse` (ConvNeXt-Tiny Pure CNN)** (achieving **93.80% accuracy** on pure images using 7x7 depthwise separable convolutions, LayerNorm, and Focal Loss), supported by an active multi-model benchmark suite (**Multi-Modal Bi-Encoder**, **Swin Transformer**, **EfficientNet-B0 Baseline**, and **INT8 Quantized Dynamic Engine**).
 
 ---
 
@@ -28,9 +28,9 @@ graph TD
         NotificationService["In-App Notification Service"]
     end
 
-    subgraph CV_Tier ["Computer Vision & Multi-Modal Tier"]
-        MM["MultiModalInfraPulse (Default Primary Bi-Encoder)"]
-        Conv["ConvNeXtInfraPulse (Modern Pure CNN)"]
+    subgraph CV_Tier ["Computer Vision & Multi-Model Tier"]
+        Conv["ConvNeXtInfraPulse (Default Primary Pure CNN)"]
+        MM["MultiModalInfraPulse (Cross-Attention Bi-Encoder)"]
         Swin["SwinInfraPulse (Shifted-Window Attention)"]
         Base["InfraPulseNet (EfficientNet-B0 Baseline)"]
         Q8["INT8 Quantized Dynamic Engine"]
@@ -50,8 +50,8 @@ graph TD
     Router --> Auth
     Router --> MDEngine
     Router --> ModelService
-    ModelService --> MM
     ModelService --> Conv
+    ModelService --> MM
     ModelService --> Swin
     ModelService --> Base
     ModelService --> Q8
@@ -70,9 +70,9 @@ graph TD
 
 The platform implements the end-to-end defect detection, triage, scoring, and dispatch workflows specified in the Problem Statement.
 
-### 2.1 Deep Learning Vision & Multi-Modal Defect Classification
-- **Primary Production Model (`MultiModalInfraPulse`)**: Bi-encoder cross-attention architecture combining visual feature embeddings with user report descriptions (**95.40% Accuracy, 0.921 Macro-F1** on holdout test samples).
-- **Pure Vision Specialist (`ConvNeXtInfraPulse`)**: Pure computer vision architecture leveraging 7x7 depthwise convolutions and LayerNorm (**93.80% Accuracy, 0.895 Macro-F1** on pure images alone).
+### 2.1 Deep Learning Vision-Based Defect Classification
+- **Primary Production Model (`ConvNeXtInfraPulse`)**: Pure convolutional neural network architecture leveraging 7x7 depthwise convolutions and LayerNorm (**93.80% Accuracy, 0.895 Macro-F1** on pure images alone with zero text crutch).
+- **Multi-Modal Specialist (`MultiModalInfraPulse`)**: Cross-attention dual-stream architecture combining visual representations with user report descriptions (**95.40% Accuracy, 0.921 Macro-F1**).
 - **Supported Defect Classes**:
   - **Spalling** (Concrete delamination / exposed rebar) -> Routed to **Structural Department**
   - **Stagnant Water** (Puddles / drainage overflow) -> Routed to **Functional Department**
@@ -122,15 +122,15 @@ sequenceDiagram
     autonumber
     actor Resident as User / Resident
     participant App as FastAPI Application
-    participant ML as Multi-Modal & GradCAM++ Engine
+    participant ML as ConvNeXt-Tiny & GradCAM++ Engine
     participant Engine as Priority Scoring Engine
     participant DB as SQLite Database
     actor Staff as Department Crew
 
     Resident->>App: Submits photo, location and Markdown description
     App->>App: Sanitizes markdown via Bleach and normalizes photo (PNG)
-    App->>ML: Passes photo and description to InfraPulseInference
-    ML->>ML: Computes Cross-Attention Gating (Image + Description)
+    App->>ML: Passes photo to ConvNeXt-Tiny Vision Pipeline
+    ML->>ML: Extracts 7x7 Depthwise Conv Features & LayerNorm
     ML->>ML: Extracts GradCAM++ Heatmap and Canny Edge Contours
     ML-->>App: Returns Predicted Defect, Category, Severity (%) and Extent (%)
     App->>Engine: Computes Priority Score (Formula)
@@ -169,8 +169,8 @@ InfraPulse provides a complete suite of specialized machine learning models, eac
 ```mermaid
 graph TD
     subgraph Model_Suite ["InfraPulse Model Family"]
-        M1["MultiModalInfraPulse<br/><b>Default Primary Model</b><br/>Accuracy: 95.40% | F1: 0.9210"]
-        M2["ConvNeXtInfraPulse<br/><b>Pure-Vision Specialist</b><br/>Accuracy: 93.80% | F1: 0.8950"]
+        M1["ConvNeXtInfraPulse<br/><b>Default Primary CNN Model</b><br/>Accuracy: 93.80% | F1: 0.8950"]
+        M2["MultiModalInfraPulse<br/><b>Cross-Attention Bi-Encoder</b><br/>Accuracy: 95.40% | F1: 0.9210"]
         M3["SwinInfraPulse<br/><b>Surface Context Transformer</b><br/>Accuracy: 92.50% | F1: 0.8840"]
         M4["INT8 Quantized Dynamic Engine<br/><b>Ultra-Fast CPU Engine</b><br/>Accuracy: 89.21% | Latency: 35.8ms"]
         M5["InfraPulseNet (Baseline)<br/><b>Problem Statement Baseline</b><br/>Accuracy: 88.80% | F1: 0.8141"]
@@ -179,15 +179,15 @@ graph TD
 
 ### 3.1 Detailed Write-Up of Each Model
 
-#### 1. `MultiModalInfraPulse` (Default Production Model)
+#### 1. `ConvNeXtInfraPulse` (Default Production Pure CNN)
+- **Architecture**: Modern pure convolutional network using 7x7 depthwise separable convolutions, inverted bottleneck channels ($[96, 192, 384, 768]$), and LayerNorm instead of BatchNorm.
+- **Key Advantage**: Operates strictly on pure image pixels with zero text input. Captures fine micro-fractures in concrete and hairline cracks in floor tiles with high spatial fidelity.
+- **Holdout Test Metrics**: **93.80% Accuracy**, **0.8950 Macro-F1**, 105.3 ms latency, 106.95 MB size.
+
+#### 2. `MultiModalInfraPulse` (Cross-Attention Bi-Encoder)
 - **Architecture**: Dual-stream Bi-Encoder network. It extracts visual representations from an EfficientNet-B0 backbone ($1280 \to 256$) and text representations from an embedding stream ($128 \to 256$), then fuses them via an explicit **Cross-Attention Dynamic Gating Layer** (`Linear(512, 128) -> ReLU -> Linear(128, 2) -> Softmax`).
 - **Key Advantage**: Disambiguates complex or low-light resident photos using textual context while falling back to 100% pure vision weighting when text is absent.
 - **Holdout Test Metrics**: **95.40% Accuracy**, **0.9210 Macro-F1**, 46.6 ms latency, 17.58 MB size.
-
-#### 2. `ConvNeXtInfraPulse` (Pure Computer Vision Specialist)
-- **Architecture**: Modern pure convolutional network using 7x7 depthwise separable convolutions, inverted bottleneck ratios, and LayerNorm instead of BatchNorm.
-- **Key Advantage**: Operates on pure image pixels with zero text input. Captures high-frequency micro-fractures in concrete and hairline cracks in floor tiles with high spatial fidelity.
-- **Holdout Test Metrics**: **93.80% Accuracy**, **0.8950 Macro-F1**, 105.3 ms latency, 106.95 MB size.
 
 #### 3. `SwinInfraPulse` (Shifted-Window Vision Transformer)
 - **Architecture**: Vision Transformer with shifted local window self-attention, providing linear $O(N)$ computational complexity relative to image dimensions.
@@ -379,7 +379,7 @@ InfraPulse/
 │   ├── config.py               # Priority weights and directory configuration
 │   ├── database.py             # SQLAlchemy async engine and session handling
 │   ├── models.py               # ORM database models
-│   ├── model_service.py        # Multi-model prediction and caching engine (Bi-Encoder default)
+│   ├── model_service.py        # Multi-model prediction and caching engine (ConvNeXt-Tiny default)
 │   ├── priority_queue.py       # Priority scoring algorithms and queue filtering
 │   ├── auth.py                 # Password hashing and session auth helpers
 │   ├── templates_config.py     # Centralized Jinja2 templates and safe markdown filter

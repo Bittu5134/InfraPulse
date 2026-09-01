@@ -2,7 +2,7 @@
 
 **System Name**: InfraPulse - Defect Detection and Priority Maintenance System  
 **Version**: 3.5.0  
-**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (Multi-Modal Bi-Encoder, ConvNeXt-Tiny, Swin-T, EfficientNet-B0 + GradCAM++), Jinja2, Tailwind CSS, EasyMDE  
+**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (ConvNeXt-Tiny Pure CNN, Multi-Modal Bi-Encoder, Swin-T, EfficientNet-B0 + GradCAM++), Jinja2, Tailwind CSS, EasyMDE  
 
 ---
 
@@ -12,7 +12,7 @@
 Campus and institutional facilities receive hundreds of maintenance requests across diverse structural, plumbing, and aesthetic issues. Without automated intelligence and structured prioritization, critical safety hazards (e.g., concrete spalling or structural beam fractures) are delayed behind cosmetic complaints (e.g., paint peeling).
 
 ### 1.2 Core Problem Statement Objectives
-- **Multi-Modal and Computer Vision Defect Classification**: Ingest defect photographs and textual descriptions to classify reports into 4 distinct physical defect types across 3 operational departments (**Structural**, **Functional**, **Performance**).
+- **Pure Computer Vision Defect Classification**: Ingest defect photographs to classify reports into 4 distinct physical defect types across 3 operational departments (**Structural**, **Functional**, **Performance**) with zero text crutches.
 - **Physical Damage Quantification (Severity & Extent)**: Extract activation heatmaps using **GradCAM++** and Canny edge analysis to measure defect severity ($0-100\%$) and surface coverage extent ($0-100\%$) directly from pixels.
 - **Objective Priority Engine**: Mathematically score and order queues to prevent manual triage bottlenecks using severity, surface extent, defect boost, and category weighting.
 - **Lifecycle Progression**: Enforce strict status transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`).
@@ -45,9 +45,9 @@ graph TB
         ModelService["PyTorch Model Service Singleton"]
     end
 
-    subgraph CV_Tier ["Machine Learning & Multi-Modal Layer"]
-        MM["MultiModalInfraPulse (Default Primary Bi-Encoder)"]
-        Conv["ConvNeXtInfraPulse (Pure Vision Specialist)"]
+    subgraph CV_Tier ["Machine Learning & Multi-Model Layer"]
+        Conv["ConvNeXtInfraPulse (Default Primary Pure CNN)"]
+        MM["MultiModalInfraPulse (Cross-Attention Bi-Encoder)"]
         Swin["SwinInfraPulse (Shifted-Window Attention)"]
         Base["InfraPulseNet (EfficientNet-B0 Baseline)"]
         Q8["INT8 Quantized Dynamic Engine"]
@@ -65,8 +65,8 @@ graph TB
     UI_Bench --> BenchRouter
 
     UserRouter --> MDEngine
-    UserRouter --> ModelService --> MM --> GradCAM
-    ModelService --> Conv
+    UserRouter --> ModelService --> Conv --> GradCAM
+    ModelService --> MM
     ModelService --> Swin
     ModelService --> Base
     ModelService --> Q8
@@ -87,15 +87,15 @@ sequenceDiagram
     autonumber
     actor Resident as User / Resident
     participant App as FastAPI Application
-    participant ML as Multi-Modal & GradCAM++ Engine
+    participant ML as ConvNeXt-Tiny & GradCAM++ Engine
     participant Engine as Priority Scoring Engine
     participant DB as SQLite Database
     actor Staff as Department Crew
 
     Resident->>App: Submits photo, location and Markdown description
     App->>App: Sanitizes markdown via Bleach and normalizes photo (PNG)
-    App->>ML: Passes photo and description to InfraPulseInference
-    ML->>ML: Computes Cross-Attention Gating (Image + Description)
+    App->>ML: Passes photo to ConvNeXt-Tiny Vision Pipeline
+    ML->>ML: Extracts 7x7 Depthwise Conv Features & LayerNorm
     ML->>ML: Extracts GradCAM++ Heatmap and Canny Edge Contours
     ML-->>App: Returns Predicted Defect, Category, Severity (%) and Extent (%)
     App->>Engine: Computes Priority Score (Formula)
@@ -132,8 +132,8 @@ InfraPulse implements 5 distinct machine learning architectures evaluated on an 
 
 | Architecture | Paradigm | Test Accuracy | Macro F1 | Weighted F1 | Latency (CPU) | Checkpoint Size | Operational Role |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`MultiModalInfraPulse`** | Dual-Stream Bi-Encoder + Cross-Attention | **95.40%** | **0.9210** | **0.9580** | **46.6 ms** | **17.58 MB** | **Default Primary Model (Production)** |
-| **`ConvNeXtInfraPulse`** | Modern Pure CNN (7x7 Depthwise + LayerNorm) | **93.80%** | **0.8950** | **0.9410** | 105.3 ms | 106.95 MB | Pure Computer Vision Specialist |
+| **`ConvNeXtInfraPulse`** | Modern Pure CNN (7x7 Depthwise + LayerNorm) | **93.80%** | **0.8950** | **0.9410** | 105.3 ms | 106.95 MB | **Default Primary CNN (Pure Vision Specialist)** |
+| **`MultiModalInfraPulse`** | Dual-Stream Bi-Encoder + Cross-Attention | **95.40%** | **0.9210** | **0.9580** | **46.6 ms** | **17.58 MB** | Multi-Modal Specialist (Photo + Text) |
 | **`SwinInfraPulse`** | Shifted-Window Vision Transformer | **92.50%** | **0.8840** | **0.9320** | 138.9 ms | 106.02 MB | Global Surface Context & Reflections |
 | **`INT8 Quantized Engine`**| 8-Bit Dynamic Quantized PyTorch | **89.21%** | **0.8173** | **0.8975** | **35.8 ms** | **16.21 MB** | Edge & Resource-Constrained Deployment |
 | **`InfraPulseNet`** | EfficientNet-B0 Backbone | 88.80% | 0.8141 | 0.8933 | 63.2 ms | 18.09 MB | Problem Statement Baseline Model |
@@ -142,18 +142,17 @@ InfraPulse implements 5 distinct machine learning architectures evaluated on an 
 
 ### 3.2 Detailed Model Specifications
 
-#### 1. Multi-Modal Bi-Encoder Network (`MultiModalInfraPulse`) - Default
-- **Visual Stream**: EfficientNet-B0 backbone with adaptive average pooling projecting to a 256-dimensional feature vector ($V \in \mathbb{R}^{256}$).
+#### 1. ConvNeXt-Tiny Pure Vision Model (`ConvNeXtInfraPulse`) - Default
+- **Structure**: Modern pure convolutional network with 7x7 depthwise separable convolutions, inverted bottleneck channels ($[96, 192, 384, 768]$), and LayerNorm instead of BatchNorm.
+- **Head**: Global Average Pool $\to$ LayerNorm $\to$ `Dropout(0.30) -> Linear(768, 256) -> GELU -> Dropout(0.20) -> Linear(256, 4)`.
+- **Strength**: High sensitivity to micro-fractures, concrete spalling boundaries, and flaking paint contours purely from pixels without requiring text inputs.
+
+#### 2. Multi-Modal Bi-Encoder Network (`MultiModalInfraPulse`)
+- **Visual Stream**: EfficientNet-B0 backbone projecting to a 256-dimensional feature vector ($V \in \mathbb{R}^{256}$).
 - **Textual Stream**: Token embedding layer (`EmbeddingBag(vocab_size=500, embed_dim=128)`) projecting to a 256-dimensional semantic vector ($T \in \mathbb{R}^{256}$).
 - **Cross-Attention Dynamic Gate**:
   $$G = \text{Softmax}\left(\text{Linear}_{512 \to 2}\left(\text{ReLU}\left(\text{Linear}_{512 \to 128}([V, T])\right)\right)\right)$$
   $$\text{Fused} = G_0 \cdot V + G_1 \cdot T$$
-- **Classification Head**: `Dropout(0.30) -> Linear(256, 128) -> ReLU -> Dropout(0.20) -> Linear(128, 4)`.
-
-#### 2. ConvNeXt-Tiny Pure Vision Model (`ConvNeXtInfraPulse`)
-- **Structure**: 7x7 depthwise separable convolutions with inverted bottleneck channels ($[96, 192, 384, 768]$).
-- **Head**: Global Average Pool $\to$ LayerNorm $\to$ `Dropout(0.30) -> Linear(768, 256) -> GELU -> Dropout(0.20) -> Linear(256, 4)`.
-- **Strength**: High sensitivity to micro-fractures, spalling edge boundaries, and flaking paint contours.
 
 #### 3. Swin Transformer (`SwinInfraPulse`)
 - **Structure**: Hierarchical Vision Transformer with shifted local window multi-head self-attention.

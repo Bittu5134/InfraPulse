@@ -12,9 +12,9 @@
 InfraPulse is an automated web platform designed for facility maintenance defect reporting, objective priority queue ranking, domain-based squad dispatch, and full lifecycle tracking.
 
 ### 1.1 Core Problem Statement Deliverables:
-1. **Multi-Modal Deep Learning Vision Model (`MultiModalInfraPulse`)**:
-   - Primary default production model combining visual feature embeddings with user report descriptions (**95.40% Test Accuracy, 0.921 Macro-F1** on unseen test samples).
-   - Supported by pure computer vision models (**ConvNeXt-Tiny at 93.80%**, **Swin-T at 92.50%**, **EfficientNet-B0 at 88.80%**).
+1. **Pure Computer Vision Deep Learning Model (`ConvNeXtInfraPulse`)**:
+   - Primary default production model leveraging 7x7 depthwise convolutions and LayerNorm (**93.80% Test Accuracy, 0.895 Macro-F1** on pure images alone with zero text inputs).
+   - Supported by the full model family (**Multi-Modal Bi-Encoder at 95.40%**, **Swin-T at 92.50%**, **EfficientNet-B0 at 88.80%**, and **INT8 Quantized Dynamic Engine**).
    - Identifies 4 defect classes: **Spalling**, **Stagnant Water**, **Cracked Tiles**, and **Paint Peeling**.
 2. **Computer Vision Damage Localization (Severity & Extent)**:
    - **GradCAM++ Visual Localization**: Extracts attention heatmaps to locate damage regions on the image pixels.
@@ -94,8 +94,8 @@ InfraPulse features a multi-model evaluation suite comparing 5 distinct vision a
 
 | Architecture | Paradigm | Test Accuracy | Macro F1 | Weighted F1 | CPU Latency | Model Size | Operational Highlight |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`MultiModalInfraPulse`** | Visual + Cross-Attention Text | **95.40%** | **0.9210** | **0.9580** | **46.6 ms** | **17.58 MB** | **Default Primary Model (Production)** |
-| **`ConvNeXtInfraPulse`** | Modern Pure CNN + Focal Loss | **93.80%** | **0.8950** | **0.9410** | 105.3 ms | 106.95 MB | Highest Pure-Vision Accuracy (Clear Winner on Visuals) |
+| **`ConvNeXtInfraPulse`** | Modern Pure CNN + Focal Loss | **93.80%** | **0.8950** | **0.9410** | 105.3 ms | 106.95 MB | **Default Primary CNN (Pure Vision Specialist)** |
+| **`MultiModalInfraPulse`** | Visual + Cross-Attention Text | **95.40%** | **0.9210** | **0.9580** | **46.6 ms** | **17.58 MB** | Multi-Modal Specialist (Photo + Text) |
 | **`SwinInfraPulse`** | Shifted-Window Self-Attention | **92.50%** | **0.8840** | **0.9320** | 138.9 ms | 106.02 MB | Best Global Context & Surface Reflections |
 | **`INT8 Quantized Engine`** | Quantized CPU Low-Memory | **89.21%** | **0.8173** | **0.8975** | **35.8 ms** | **16.21 MB** | Fastest CPU Execution (3x Speedup) |
 | **`InfraPulseNet`** | PS Baseline Backbone | 88.80% | 0.8141 | 0.8933 | 63.2 ms | 18.09 MB | Problem Statement Baseline Deliverable |
@@ -104,13 +104,13 @@ InfraPulse features a multi-model evaluation suite comparing 5 distinct vision a
 
 ### 3.2 Detailed Model Write-Ups
 
-1. **`MultiModalInfraPulse` (Default Production Model)**:
+1. **`ConvNeXtInfraPulse` (Default Production Pure CNN)**:
+   - Modern pure CNN utilizing 7x7 depthwise convolutions, inverted bottleneck channels ($[96, 192, 384, 768]$), and LayerNorm.
+   - Achieves **93.80% accuracy on pure images alone** with zero text input, excelling at high-frequency crack texture identification.
+
+2. **`MultiModalInfraPulse` (Cross-Attention Bi-Encoder)**:
    - Fuses visual representations ($1280 \to 256$) with user description token embeddings ($128 \to 256$) via a dual-stream cross-attention dynamic gate (`Linear(512, 128) -> ReLU -> Linear(128, 2) -> Softmax`).
    - Achieves **95.40% accuracy** by resolving ambiguous, low-light, or cropped photos using description context.
-
-2. **`ConvNeXtInfraPulse` (Pure Computer Vision Specialist)**:
-   - Modern pure CNN utilizing 7x7 depthwise convolutions and LayerNorm.
-   - Achieves **93.80% accuracy on pure images alone** with zero text input, excelling at high-frequency crack texture identification.
 
 3. **`SwinInfraPulse` (Vision Transformer)**:
    - Utilizes shifted local window self-attention to capture long-range contextual relationships and reflections across wide surface areas.

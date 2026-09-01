@@ -101,16 +101,16 @@ def tokenize_text_to_tensor(text: str, vocab_size: int = 500, device: torch.devi
 
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
-    Runs primary ML inference using the default Multi-Modal Bi-Encoder model
-    (combining photographic features with resident text description), with fallback
-    hierarchy to ConvNeXt-Tiny and EfficientNet-B0.
+    Runs primary ML inference using the default ConvNeXt-Tiny pure computer vision model
+    (93.8% test accuracy on pure images, 7x7 depthwise convolutions + LayerNorm + Focal Loss),
+    with fallback hierarchy to EfficientNet-B0 and Heuristic Fallback.
     """
     cache_key = f"{image_path}_{age_hours}_{description}"
     if cache_key in _prediction_cache:
         return _prediction_cache[cache_key]
 
-    # Primary Default: Multi-Modal Bi-Encoder; Secondary: ConvNeXt-Tiny; Tertiary: Baseline EfficientNet
-    model_obj = load_custom_model("multimodal_fusion") or load_custom_model("convnext_tiny") or load_custom_model("baseline")
+    # Primary Default: ConvNeXt-Tiny (Pure Vision Specialist); Secondary: Baseline EfficientNet; Tertiary: Multi-Modal
+    model_obj = load_custom_model("convnext_tiny") or load_custom_model("baseline") or load_custom_model("multimodal_fusion")
 
     if model_obj is not None:
         try:
@@ -162,7 +162,7 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
                 "severity": severity,
                 "extent": extent,
                 "priority_score": priority_score,
-                "model_mode": "Multi-Modal Bi-Encoder (Default)",
+                "model_mode": "ConvNeXt-Tiny (Default CNN)",
                 "fallback_used": False,
             }
             _prediction_cache[cache_key] = formatted
