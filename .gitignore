@@ -30,6 +30,10 @@ htmlcov/
 temp/
 .temp/
 
+# ML Training & Evaluation Datasets (Keep model code & checkpoints, ignore bulk images)
+data/
+app/model/data/
+
 # IDE / Editor files
 .vscode/
 .idea/
