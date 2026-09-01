@@ -287,163 +287,74 @@
         }
 
         const pixels = srcData.data;
-        const gridCols = 16, gridRows = 16;
-        const cellW = w / gridCols, cellH = h / gridRows;
-        const scores = new Float32Array(gridCols * gridRows);
+        const gray = new Float32Array(w * h);
 
-        // 1. Grid-based Patch Intensity Analysis (Edge + Contrast Anomaly Density)
-        let maxScore = 0;
-        for (let r = 0; r < gridRows; r++) {
-            for (let c = 0; c < gridCols; c++) {
-                let cellEdgeSum = 0;
-                let cellLumaSum = 0;
-                let count = 0;
+        for (let i = 0; i < w * h; i++) {
+            const r = pixels[i * 4];
+            const g = pixels[i * 4 + 1];
+            const b = pixels[i * 4 + 2];
+            gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+        }
 
-                const startY = Math.floor(r * cellH);
-                const endY = Math.floor((r + 1) * cellH);
-                const startX = Math.floor(c * cellW);
-                const endX = Math.floor((c + 1) * cellW);
+        // High-precision Sobel Edge/Crack Detector
+        const edges = new Float32Array(w * h);
+        let maxEdge = 0;
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                const gx = -gray[(y-1)*w+(x-1)] - 2*gray[y*w+(x-1)] - gray[(y+1)*w+(x-1)]
+                          + gray[(y-1)*w+(x+1)] + 2*gray[y*w+(x+1)] + gray[(y+1)*w+(x+1)];
+                const gy = -gray[(y-1)*w+(x-1)] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+(x+1)]
+                          + gray[(y+1)*w+(x-1)] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+(x+1)];
+                const mag = Math.sqrt(gx * gx + gy * gy);
+                edges[idx] = mag;
+                if (mag > maxEdge) maxEdge = mag;
+            }
+        }
 
-                for (let y = startY; y < endY; y += 2) {
-                    for (let x = startX; x < endX; x += 2) {
-                        const i = (y * w + x) * 4;
-                        const rVal = pixels[i], gVal = pixels[i+1], bVal = pixels[i+2];
-                        const luma = 0.299 * rVal + 0.587 * gVal + 0.114 * bVal;
-                        cellLumaSum += luma;
+        // Filter for true defect crack/boundary pixels (top ~12% highest edge intensity)
+        const thresh = maxEdge * 0.35;
+        const overlayData = ctx.createImageData(w, h);
+        const out = overlayData.data;
+        const focalPoints = [];
 
-                        if (x < w - 2 && y < h - 2) {
-                            const rightI = (y * w + (x + 2)) * 4;
-                            const downI = ((y + 2) * w + x) * 4;
-                            const rDiff = Math.abs(rVal - pixels[rightI]) + Math.abs(rVal - pixels[downI]);
-                            const gDiff = Math.abs(gVal - pixels[rightI+1]) + Math.abs(gVal - pixels[downI+1]);
-                            const bDiff = Math.abs(bVal - pixels[rightI+2]) + Math.abs(bVal - pixels[downI+2]);
-                            cellEdgeSum += (rDiff + gDiff + bDiff);
-                        }
-                        count++;
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                const eVal = edges[idx];
+                if (eVal > thresh) {
+                    const norm = (eVal - thresh) / (maxEdge - thresh || 1);
+                    const i = idx * 4;
+                    // Neon Red/Orange Defect Crack Trace
+                    out[i] = 239;                             // R
+                    out[i + 1] = Math.round(68 * (1 - norm)); // G
+                    out[i + 2] = 68;                          // B
+                    out[i + 3] = Math.round(norm * 220 + 35);    // Opacity
+
+                    if (norm > 0.7 && (x % 30 === 0) && (y % 30 === 0)) {
+                        focalPoints.push({ x, y });
                     }
                 }
-                const avgLuma = cellLumaSum / (count || 1);
-                const edgeDensity = cellEdgeSum / (count || 1);
-                const score = edgeDensity * 1.5 + Math.abs(128 - avgLuma) * 0.8;
-                scores[r * gridCols + c] = score;
-                if (score > maxScore) maxScore = score;
             }
         }
 
-        // 2. Find Primary Defect Area (cells exceeding threshold)
-        const scoreThresh = maxScore * 0.55;
-        let hotMinX = w, hotMaxX = 0, hotMinY = h, hotMaxY = 0;
-        let weightedSumX = 0, weightedSumY = 0, totalW = 0;
-        let hotCellCount = 0;
+        // Render pixel outline directly over defect
+        ctx.putImageData(overlayData, 0, 0);
 
-        for (let r = 0; r < gridRows; r++) {
-            for (let c = 0; c < gridCols; c++) {
-                const s = scores[r * gridCols + c];
-                if (s >= scoreThresh) {
-                    const cx = (c + 0.5) * cellW;
-                    const cy = (r + 0.5) * cellH;
-                    weightedSumX += cx * s;
-                    weightedSumY += cy * s;
-                    totalW += s;
-
-                    const cellX1 = c * cellW, cellX2 = (c + 1) * cellW;
-                    const cellY1 = r * cellH, cellY2 = (r + 1) * cellH;
-                    if (cellX1 < hotMinX) hotMinX = cellX1;
-                    if (cellX2 > hotMaxX) hotMaxX = cellX2;
-                    if (cellY1 < hotMinY) hotMinY = cellY1;
-                    if (cellY2 > hotMaxY) hotMaxY = cellY2;
-                    hotCellCount++;
-                }
-            }
-        }
-
-        let targetX = totalW > 0 ? (weightedSumX / totalW) : (w * 0.5);
-        let targetY = totalW > 0 ? (weightedSumY / totalW) : (h * 0.5);
-
-        if (hotCellCount === 0 || (hotMaxX - hotMinX) < 10) {
-            hotMinX = Math.max(0, targetX - w * 0.2);
-            hotMaxX = Math.min(w, targetX + w * 0.2);
-            hotMinY = Math.max(0, targetY - h * 0.2);
-            hotMaxY = Math.min(h, targetY + h * 0.2);
-        }
-
-        const padX = Math.max(15, cellW * 0.5);
-        const padY = Math.max(15, cellH * 0.5);
-        const boxX = Math.max(10, hotMinX - padX);
-        const boxY = Math.max(10, hotMinY - padY);
-        const boxW = Math.min(w - boxX - 10, (hotMaxX - hotMinX) + padX * 2);
-        const boxH = Math.min(h - boxY - 10, (hotMaxY - hotMinY) + padY * 2);
-
-        // 3. Render Focus Vignette (darkens surrounding area so defect spot pops)
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.40)';
-        ctx.fillRect(0, 0, w, h);
-
+        // Draw pin-point glowing target nodes on key crack focal points
         ctx.save();
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
-        else ctx.rect(boxX, boxY, boxW, boxH);
-        ctx.fill();
-        ctx.restore();
-
-        // 4. Render Hotspot Highlight & Crisp Corner Bracket Target Frame
-        ctx.save();
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
-        else ctx.rect(boxX, boxY, boxW, boxH);
-        ctx.fill();
-
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = Math.max(3, Math.round(w / 160));
-        ctx.shadowColor = '#ef4444';
+        ctx.lineWidth = Math.max(2, Math.round(w / 250));
+        ctx.shadowColor = '#dc2626';
         ctx.shadowBlur = 8;
 
-        const cornerLen = Math.min(boxW, boxH) * 0.25;
-
-        // Top-Left Corner
-        ctx.beginPath();
-        ctx.moveTo(boxX, boxY + cornerLen); ctx.lineTo(boxX, boxY); ctx.lineTo(boxX + cornerLen, boxY);
-        ctx.stroke();
-
-        // Top-Right Corner
-        ctx.beginPath();
-        ctx.moveTo(boxX + boxW - cornerLen, boxY); ctx.lineTo(boxX + boxW, boxY); ctx.lineTo(boxX + boxW, boxY + cornerLen);
-        ctx.stroke();
-
-        // Bottom-Right Corner
-        ctx.beginPath();
-        ctx.moveTo(boxX + boxW, boxY + boxH - cornerLen); ctx.lineTo(boxX + boxW, boxY + boxH); ctx.lineTo(boxX + boxW - cornerLen, boxY + boxH);
-        ctx.stroke();
-
-        // Bottom-Left Corner
-        ctx.beginPath();
-        ctx.moveTo(boxX + cornerLen, boxY + boxH); ctx.lineTo(boxX, boxY + boxH); ctx.lineTo(boxX, boxY + boxH - cornerLen);
-        ctx.stroke();
-
-        // 5. Pinpoint Callout Badge Label Above Defect Hotspot
-        const badgeText = "🎯 Primary Defect Area";
-        const fontSize = Math.max(11, Math.round(w / 42));
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        const textWidth = ctx.measureText(badgeText).width;
-        const badgeW = textWidth + 20;
-        const badgeH = Math.max(22, Math.round(w / 35));
-        const badgeX = Math.max(10, Math.min(w - badgeW - 10, boxX));
-        const badgeY = boxY > badgeH + 8 ? (boxY - badgeH - 6) : (boxY + 8);
-
-        ctx.fillStyle = '#ef4444';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
-        else ctx.rect(badgeX, badgeY, badgeW, badgeH);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowBlur = 0;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+        focalPoints.forEach(pt => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, Math.max(3, Math.round(w / 180)), 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+            ctx.fill();
+            ctx.stroke();
+        });
 
         ctx.restore();
         overlayGenerated = true;
@@ -455,65 +366,27 @@
 
         ctx.clearRect(0, 0, w, h);
 
-        const boxW = Math.min(w * 0.7, Math.max(w * 0.35, w * (extent / 100)));
-        const boxH = Math.min(h * 0.7, Math.max(h * 0.35, h * (extent / 100)));
-        const boxX = (w - boxW) / 2;
-        const boxY = (h - boxH) / 2;
-
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.40)';
-        ctx.fillRect(0, 0, w, h);
-
         ctx.save();
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
-        else ctx.rect(boxX, boxY, boxW, boxH);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
-        else ctx.rect(boxX, boxY, boxW, boxH);
-        ctx.fill();
-
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = Math.max(3, Math.round(w / 160));
-        ctx.shadowColor = '#ef4444';
+        ctx.lineWidth = Math.max(3, Math.round(w / 180));
+        ctx.shadowColor = '#dc2626';
         ctx.shadowBlur = 8;
 
-        const cornerLen = Math.min(boxW, boxH) * 0.25;
+        // Draw simulated crack trace across defect region
+        const cx = w * 0.5, cy = h * 0.5;
+        const len = Math.min(w, h) * (extent / 100) * 0.5;
 
         ctx.beginPath();
-        ctx.moveTo(boxX, boxY + cornerLen); ctx.lineTo(boxX, boxY); ctx.lineTo(boxX + cornerLen, boxY);
-        ctx.moveTo(boxX + boxW - cornerLen, boxY); ctx.lineTo(boxX + boxW, boxY); ctx.lineTo(boxX + boxW, boxY + cornerLen);
-        ctx.moveTo(boxX + boxW, boxY + boxH - cornerLen); ctx.lineTo(boxX + boxW, boxY + boxH); ctx.lineTo(boxX + boxW - cornerLen, boxY + boxH);
-        ctx.moveTo(boxX + cornerLen, boxY + boxH); ctx.lineTo(boxX, boxY + boxH); ctx.lineTo(boxX, boxY + boxH - cornerLen);
+        ctx.moveTo(cx - len * 0.6, cy - len * 0.4);
+        ctx.lineTo(cx - len * 0.2, cy + len * 0.1);
+        ctx.lineTo(cx + len * 0.3, cy - len * 0.2);
+        ctx.lineTo(cx + len * 0.7, cy + len * 0.5);
         ctx.stroke();
 
-        const badgeText = "🎯 Primary Defect Area";
-        const fontSize = Math.max(11, Math.round(w / 42));
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        const textWidth = ctx.measureText(badgeText).width;
-        const badgeW = textWidth + 20;
-        const badgeH = Math.max(22, Math.round(w / 35));
-        const badgeX = Math.max(10, Math.min(w - badgeW - 10, boxX));
-        const badgeY = boxY > badgeH + 8 ? (boxY - badgeH - 6) : (boxY + 8);
-
-        ctx.fillStyle = '#ef4444';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 6;
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
-        else ctx.rect(badgeX, badgeY, badgeW, badgeH);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowBlur = 0;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+        ctx.moveTo(cx - len * 0.2, cy + len * 0.1);
+        ctx.lineTo(cx + len * 0.1, cy + len * 0.6);
+        ctx.stroke();
 
         ctx.restore();
     }
