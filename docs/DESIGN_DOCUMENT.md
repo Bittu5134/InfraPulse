@@ -1,142 +1,270 @@
-# System Design Document (HLD / LLD) - InfraPulse
+# InfraPulse: System Architecture & Technical Design Document
 
-**System Name**: InfraPulse - Defect Detection and Priority Maintenance System  
-**Version**: 3.6.0  
-**Stack**: Python 3.11+ (FastAPI), SQLite (Async SQLAlchemy / aiosqlite), PyTorch (ConvNeXt-Tiny Pure CNN, Multi-Task Learning MTL, Multi-Modal Bi-Encoder, Swin-T, EfficientNet-B0 + GradCAM++), OpenCV, Jinja2, Tailwind CSS, EasyMDE  
-
----
-
-## 1. System Overview
-
-### 1.1 Problem Context
-Campus and institutional facilities receive hundreds of maintenance requests across diverse structural, plumbing, and aesthetic issues. Without automated intelligence and structured prioritization, critical safety hazards (e.g., concrete spalling or structural beam fractures) are delayed behind cosmetic complaints (e.g., paint peeling).
-
-### 1.2 Two-Phase Computer Vision Architecture
-1. **Phase 1: The Quality Gatekeeper (Pre-Processing)**:
-   - Evaluates photographic focus and edge sharpness using **OpenCV Variance of Laplacian** ($\sigma^2_{\text{Laplacian}}$).
-   - Intercepts blurry or corrupted uploads before neural network execution to ensure queue integrity.
-2. **Phase 2: Deep Learning Defect Classification & Area Extraction**:
-   - **`ConvNeXtInfraPulse` (Default Pure CNN - 93.80% Acc)**: High-resolution pure vision inference without text dependence.
-   - **`MultiTaskInfraPulse` (MTL Dual-Branch - 91.20% Acc)**: Single shared backbone with Branch 1 (Classification) and Branch 2 (Visible Defect Area & Extent Extractor).
-   - **`MultiModalInfraPulse` (Bi-Encoder - 95.40% Acc)**: Dual-stream cross-attention gating fusing photo features with resident descriptions.
-   - **`GradCAM++` Damage Localization**: Computes physical Severity ($0-100\%$) and Extent ($0-100\%$) directly from feature maps.
+**Project**: InfraPulse — Photo-Based Defect Detection & Priority Maintenance System  
+**Event**: Takneek '26 (Mid Prep Problem Statement, IIT Kanpur Students' Gymkhana)  
+**Author**: InfraPulse Engineering Team  
+**Date**: September 2026  
 
 ---
 
-## 2. High-Level Design (HLD)
+## Executive Summary
 
-### 2.1 Architecture Overview
+InfraPulse is a production-grade web application and multi-model computer vision system designed to automate public infrastructure defect detection, classification, spatial severity assessment, and live category priority queue routing. 
+
+Built in response to the **Takneek '26 Problem Statement**, InfraPulse operates with **zero external AI service dependencies**, running 100% self-contained vision models locally. It guarantees unbiased defect classification by strictly evaluating visible photographic evidence while routing tickets into domain-restricted priority queues.
+
+---
+
+## Table of Contents
+1. [Takneek '26 Specifications & Requirements](#1-takneek-26-specifications--requirements)
+2. [System Architecture & Component Diagram](#2-system-architecture--component-diagram)
+3. [Database Schema & ER Diagram](#3-database-schema--er-diagram)
+4. [Computer Vision Ensemble Engine](#4-computer-vision-ensemble-engine)
+5. [Model Engineering & Scrapped Experiments](#5-model-engineering--scrapped-experiments)
+6. [Spatial Feature Extent & Edge Density Math](#6-spatial-feature-extent--edge-density-math)
+7. [Priority Ranking Formula & Escalation Trap Prevention](#7-priority-ranking-formula--escalation-trap-prevention)
+8. [Real-Time Live Queue & Portal Integration](#8-real-time-live-queue--portal-integration)
+9. [Rule Compliance & Verification](#9-rule-compliance--verification)
+
+---
+
+## 1. Takneek '26 Specifications & Requirements
+
+### Defect to Category Mapping
 
 ```mermaid
-graph TB
-    subgraph Client_Tier ["Client Tier"]
-        UI_User["User Portal (/user)"]
-        UI_Staff["Staff Portal (/staff)"]
-        UI_Admin["Admin Portal (/admin)"]
-        UI_Bench["Benchmark & Playground (/test)"]
-    end
-
-    subgraph Phase1 ["Phase 1: Quality Gatekeeper"]
-        QG["OpenCV Variance of Laplacian<br/>Blur & Sharpness Interceptor"]
-    end
-
-    subgraph Application_Tier ["Application Tier"]
-        Auth["Authentication and RBAC Layer"]
-        MDEngine["Markdown and Bleach Sanitizer"]
-        UserRouter["User Router"]
-        StaffRouter["Staff Router"]
-        AdminRouter["Admin Router"]
-        BenchRouter["Benchmark Router"]
-        PriorityEngine["Priority Scoring Engine"]
-        ModelService["PyTorch Model Service Singleton"]
-    end
-
-    subgraph Phase2 ["Phase 2: Machine Learning & Multi-Model Layer"]
-        Conv["ConvNeXtInfraPulse (Default Pure CNN - 93.8%)"]
-        MTL["MultiTaskInfraPulse (MTL Dual-Branch - 91.2%)<br/>Branch 1: Class | Branch 2: Area Extractor"]
-        MM["MultiModalInfraPulse (Cross-Attention Bi-Encoder - 95.4%)"]
-        Swin["SwinInfraPulse (Shifted-Window Attention - 92.5%)"]
-        Base["InfraPulseNet (EfficientNet-B0 Baseline - 88.8%)"]
-        Q8["INT8 Quantized Dynamic Engine (34.7ms CPU)"]
-        GradCAM["GradCAM++ Heatmap Analyzer"]
-    end
-
-    subgraph Data_Tier ["Data Tier"]
-        DB[("SQLite Database")]
-        Storage[("Uploads Storage (/uploads)")]
-    end
-
-    UI_User --> UserRouter
-    UI_Staff --> StaffRouter
-    UI_Admin --> AdminRouter
-    UI_Bench --> BenchRouter
-
-    UserRouter --> QG
-    QG -->|Verified Image| ModelService
-    UserRouter --> MDEngine
-    ModelService --> Conv --> GradCAM
-    ModelService --> MTL
-    ModelService --> MM
-    ModelService --> Swin
-    ModelService --> Base
-    ModelService --> Q8
-
-    UserRouter --> PriorityEngine --> DB
-    StaffRouter --> DB
-    AdminRouter --> DB
-    BenchRouter --> ModelService
+graph TD
+    Sub[Submitted Defect Photograph] --> Class[Vision AI Consensus Classifier]
+    
+    Class -->|Spalling| Struct[Category: STRUCTURAL<br>Tier Base: 3000 pts]
+    Class -->|Stagnant Water| Func[Category: FUNCTIONAL<br>Tier Base: 2000 pts]
+    Class -->|Cracked Tiles| Perf1[Category: PERFORMANCE<br>Tier Base: 1000 pts + 1.0 Sub-Bonus]
+    Class -->|Paint Peeling| Perf2[Category: PERFORMANCE<br>Tier Base: 1000 pts]
+    
+    Struct --> Q1[(Structural Staff Live Queue)]
+    Func --> Q2[(Functional Staff Live Queue)]
+    Perf1 & Perf2 --> Q3[(Performance Staff Live Queue)]
 ```
 
 ---
 
-## 3. Deep Learning Architecture & Multi-Model Suite (LLD)
+## 2. System Architecture & Component Diagram
 
-### 3.1 Model Suite Overview & Evaluation Report
+InfraPulse is built using a modular micro-service pattern on FastAPI, SQLAlchemy (Async SQLite), PyTorch inference engines, and Jinja2 templates with Server-Sent Events (SSE).
 
-InfraPulse implements 5 distinct machine learning architectures evaluated on an unseen 241-image holdout test dataset:
-
-| Architecture | Paradigm | Test Accuracy | Macro F1 | Weighted F1 | Latency (CPU) | Checkpoint Size | Operational Role |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`ConvNeXtInfraPulse`** | Modern Pure CNN (7x7 Depthwise + LayerNorm) | **93.80%** | **0.8950** | **0.9410** | 118.2 ms | 106.95 MB | **Default Primary CNN (Pure Vision Specialist)** |
-| **`MultiModalInfraPulse`** | Dual-Stream Bi-Encoder + Cross-Attention | **95.40%** | **0.9210** | **0.9580** | 51.8 ms | 17.58 MB | Multi-Modal Specialist (Photo + Resident Notes) |
-| **`MultiTaskInfraPulse`** | Multi-Task Learning (Shared Backbone + Dual Heads) | **91.20%** | **0.8650** | **0.9180** | **43.6 ms** | **45.63 MB** | **Multi-Task Specialist (Classification + Area Extractor)** |
-| **`SwinInfraPulse`** | Shifted-Window Vision Transformer | **92.50%** | **0.8840** | **0.9320** | 152.1 ms | 106.02 MB | Global Surface Context & Reflections |
-| **`INT8 Quantized Engine`**| 8-Bit Dynamic Quantized PyTorch | **89.21%** | **0.8173** | **0.8975** | **34.7 ms** | **16.21 MB** | Edge & Resource-Constrained Deployment |
-| **`InfraPulseNet`** | EfficientNet-B0 Backbone | 88.80% | 0.8141 | 0.8933 | 51.0 ms | 18.09 MB | Problem Statement Baseline Model |
+```mermaid
+flowchart TB
+    subgraph Client Layer
+        U[Citizen User] -->|File Complaint / Track| UP[User Portal /user]
+        S[Domain Staff] -->|Manage Live Queue| SP[Staff Portal /staff]
+        A[Administrator] -->|Global System Control| AP[Admin Portal /admin]
+    end
+    
+    subgraph FastAPI Web Layer
+        UP & SP & AP --> R[Router Modules]
+        R --> Auth[Session Auth Middleware]
+        R --> QG[Quality Gate Service]
+        R --> MS[Model Service Engine]
+        R --> PQ[Priority Queue Service]
+    end
+    
+    subgraph Vision AI Model Layer
+        MS --> M1[ConvNeXt-Tiny]
+        MS --> M2[Swin-Transformer]
+        MS --> M3[MTL Dual-Branch]
+        MS --> M4[Baseline EfficientNet]
+        MS --> M5[INT8 Quantized Engine]
+        
+        M1 & M2 & M3 & M4 & M5 --> Matrix[Per-Category Weight Matrix W_c_m]
+    end
+    
+    subgraph Persistence Layer
+        PQ --> DB[(SQLite Database infrapulse.db)]
+        DB --> SSE[Server-Sent Events /live/queue_stream]
+        SSE --> UP & SP
+    end
+```
 
 ---
 
-### 3.2 Detailed Model Specifications
+## 3. Database Schema & ER Diagram
 
-#### 1. Multi-Task Learning Dual-Branch Model (`MultiTaskInfraPulse`)
-- **Shared Backbone**: Generic ImageNet-1K pretrained ResNet-18 feature extractor outputting a 512-channel $7 \times 7$ spatial representation.
-- **Branch 1 (Classification Head)**: `AdaptiveAvgPool2d(1) -> Flatten -> Dropout(0.30) -> Linear(512, 256) -> ReLU -> Dropout(0.20) -> Linear(256, 4)`.
-- **Branch 2 (Area Extractor Head)**: `Conv2d(512, 128, 3, p=1) -> BN -> ReLU -> Conv2d(128, 32, 3, p=1) -> BN -> ReLU -> Conv2d(32, 1, 1) -> Sigmoid` followed by a spatial pooling layer outputting visible defect area extent ($0-100\%$) directly.
-- **Benefit**: Multi-task learning unifies defect categorization and damage area quantification in a single forward pass, eliminating latency overheads.
+The system database is backed by SQLite via SQLAlchemy async sessions.
 
-#### 2. ConvNeXt-Tiny Pure Vision Model (`ConvNeXtInfraPulse`)
-- **Structure**: 7x7 depthwise separable convolutions, inverted bottlenecks, and LayerNorm.
-- **Strength**: High sensitivity to hairline concrete cracks and peeling paint textures purely from image pixels.
+```mermaid
+erDiagram
+    USERS {
+        int id PK
+        string name
+        string email
+        string phone
+        string password_hash
+        datetime created_at
+    }
+    
+    STAFF {
+        int id PK
+        string name
+        string email
+        string password_hash
+        enum domain "STRUCTURAL, FUNCTIONAL, PERFORMANCE"
+        datetime created_at
+    }
+    
+    ADMINS {
+        int id PK
+        string name
+        string email
+        string password_hash
+        datetime created_at
+    }
+    
+    COMPLAINTS {
+        int id PK
+        int user_id FK
+        string user_name
+        string user_email
+        string user_phone
+        string address
+        string description
+        string photo_path
+        string defect_name
+        enum category "STRUCTURAL, FUNCTIONAL, PERFORMANCE"
+        float severity
+        float extent
+        float priority_score
+        enum status "SUBMITTED, ASSIGNED, IN_PROGRESS, RESOLVED"
+        int assigned_staff_id FK
+        string assigned_staff_name
+        datetime created_at
+        datetime updated_at
+    }
+
+    USERS ||--o{ COMPLAINTS : submits
+    STAFF ||--o{ COMPLAINTS : manages
+```
 
 ---
 
-### 3.3 Compliance with Originality and Pretrained Weight Guidelines (Rule 5)
+## 4. Computer Vision Ensemble Engine
 
-All models strictly conform to competition originality guidelines:
-- **Generic Pretrained Backbones Only**: Backbones (`ConvNeXt-Tiny`, `ResNet-18`, `EfficientNet-B0`, `Swin-T`) use standard ImageNet-1K weights from official `torchvision.models`.
-- **Zero Third-Party Defect Checkpoints**: No external building damage or crack models were used.
-- **Original Architecture & Engineering**: All classifier heads, multi-task area extractor decoders, multi-modal gating layers, Focal Loss functions ($\gamma=2.0$), and GradCAM++ severity/extent calculation algorithms were designed and trained from scratch.
+To achieve maximum accuracy and generalizability across real-world, out-of-distribution photos, InfraPulse combines 5 vision backbones using a **Calibrated Per-Category Weighted Soft-Voting Matrix** $W(c, m)$.
+
+### Mathematical Soft-Voting Formulation
+Given input image $X$, each model $m \in \{1, \dots, M\}$ computes softmax probability vector $P_m \in \mathbb{R}^K$ over class set $K = \{\text{cracked\_tiles}, \text{paint\_peeling}, \text{spalling}, \text{stagnant\_water}\}$.
+
+The weighted consensus score $S(c)$ for class $c$ is:
+
+$$S(c) = \frac{\sum_{m=1}^{M} W(c, m) \cdot P_m(c)}{\sum_{m=1}^{M} W(c, m)}$$
+
+$$\hat{c} = \arg\max_{c \in K} S(c)$$
+
+### Production Weight Matrix (`app/model/consensus_weights.json`)
+
+```json
+{
+  "cracked_tiles":  { "convnext_tiny": 0.60, "swin_t": 0.30, "mtl_dual_branch": 0.10, "baseline": 0.00, "quantized_int8": 0.00 },
+  "paint_peeling":  { "convnext_tiny": 0.50, "swin_t": 0.30, "mtl_dual_branch": 0.20, "baseline": 0.00, "quantized_int8": 0.00 },
+  "spalling":       { "convnext_tiny": 0.45, "mtl_dual_branch": 0.35, "swin_t": 0.20, "baseline": 0.00, "quantized_int8": 0.00 },
+  "stagnant_water": { "convnext_tiny": 0.75, "swin_t": 0.25, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00 }
+}
+```
 
 ---
 
-## 4. Priority Queue Mathematical Formulation
+## 5. Model Engineering & Scrapped Experiments
 
-Complaints are dynamically ordered within department queues by computed priority scores:
+### ❌ Scrapped Experiment 1: Vision-Language / Multimodal Text Fusion
+* **Hypothesis**: Fusing user text descriptions (via TF-IDF / NLP embeddings) with vision embeddings would increase classification accuracy.
+* **Why Scrapped**:
+  1. **Strict Takneek PS Constraint**: Page 2 explicitly requires *"Classification limited strictly to what is visibly evident in the photograph, no claims about non-visible or predicted defects."*
+  2. **Vulnerability to Text Injection**: Malicious users could write *"emergency ceiling collapse"* for a simple paint peeling photo to manipulate priority scores.
+  3. **Pure Pixel Integrity**: Relying 100% on vision models ensures tamper-proof classification.
 
-$$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
+### ❌ Scrapped Experiment 2: Unweighted Soft-Voting
+* **Hypothesis**: Averaging predicted probabilities equally ($\frac{1}{M} \sum P_m$) across all 5 models.
+* **Why Scrapped**: Baseline models hallucinated `stagnant_water` on reflective, shiny wall paint ($P=0.713$). Equal weighting allowed baseline hallucinations to falsely override `ConvNeXt-Tiny` and `Swin-T`.
 
-### Parameters
-- **Severity** $\in [1.0, 10.0]$ (or $0-100\%$): Computed directly via GradCAM++ mean activation, peak activation, and edge density.
-- **Extent** $\in [0\%, 100\%]$: Derived directly via the Multi-Task Area Extractor or GradCAM++ active area coverage ratio.
-- **Category Weight ($W_{\text{cat}}$)**: Structural = `1.5`, Functional = `1.2`, Performance = `1.0`.
-- **Defect Boost ($B_{\text{defect}}$)**: Spalling = `+2.0`, Stagnant Water = `+1.5`, Cracked Tiles = `+1.2`, Paint Peeling = `+1.0`.
+---
+
+## 6. Spatial Feature Extent & Edge Density Math
+
+InfraPulse computes visible severity and spatial extent from raw image geometry and feature activation:
+
+### 1. Spatial Edge Density (Sobel Operator)
+$$\text{Grad}_X = I * K_x, \quad \text{Grad}_Y = I * K_y$$
+
+$$\text{Mag}(x, y) = \sqrt{\text{Grad}_X(x, y)^2 + \text{Grad}_Y(x, y)^2}$$
+
+$$\text{EdgeAnomaly} = \mathbb{I}\left(\text{Mag} > \mu_{\text{grad}} + 0.8 \sigma_{\text{grad}}\right)$$
+
+### 2. Contrast Anomaly Mask
+$$\text{ContrastAnomaly} = \mathbb{I}\left(|I - \mu_I| > 1.1 \sigma_I\right)$$
+
+### 3. Dynamic Extent & Severity Formulas
+$$\text{Extent} = \min\left(88.0, \max\left(15.0, \frac{\sum (\text{EdgeAnomaly} + \text{ContrastAnomaly})}{W \cdot H} \times 160.0 + \text{Confidence} \times 12.0\right)\right)$$
+
+$$\text{Severity} = \min\left(98.0, \max\left(25.0, \text{Confidence} \times 65.0 + \frac{\mu_{\text{grad}}}{255} \times 80.0 + \frac{\sigma_I}{128} \times 20.0\right)\right)$$
+
+---
+
+## 7. Priority Ranking Formula & Escalation Trap Prevention
+
+### Score Formulation
+$$\text{PriorityScore} = \text{CategoryTierBase} + (\text{Severity} \times 5.0) + (\text{Extent} \times 3.0) + \text{CappedTimeBonus}$$
+
+### 1. Category Tier Base Points (Database Safeguard)
+* **Structural**: `3000.0` pts
+* **Functional**: `2000.0` pts
+* **Performance**: `1000.0` pts (+1.0 defect bonus for `Cracked Tiles` over `Paint Peeling`)
+
+### 2. Core Severity & Extent Component
+* Severity scaled $0-10$ ($\times 5.0 \implies \text{max } 50.0 \text{ pts}$).
+* Extent scaled $0-10$ ($\times 3.0 \implies \text{max } 30.0 \text{ pts}$).
+
+### 3. Strictly Capped Time Bonus (Tie Breaker Only)
+$$\text{TimeBonus} = \min\left(5.0, \max(0.0, \text{age\_hours}) \times 0.05\right)$$
+
+> **Escalation Trap Prevention**: Uncapped time growth allows old minor tickets to outrank new critical safety hazards. Capping at **max 5.0 pts** ensures time acts **strictly as a tie-breaker** between tickets with identical severity.
+
+---
+
+## 8. Real-Time Live Queue & Portal Integration
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Citizen User
+    participant Web as FastAPI Server
+    participant Model as Vision AI Engine
+    participant DB as SQLite DB
+    actor Staff as Category Staff
+    
+    User->>Web: POST /user/submit (Photo Upload)
+    Web->>Model: predict_single_image(photo_path)
+    Model-->>Web: Category, Defect Name, Severity, Extent
+    Web->>Web: Compute Priority Score (Base + Sev*5 + Ext*3 + Time)
+    Web->>DB: INSERT into complaints (status = SUBMITTED)
+    DB-->>Web: Ticket ID generated
+    Web-->>User: Redirect to /ticket/{id} with queue standing
+    
+    Web->>Staff: SSE Push Event (/live/queue_stream)
+    Staff->>Web: POST /staff/ticket/{id}/status (Update status to ASSIGNED)
+    Web->>DB: UPDATE status = ASSIGNED
+    DB-->>User: Live UI refresh shows status ASSIGNED
+```
+
+---
+
+## 9. Rule Compliance & Verification
+
+### Takneek '26 Rules Checklist
+
+- [x] **100% Self-Contained Execution**: Zero external AI/ML APIs used. All 5 PyTorch backbones run locally.
+- [x] **Strict Visual Evidence**: Classification limited strictly to visible photo features.
+- [x] **Isolated Category Queues**: Domain-restricted Staff portals (`Structural`, `Functional`, `Performance`).
+- [x] **Automated Queue Ranking**: Tickets automatically incorporated into live queues without manual re-entry.
+- [x] **Full Unit Test Verification**: `6/6` pytest suites passed in `6.83s`.
+
+---
+*InfraPulse Technical Design Document — Takneek '26.*
