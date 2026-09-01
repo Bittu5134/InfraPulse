@@ -48,11 +48,11 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-slate-500">Severity / Extent:</span>
-                    <span class="font-mono text-slate-700 dark:text-slate-300">{{ complaint.severity }}/10 • {{ complaint.extent }}%</span>
+                    <span class="font-mono text-slate-700 dark:text-slate-300">{{ "%.1f"|format(complaint.severity / 10.0 if complaint.severity > 10.0 else complaint.severity) }}/10 • {{ "%.1f"|format(complaint.extent) }}%</span>
                 </div>
                 <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
                     <span class="font-semibold text-slate-700 dark:text-slate-300">Priority Score:</span>
-                    <span class="text-lg font-mono font-bold text-[#ea580c] dark:text-[#f97316]">{{ complaint.priority_score }}</span>
+                    <span class="text-lg font-mono font-bold text-[#ea580c] dark:text-[#f97316]">{{ "%.1f"|format(complaint.priority_score) }}</span>
                 </div>
             </div>
         </div>

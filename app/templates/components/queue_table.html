@@ -68,7 +68,7 @@
                     </div>
                     <div class="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs truncate" title="{{ item.description }}">{{ item.description }}</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">
-                        Severity: {{ item.severity }}/10 • Extent: {{ item.extent }}%
+                        Severity: {{ "%.1f"|format(item.severity / 10.0 if item.severity > 10.0 else item.severity) }}/10 • Extent: {{ "%.1f"|format(item.extent) }}%
                     </div>
                 </td>
 
@@ -82,7 +82,7 @@
                 <!-- Priority Score -->
                 <td class="py-3 px-4 text-center">
                     <div class="font-mono text-sm font-bold text-[#ea580c] dark:text-[#f97316]">
-                        {{ item.priority_score }}
+                        {{ "%.1f"|format(item.priority_score) }}
                     </div>
                 </td>
 
