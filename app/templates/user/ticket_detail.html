@@ -347,12 +347,58 @@
         overlayData.data.set(blurred);
         ctx.putImageData(overlayData, 0, 0);
 
-        // Draw a prominent dashed boundary ring around the main affected area
-        const extent = {{ complaint.extent }};
-        const cx = w * 0.5, cy = h * 0.5;
-        const rx = w * (extent / 100) * 0.45;
-        const ry = h * (extent / 100) * 0.45;
+        // Calculate dynamic weighted centroid & bounding box of detected defect pixels
+        let sumX = 0, sumY = 0, totalWeight = 0;
+        let minX = w, maxX = 0, minY = h, maxY = 0;
+        let countAboveThresh = 0;
 
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const idx = y * w + x;
+                const alpha = out[idx * 4 + 3];
+                if (alpha > 60) {
+                    sumX += x * alpha;
+                    sumY += y * alpha;
+                    totalWeight += alpha;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                    countAboveThresh++;
+                }
+            }
+        }
+
+        let cx = w * 0.5, cy = h * 0.5;
+        let rx = w * 0.25, ry = h * 0.25;
+
+        if (totalWeight > 0 && countAboveThresh > 10) {
+            cx = sumX / totalWeight;
+            cy = sumY / totalWeight;
+            rx = Math.max(25, (maxX - minX) * 0.5);
+            ry = Math.max(25, (maxY - minY) * 0.5);
+        }
+
+        // Draw dynamic defect bounding box & glowing target reticle around ACTUAL defect position
+        ctx.save();
+
+        // 1. Defect Bounding Box
+        ctx.lineWidth = Math.max(3, Math.round(w / 180));
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.95)';
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+        ctx.setLineDash([8, 4]);
+
+        const boxX = Math.max(5, minX - 10);
+        const boxY = Math.max(5, minY - 10);
+        const boxW = Math.min(w - boxX - 5, (maxX - minX) + 20);
+        const boxH = Math.min(h - boxY - 5, (maxY - minY) + 20);
+
+        if (countAboveThresh > 10) {
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+        }
+
+        // 2. Dashed Target Ellipse Ring around Centroid
         ctx.beginPath();
         ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
         ctx.lineWidth = Math.max(3, Math.round(w / 150));
@@ -363,9 +409,11 @@
         ctx.beginPath();
         ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
         ctx.lineWidth = Math.max(2, Math.round(w / 200));
-        ctx.strokeStyle = 'rgba(239, 68, 68, 1.0)';
+        ctx.strokeStyle = 'rgba(245, 158, 11, 1.0)'; // Amber highlight ring
         ctx.setLineDash([]);
         ctx.stroke();
+
+        ctx.restore();
 
         overlayGenerated = true;
     }

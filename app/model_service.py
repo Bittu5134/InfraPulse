@@ -109,6 +109,36 @@ def load_custom_model(model_key: str):
         print(f"[ModelService] Could not load model {model_key}: {e}")
         return None
 
+def compute_dynamic_spatial_extent(pil_img: Image.Image, confidence: float) -> tuple[float, float]:
+    """
+    Computes dynamic spatial defect extent (%) and severity score directly
+    from image feature variance, edge density distribution, and spatial grid intensity.
+    """
+    gray = np.array(pil_img.convert("L"), dtype=np.float32)
+    h, w = gray.shape
+
+    # Spatial Sobel gradient magnitude
+    gx = np.abs(np.diff(gray, axis=1, prepend=gray[:, :1]))
+    gy = np.abs(np.diff(gray, axis=0, prepend=gray[:1, :]))
+    grad_mag = np.sqrt(gx**2 + gy**2)
+
+    # Anomaly spatial thresholding (high gradient or dark/bright contrast anomalies)
+    mean_val = np.mean(gray)
+    std_val = np.std(gray)
+    contrast_anomaly = (np.abs(gray - mean_val) > (1.1 * std_val)).astype(np.float32)
+    edge_anomaly = (grad_mag > (np.mean(grad_mag) + 0.8 * np.std(grad_mag))).astype(np.float32)
+
+    combined_mask = np.clip(contrast_anomaly + edge_anomaly, 0.0, 1.0)
+
+    # Spatial coverage ratio
+    spatial_coverage = (np.sum(combined_mask) / max(1.0, float(h * w))) * 100.0
+    
+    # Dynamic extent in range [15%, 88%] based on image features & confidence
+    extent = round(min(88.0, max(15.0, spatial_coverage * 1.6 + confidence * 12.0)), 1)
+    severity = round(min(98.0, max(25.0, confidence * 65.0 + (np.mean(grad_mag) / 255.0) * 80.0 + (std_val / 128.0) * 20.0)), 1)
+
+    return severity, extent
+
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
     Per-Category Weighted Consensus Production Pipeline:
@@ -150,7 +180,6 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
         tfm = get_transform(224)
 
         all_probs = {}
-        mtl_extent = None
         start_t = time.perf_counter()
 
         for mk, m_obj in loaded.items():
@@ -162,7 +191,6 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
                 if isinstance(model, MultiTaskInfraPulse):
                     mtl_out = model(x, return_all=True)
                     logits = mtl_out["logits"]
-                    mtl_extent = float(mtl_out["extent_ratio"].item())
                 else:
                     logits = model(x)
                 probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
@@ -192,14 +220,8 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
         confidence = float(consensus_scores[pred_idx])
         defect = CLASS_NAMES[pred_idx]
 
-        # Extent calculation (Multi-Task Area Extractor with edge fallback)
-        gray = np.array(pil.convert("L"))
-        edges = np.sum(gray < 80) / max(1, gray.size) * 100.0
-        severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
-        if mtl_extent is not None:
-            extent = round(min(95.0, max(15.0, mtl_extent)), 1)
-        else:
-            extent = round(min(95.0, max(15.0, (1.0 - float(min(consensus_scores))) * 50.0 + edges * 0.8)), 1)
+        # Dynamic Spatial Feature Extent Calculation
+        severity, extent = compute_dynamic_spatial_extent(pil, confidence)
 
         cat_str = CATEGORY_MAP.get(defect, "Performance")
         if cat_str == "Structural":
@@ -321,14 +343,8 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         cat_str = CATEGORY_MAP.get(defect, "Performance")
         cat_enum = CategoryEnum.STRUCTURAL if cat_str == "Structural" else (CategoryEnum.FUNCTIONAL if cat_str == "Functional" else CategoryEnum.PERFORMANCE)
 
-        # Extent and severity
-        gray = np.array(pil.convert("L"))
-        edges = float(np.sum(gray < 80) / max(1, gray.size) * 100.0)
-        severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
-        if mtl_extent is not None:
-            extent = round(min(95.0, max(15.0, mtl_extent)), 1)
-        else:
-            extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
+        # Dynamic Extent & Severity computation directly from spatial features
+        severity, extent = compute_dynamic_spatial_extent(pil, confidence)
         priority_score = compute_priority_score(cat_enum, defect, severity, extent)
 
         defect_title = defect.replace("_", " ").title()
@@ -371,7 +387,9 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         ens_conf = float(consensus_scores[ens_idx])
         ens_cat = CATEGORY_MAP.get(ens_defect, "Performance")
         ens_cat_enum = CategoryEnum.STRUCTURAL if ens_cat == "Structural" else (CategoryEnum.FUNCTIONAL if ens_cat == "Functional" else CategoryEnum.PERFORMANCE)
-        ens_score = compute_priority_score(ens_cat_enum, ens_defect, 75.0, 45.0)
+        
+        ens_severity, ens_extent = compute_dynamic_spatial_extent(pil, ens_conf)
+        ens_score = compute_priority_score(ens_cat_enum, ens_defect, ens_severity, ens_extent)
 
         consensus_output = {
             "model_key": "ensemble_consensus",
@@ -380,8 +398,8 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
             "category": ens_cat_enum,
             "category_str": ens_cat,
             "confidence": round(ens_conf * 100, 1),
-            "severity": 75.0,
-            "extent": 45.0,
+            "severity": ens_severity,
+            "extent": ens_extent,
             "priority_score": ens_score,
             "latency_ms": round(max(o.get("latency_ms", 30) for o in evaluated_outputs) + 2.0, 1),
             "is_correct": (ens_defect.lower() == ground_truth_name.lower().replace(" ", "_")),
