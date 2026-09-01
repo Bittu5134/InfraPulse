@@ -302,7 +302,7 @@ async def user_dashboard(
         else:
             stmt = stmt.where(or_(Complaint.address.ilike(q), Complaint.description.ilike(q), Complaint.defect_name.ilike(q)))
 
-    stmt = stmt.order_by(Complaint.created_at.desc())
+    stmt = stmt.order_by(Complaint.priority_score.desc(), Complaint.created_at.asc())
     res = await db.execute(stmt)
     complaints = list(res.scalars().all())
     

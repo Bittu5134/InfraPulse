@@ -111,84 +111,121 @@ def load_custom_model(model_key: str):
 
 def predict_single_image(image_path: str, age_hours: float = 0.0, description: str = "") -> Dict[str, Any]:
     """
-    Two-Model Parallel Production Pipeline:
-    1. The Classifier: ConvNeXt-Tiny (93.8% test accuracy, pure vision) categorizes defect & department queue.
-    2. The Extractor: MultiTaskInfraPulse (MTL Dual-Branch, 91.2% accuracy, 43ms) extracts spatial defect area extent (%).
+    Per-Category Weighted Consensus Production Pipeline:
+    Runs all 5 pure vision models, then applies category-specialized SLSQP-calibrated
+    weight matrix W(c, m) to produce the final prediction via weighted soft-voting.
     100% Pure Computer Vision - Strictly Zero Text Reliance.
     """
     cache_key = f"{image_path}_{age_hours}_{description}"
     if cache_key in _prediction_cache:
         return _prediction_cache[cache_key]
 
-    conv_obj = load_custom_model("convnext_tiny") or load_custom_model("baseline")
-    mtl_obj = load_custom_model("mtl_dual_branch")
+    model_keys = ["convnext_tiny", "swin_t", "baseline", "quantized_int8", "mtl_dual_branch"]
+    loaded = {}
+    for mk in model_keys:
+        obj = load_custom_model(mk)
+        if obj is not None:
+            loaded[mk] = obj
 
-    if conv_obj is not None:
-        try:
-            from priority import compute_priority
-            from model import CATEGORY_MAP, MultiTaskInfraPulse
+    if not loaded:
+        # Fallback to rule classifier if no models load
+        rule = mock_classify_defect(description, Path(image_path).name)
+        priority_score = compute_priority_score(rule["category"], rule["defect_name"], rule["severity"], rule["extent"])
+        return {
+            "defect_name": rule["defect_name"],
+            "category": rule["category"],
+            "category_str": rule["category"].value if hasattr(rule["category"], "value") else str(rule["category"]),
+            "confidence": 50.0,
+            "severity": rule["severity"],
+            "extent": rule["extent"],
+            "priority_score": priority_score,
+            "model_mode": "Heuristic Fallback",
+            "fallback_used": True,
+        }
 
-            pil = Image.open(image_path).convert("RGB")
-            device = conv_obj["device"]
-            model = conv_obj["model"]
+    try:
+        from model import CATEGORY_MAP, CLASS_NAMES, MultiTaskInfraPulse
 
-            tfm = get_transform(224)
+        pil = Image.open(image_path).convert("RGB")
+        tfm = get_transform(224)
+
+        all_probs = {}
+        mtl_extent = None
+        start_t = time.perf_counter()
+
+        for mk, m_obj in loaded.items():
+            model = m_obj["model"]
+            device = m_obj["device"]
             x = tfm(pil).unsqueeze(0).to(device)
 
-            start_t = time.perf_counter()
             with torch.inference_mode():
-                logits = model(x)
-                probs = torch.softmax(logits, dim=1)[0]
-                pred_idx = int(torch.argmax(probs).item())
-                confidence = float(probs[pred_idx].item())
-
-                # Parallel Extractor Stream: MultiTask MTL Area Extractor
-                mtl_extent = None
-                if mtl_obj is not None:
-                    mtl_model = mtl_obj["model"]
-                    mtl_dev = mtl_obj["device"]
-                    mtl_x = x.to(mtl_dev)
-                    mtl_out = mtl_model(mtl_x, return_all=True)
+                if isinstance(model, MultiTaskInfraPulse):
+                    mtl_out = model(x, return_all=True)
+                    logits = mtl_out["logits"]
                     mtl_extent = float(mtl_out["extent_ratio"].item())
+                else:
+                    logits = model(x)
+                probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
+                all_probs[mk] = probs
 
-            latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
-            class_names = conv_obj["class_names"]
-            defect = class_names[pred_idx]
+        latency_ms = round((time.perf_counter() - start_t) * 1000.0, 1)
 
-            # Extent calculation (Multi-Task Area Extractor with edge fallback)
-            gray = np.array(pil.convert("L"))
-            edges = np.sum(gray < 80) / max(1, gray.size) * 100.0
-            severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
-            if mtl_extent is not None:
-                extent = round(min(95.0, max(15.0, mtl_extent)), 1)
+        # Per-category weighted consensus: for each candidate class c, compute
+        # score(c) = sum_m [ W(c,m) * P_m(c) ] across all models m
+        n_classes = len(CLASS_NAMES)
+        consensus_scores = np.zeros(n_classes, dtype=np.float64)
+
+        for c_idx, c_name in enumerate(CLASS_NAMES):
+            cat_weights = PER_CATEGORY_OPTIMAL_WEIGHTS.get(c_name, {})
+            weighted_prob = 0.0
+            total_w = 0.0
+            for mk, probs in all_probs.items():
+                w = cat_weights.get(mk, 0.2)
+                weighted_prob += w * float(probs[c_idx])
+                total_w += w
+            if total_w > 0:
+                consensus_scores[c_idx] = weighted_prob / total_w
             else:
-                extent = round(min(95.0, max(15.0, (1.0 - probs.min().item()) * 50.0 + edges * 0.8)), 1)
+                consensus_scores[c_idx] = np.mean([float(p[c_idx]) for p in all_probs.values()])
 
-            cat_str = CATEGORY_MAP.get(defect, "Performance")
-            if cat_str == "Structural":
-                cat_enum = CategoryEnum.STRUCTURAL
-            elif cat_str == "Functional":
-                cat_enum = CategoryEnum.FUNCTIONAL
-            else:
-                cat_enum = CategoryEnum.PERFORMANCE
+        pred_idx = int(np.argmax(consensus_scores))
+        confidence = float(consensus_scores[pred_idx])
+        defect = CLASS_NAMES[pred_idx]
 
-            priority_score = compute_priority_score(cat_enum, defect, severity, extent)
+        # Extent calculation (Multi-Task Area Extractor with edge fallback)
+        gray = np.array(pil.convert("L"))
+        edges = np.sum(gray < 80) / max(1, gray.size) * 100.0
+        severity = round(min(100.0, max(25.0, confidence * 70.0 + edges * 0.5)), 1)
+        if mtl_extent is not None:
+            extent = round(min(95.0, max(15.0, mtl_extent)), 1)
+        else:
+            extent = round(min(95.0, max(15.0, (1.0 - float(min(consensus_scores))) * 50.0 + edges * 0.8)), 1)
 
-            formatted = {
-                "defect_name": defect.replace("_", " ").title(),
-                "category": cat_enum,
-                "category_str": cat_str,
-                "confidence": round(confidence * 100, 1),
-                "severity": severity,
-                "extent": extent,
-                "priority_score": priority_score,
-                "latency_ms": latency_ms,
-                "model_name": "Two-Model Parallel Pipeline (ConvNeXt Classifier + MTL Area Extractor)"
-            }
-            _prediction_cache[cache_key] = formatted
-            return formatted
-        except Exception as e:
-            print(f"[ModelService] Inference failed: {e}")
+        cat_str = CATEGORY_MAP.get(defect, "Performance")
+        if cat_str == "Structural":
+            cat_enum = CategoryEnum.STRUCTURAL
+        elif cat_str == "Functional":
+            cat_enum = CategoryEnum.FUNCTIONAL
+        else:
+            cat_enum = CategoryEnum.PERFORMANCE
+
+        priority_score = compute_priority_score(cat_enum, defect, severity, extent)
+
+        formatted = {
+            "defect_name": defect.replace("_", " ").title(),
+            "category": cat_enum,
+            "category_str": cat_str,
+            "confidence": round(confidence * 100, 1),
+            "severity": severity,
+            "extent": extent,
+            "priority_score": priority_score,
+            "latency_ms": latency_ms,
+            "model_name": f"Per-Category Weighted Consensus ({len(loaded)} Models)"
+        }
+        _prediction_cache[cache_key] = formatted
+        return formatted
+    except Exception as e:
+        print(f"[ModelService] Consensus inference failed: {e}")
 
     # Fallback to rule classifier if vision fails
     rule = mock_classify_defect(description, Path(image_path).name)

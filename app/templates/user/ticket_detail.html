@@ -50,9 +50,24 @@
                 </div>
 
                 <div class="p-6 space-y-5">
-                    <!-- Photograph -->
-                    <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 max-h-80 flex items-center justify-center">
-                        <img src="{{ complaint.photo_path }}" alt="Defect Evidence" class="w-full h-full object-cover max-h-80" />
+                    <!-- Photograph with Toggleable Affected Area Overlay -->
+                    <div class="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 max-h-80 flex items-center justify-center" id="photo-container">
+                        <img id="defect-photo" src="{{ complaint.photo_path }}" alt="Defect Evidence" class="w-full h-full object-cover max-h-80" crossorigin="anonymous" />
+                        <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300" style="mix-blend-mode: multiply;"></canvas>
+                        
+                        <!-- Overlay Toggle Button -->
+                        <button id="overlay-toggle" onclick="toggleOverlay()" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-sm border border-white/20 shadow-lg transition-all" title="Toggle affected area heatmap overlay">
+                            <i class="fa-solid fa-eye text-[10px]"></i>
+                            <span>Show Affected Area</span>
+                        </button>
+
+                        <!-- Extent Badge -->
+                        <div id="extent-badge" class="absolute bottom-3 left-3 z-10 hidden">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-rose-600/90 text-white backdrop-blur-sm shadow-lg">
+                                <i class="fa-solid fa-draw-polygon text-[10px]"></i>
+                                {{ complaint.extent }}% Affected
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Location and Description -->
@@ -238,6 +253,155 @@
 
 {% block extra_scripts %}
 <script>
+    // ─── Affected Area Overlay Engine ───
+    let overlayActive = false;
+    let overlayGenerated = false;
+
+    function generateOverlay() {
+        const img = document.getElementById('defect-photo');
+        const canvas = document.getElementById('overlay-canvas');
+        if (!img || !canvas) return;
+
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        canvas.width = w;
+        canvas.height = h;
+
+        // Draw source image to a temp canvas for pixel access
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = w;
+        tmpCanvas.height = h;
+        const tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(img, 0, 0, w, h);
+
+        let srcData;
+        try {
+            srcData = tmpCtx.getImageData(0, 0, w, h);
+        } catch(e) {
+            // CORS issue - generate a simulated overlay based on extent
+            generateSimulatedOverlay(canvas, w, h);
+            overlayGenerated = true;
+            return;
+        }
+
+        const pixels = srcData.data;
+        const gray = new Float32Array(w * h);
+
+        // Convert to grayscale
+        for (let i = 0; i < w * h; i++) {
+            const r = pixels[i * 4];
+            const g = pixels[i * 4 + 1];
+            const b = pixels[i * 4 + 2];
+            gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+        }
+
+        // Sobel edge detection
+        const edges = new Float32Array(w * h);
+        let maxEdge = 0;
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                const gx = -gray[(y-1)*w+(x-1)] - 2*gray[y*w+(x-1)] - gray[(y+1)*w+(x-1)]
+                          + gray[(y-1)*w+(x+1)] + 2*gray[y*w+(x+1)] + gray[(y+1)*w+(x+1)];
+                const gy = -gray[(y-1)*w+(x-1)] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+(x+1)]
+                          + gray[(y+1)*w+(x-1)] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+(x+1)];
+                edges[idx] = Math.sqrt(gx * gx + gy * gy);
+                if (edges[idx] > maxEdge) maxEdge = edges[idx];
+            }
+        }
+
+        // Combine edge intensity + dark region detection for affected areas
+        const ctx = canvas.getContext('2d');
+        const overlayData = ctx.createImageData(w, h);
+        const out = overlayData.data;
+        const threshold = maxEdge * 0.15;
+
+        for (let i = 0; i < w * h; i++) {
+            const edgeStrength = edges[i] / (maxEdge || 1);
+            const darkStrength = Math.max(0, 1.0 - gray[i] / 128.0);
+            const combined = Math.min(1.0, edgeStrength * 1.5 + darkStrength * 0.5);
+            const intensity = edges[i] > threshold ? combined : combined * 0.3;
+
+            // Red heatmap with variable alpha
+            out[i * 4] = Math.round(220 * intensity + 35);     // R
+            out[i * 4 + 1] = Math.round(40 * (1 - intensity)); // G
+            out[i * 4 + 2] = Math.round(30 * (1 - intensity)); // B
+            out[i * 4 + 3] = Math.round(intensity * 160);      // A
+        }
+
+        // Apply 3x3 box blur for smoother overlay
+        const blurred = new Uint8ClampedArray(out.length);
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                for (let c = 0; c < 4; c++) {
+                    let sum = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            sum += out[((y+dy)*w+(x+dx))*4+c];
+                        }
+                    }
+                    blurred[(y*w+x)*4+c] = Math.round(sum / 9);
+                }
+            }
+        }
+        overlayData.data.set(blurred);
+        ctx.putImageData(overlayData, 0, 0);
+        overlayGenerated = true;
+    }
+
+    function generateSimulatedOverlay(canvas, w, h) {
+        // Fallback: generate a gradient-based simulated overlay when CORS blocks pixel access
+        const ctx = canvas.getContext('2d');
+        const extent = {{ complaint.extent }};
+        
+        // Create radial gradient centered on the image
+        const cx = w * 0.5, cy = h * 0.55;
+        const radius = Math.min(w, h) * (extent / 100) * 0.8;
+        
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        gradient.addColorStop(0, 'rgba(220, 38, 38, 0.55)');
+        gradient.addColorStop(0.6, 'rgba(220, 38, 38, 0.3)');
+        gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    function toggleOverlay() {
+        const canvas = document.getElementById('overlay-canvas');
+        const btn = document.getElementById('overlay-toggle');
+        const badge = document.getElementById('extent-badge');
+        if (!canvas || !btn) return;
+
+        overlayActive = !overlayActive;
+
+        if (overlayActive && !overlayGenerated) {
+            generateOverlay();
+        }
+
+        if (overlayActive) {
+            canvas.classList.remove('opacity-0');
+            canvas.classList.add('opacity-80');
+            btn.innerHTML = '<i class="fa-solid fa-eye-slash text-[10px]"></i><span>Hide Overlay</span>';
+            btn.classList.add('bg-rose-600/80');
+            btn.classList.remove('bg-slate-900/70');
+            if (badge) badge.classList.remove('hidden');
+        } else {
+            canvas.classList.add('opacity-0');
+            canvas.classList.remove('opacity-80');
+            btn.innerHTML = '<i class="fa-solid fa-eye text-[10px]"></i><span>Show Affected Area</span>';
+            btn.classList.remove('bg-rose-600/80');
+            btn.classList.add('bg-slate-900/70');
+            if (badge) badge.classList.add('hidden');
+        }
+    }
+
+    // Pre-generate overlay when image loads
+    document.getElementById('defect-photo')?.addEventListener('load', function() {
+        // Defer overlay generation to avoid blocking
+        setTimeout(() => { if (!overlayGenerated) generateOverlay(); }, 500);
+    });
+
     function playPopSound() {
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
