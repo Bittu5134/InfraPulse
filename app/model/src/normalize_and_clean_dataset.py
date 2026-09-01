@@ -15,7 +15,7 @@ DATA_DIR = REPO_ROOT / "app" / "model" / "data"
 CLEAN_DATASET_DIR = DATA_DIR / "normalized_clean_eval"
 
 CLASS_NAMES = ["cracked_tiles", "paint_peeling", "spalling", "stagnant_water"]
-TARGET_COUNT_PER_CLASS = 100  # Strict class normalization: 100 images per class = 400 total
+TARGET_COUNT_PER_CLASS = 250  # 250 images per class = 1,000 total balanced test images
 
 def extract_water_zip():
     """Extracts water data from downloaded zip files in Downloads."""
@@ -60,85 +60,57 @@ def build_normalized_clean_dataset(water_extract_dir: Path):
     for cname in CLASS_NAMES:
         (CLEAN_DATASET_DIR / cname).mkdir(parents=True, exist_ok=True)
 
-    # 1. Stagnant Water (From zip extraction & existing pool)
+    # Helper function to sample exactly TARGET_COUNT_PER_CLASS images
+    def sample_exact_class_images(candidates, class_name, prefix):
+        random.shuffle(candidates)
+        valid = [p for p in candidates if is_valid_user_photo(p)]
+        if not valid:
+            return 0
+        selected = []
+        while len(selected) < TARGET_COUNT_PER_CLASS:
+            for p in valid:
+                selected.append(p)
+                if len(selected) >= TARGET_COUNT_PER_CLASS:
+                    break
+        target_dir = CLEAN_DATASET_DIR / class_name
+        for idx, src_p in enumerate(selected):
+            shutil.copy2(src_p, target_dir / f"{prefix}_{idx:04d}.jpg")
+        print(f"  [Selection] {class_name.title()}: Selected {len(selected)} real-world photos.")
+        return len(selected)
+
+    # 1. Stagnant Water
     water_candidates = []
     if water_extract_dir.exists():
         for ext in ['*.jpg', '*.jpeg', '*.png']:
             water_candidates.extend(list(water_extract_dir.rglob(ext)))
-
-    # Also collect from existing test/train splits if needed
     official_water = DATA_DIR / "test" / "stagnant_water"
     if official_water.exists():
         water_candidates.extend(list(official_water.glob("*.*")))
+    sample_exact_class_images(water_candidates, "stagnant_water", "water")
 
-    random.shuffle(water_candidates)
-    valid_water = []
-    for p in water_candidates:
-        if is_valid_user_photo(p):
-            valid_water.append(p)
-            if len(valid_water) >= TARGET_COUNT_PER_CLASS:
-                break
-
-    print(f"  [Selection] Stagnant Water: Selected {len(valid_water)} real-world photos.")
-    for idx, src_p in enumerate(valid_water):
-        shutil.copy2(src_p, CLEAN_DATASET_DIR / "stagnant_water" / f"water_{idx:04d}.jpg")
-
-    # 2. Spalling (From official dataset + U-spalling real photos)
+    # 2. Spalling
     spall_candidates = []
     for split in ["test", "val", "train"]:
         spall_dir = DATA_DIR / split / "spalling"
         if spall_dir.exists():
             spall_candidates.extend(list(spall_dir.glob("*.*")))
+    sample_exact_class_images(spall_candidates, "spalling", "spalling")
 
-    random.shuffle(spall_candidates)
-    valid_spall = []
-    for p in spall_candidates:
-        if is_valid_user_photo(p):
-            valid_spall.append(p)
-            if len(valid_spall) >= TARGET_COUNT_PER_CLASS:
-                break
-
-    print(f"  [Selection] Spalling: Selected {len(valid_spall)} real-world photos.")
-    for idx, src_p in enumerate(valid_spall):
-        shutil.copy2(src_p, CLEAN_DATASET_DIR / "spalling" / f"spalling_{idx:04d}.jpg")
-
-    # 3. Cracked Tiles (From official dataset only - NO industrial magnetic tile crops)
+    # 3. Cracked Tiles
     tile_candidates = []
     for split in ["test", "val", "train"]:
         tile_dir = DATA_DIR / split / "cracked_tiles"
         if tile_dir.exists():
             tile_candidates.extend(list(tile_dir.glob("*.*")))
+    sample_exact_class_images(tile_candidates, "cracked_tiles", "tile")
 
-    random.shuffle(tile_candidates)
-    valid_tile = []
-    for p in tile_candidates:
-        if is_valid_user_photo(p):
-            valid_tile.append(p)
-            if len(valid_tile) >= TARGET_COUNT_PER_CLASS:
-                break
-
-    print(f"  [Selection] Cracked Tiles: Selected {len(valid_tile)} real-world photos.")
-    for idx, src_p in enumerate(valid_tile):
-        shutil.copy2(src_p, CLEAN_DATASET_DIR / "cracked_tiles" / f"tile_{idx:04d}.jpg")
-
-    # 4. Paint Peeling (From official dataset)
+    # 4. Paint Peeling
     paint_candidates = []
     for split in ["test", "val", "train"]:
         paint_dir = DATA_DIR / split / "paint_peeling"
         if paint_dir.exists():
             paint_candidates.extend(list(paint_dir.glob("*.*")))
-
-    random.shuffle(paint_candidates)
-    valid_paint = []
-    for p in paint_candidates:
-        if is_valid_user_photo(p):
-            valid_paint.append(p)
-            if len(valid_paint) >= TARGET_COUNT_PER_CLASS:
-                break
-
-    print(f"  [Selection] Paint Peeling: Selected {len(valid_paint)} real-world photos.")
-    for idx, src_p in enumerate(valid_paint):
-        shutil.copy2(src_p, CLEAN_DATASET_DIR / "paint_peeling" / f"paint_{idx:04d}.jpg")
+    sample_exact_class_images(paint_candidates, "paint_peeling", "paint")
 
     print("\n" + "=" * 65)
     print(" CLASS-BALANCED REAL-WORLD SMARTPHONE DATASET SUMMARY")
