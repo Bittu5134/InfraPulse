@@ -86,6 +86,8 @@ async def staff_queue_page(
         return RedirectResponse(url="/staff/login", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
         
     cat_param = category or category_str
+    if not cat_param and staff and hasattr(staff, 'domain') and staff.domain:
+        cat_param = staff.domain.value
     
     complaints = await get_staff_tickets_filtered(
         db,
