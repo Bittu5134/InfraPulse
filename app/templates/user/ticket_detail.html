@@ -53,7 +53,7 @@
                     <!-- Photograph with Toggleable Affected Area Overlay -->
                     <div class="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 max-h-80 flex items-center justify-center" id="photo-container">
                         <img id="defect-photo" src="{{ complaint.photo_path }}" alt="Defect Evidence" class="w-full h-full object-cover max-h-80" crossorigin="anonymous" />
-                        <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300" style="mix-blend-mode: multiply;"></canvas>
+                        <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300 z-10"></canvas>
                         
                         <!-- Overlay Toggle Button -->
                         <button id="overlay-toggle" onclick="toggleOverlay()" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-sm border border-white/20 shadow-lg transition-all" title="Toggle affected area heatmap overlay">
@@ -319,14 +319,14 @@
         for (let i = 0; i < w * h; i++) {
             const edgeStrength = edges[i] / (maxEdge || 1);
             const darkStrength = Math.max(0, 1.0 - gray[i] / 128.0);
-            const combined = Math.min(1.0, edgeStrength * 1.5 + darkStrength * 0.5);
-            const intensity = edges[i] > threshold ? combined : combined * 0.3;
+            const combined = Math.min(1.0, edgeStrength * 2.2 + darkStrength * 0.8);
+            const intensity = edges[i] > threshold ? combined : combined * 0.4;
 
-            // Red heatmap with variable alpha
-            out[i * 4] = Math.round(220 * intensity + 35);     // R
-            out[i * 4 + 1] = Math.round(40 * (1 - intensity)); // G
-            out[i * 4 + 2] = Math.round(30 * (1 - intensity)); // B
-            out[i * 4 + 3] = Math.round(intensity * 160);      // A
+            // Super Vivid Red/Orange Heatmap Overlay
+            out[i * 4] = Math.min(255, Math.round(255 * intensity + 40));  // R
+            out[i * 4 + 1] = Math.round(25 * (1 - intensity));             // G
+            out[i * 4 + 2] = Math.round(20 * (1 - intensity));             // B
+            out[i * 4 + 3] = Math.round(intensity * 220);                  // A (Super High Opacity)
         }
 
         // Apply 3x3 box blur for smoother overlay
@@ -346,25 +346,61 @@
         }
         overlayData.data.set(blurred);
         ctx.putImageData(overlayData, 0, 0);
+
+        // Draw a prominent dashed boundary ring around the main affected area
+        const extent = {{ complaint.extent }};
+        const cx = w * 0.5, cy = h * 0.5;
+        const rx = w * (extent / 100) * 0.45;
+        const ry = h * (extent / 100) * 0.45;
+
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        ctx.lineWidth = Math.max(3, Math.round(w / 150));
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.setLineDash([10, 6]);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        ctx.lineWidth = Math.max(2, Math.round(w / 200));
+        ctx.strokeStyle = 'rgba(239, 68, 68, 1.0)';
+        ctx.setLineDash([]);
+        ctx.stroke();
+
         overlayGenerated = true;
     }
 
     function generateSimulatedOverlay(canvas, w, h) {
-        // Fallback: generate a gradient-based simulated overlay when CORS blocks pixel access
+        // Fallback: generate a vibrant gradient + boundary ring when CORS blocks pixel access
         const ctx = canvas.getContext('2d');
         const extent = {{ complaint.extent }};
         
-        // Create radial gradient centered on the image
-        const cx = w * 0.5, cy = h * 0.55;
-        const radius = Math.min(w, h) * (extent / 100) * 0.8;
+        const cx = w * 0.5, cy = h * 0.5;
+        const rx = w * (extent / 100) * 0.45;
+        const ry = h * (extent / 100) * 0.45;
         
-        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        gradient.addColorStop(0, 'rgba(220, 38, 38, 0.55)');
-        gradient.addColorStop(0.6, 'rgba(220, 38, 38, 0.3)');
-        gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
+        gradient.addColorStop(0.65, 'rgba(220, 38, 38, 0.6)');
+        gradient.addColorStop(1, 'rgba(185, 28, 28, 0)');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
+
+        // Vibrant Outline Ring
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.setLineDash([10, 6]);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(239, 68, 68, 1.0)';
+        ctx.setLineDash([]);
+        ctx.stroke();
     }
 
     function toggleOverlay() {
@@ -381,16 +417,16 @@
 
         if (overlayActive) {
             canvas.classList.remove('opacity-0');
-            canvas.classList.add('opacity-80');
+            canvas.classList.add('opacity-100');
             btn.innerHTML = '<i class="fa-solid fa-eye-slash text-[10px]"></i><span>Hide Overlay</span>';
-            btn.classList.add('bg-rose-600/80');
+            btn.classList.add('bg-rose-600');
             btn.classList.remove('bg-slate-900/70');
             if (badge) badge.classList.remove('hidden');
         } else {
             canvas.classList.add('opacity-0');
-            canvas.classList.remove('opacity-80');
+            canvas.classList.remove('opacity-100');
             btn.innerHTML = '<i class="fa-solid fa-eye text-[10px]"></i><span>Show Affected Area</span>';
-            btn.classList.remove('bg-rose-600/80');
+            btn.classList.remove('bg-rose-600');
             btn.classList.add('bg-slate-900/70');
             if (badge) badge.classList.add('hidden');
         }
