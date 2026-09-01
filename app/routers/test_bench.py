@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import BASE_DIR
 from app.database import get_db
 from app.auth import get_current_user, get_current_staff, get_current_admin
-from app.model_service import predict_single_image, run_rule_based_classifier
+from app.model_service import predict_all_models, get_models_leaderboard
 
 from app.templates_config import templates
 
@@ -77,27 +77,21 @@ async def render_benchmark_page(
     end_idx = start_idx + page_size
     page_images = all_images[start_idx:end_idx]
 
-    # 3. Run predictions on this page's batch only
+    # 3. Multi-Model Benchmark Inference on this batch
     items = []
     for img in page_images:
-        # Deep Learning PyTorch Model Prediction
-        ml_res = predict_single_image(img["full_path"])
-        
-        # Rule-Based / Mock Baseline Prediction
-        rule_res = run_rule_based_classifier(img["filename"], "")
-
-        # Check correctness against ground truth
-        predicted_cls_slug = ml_res["defect_name"].lower().replace(" ", "_")
-        is_ml_correct = (predicted_cls_slug == img["ground_truth_class"])
-        is_rule_correct = (rule_res["defect_name"].lower().replace(" ", "_") == img["ground_truth_class"])
+        multi_eval = predict_all_models(
+            image_path=img["full_path"],
+            ground_truth_name=img["ground_truth_name"]
+        )
 
         items.append({
             "meta": img,
-            "ml_model": ml_res,
-            "rule_model": rule_res,
-            "is_ml_correct": is_ml_correct,
-            "is_rule_correct": is_rule_correct
+            "models": multi_eval["models"],
+            "winner": multi_eval["winner"]
         })
+
+    leaderboard = get_models_leaderboard()
 
     return templates.TemplateResponse(
         request=request,
@@ -107,6 +101,7 @@ async def render_benchmark_page(
             "current_staff": current_staff,
             "current_admin": current_admin,
             "items": items,
+            "leaderboard": leaderboard,
             "current_page": current_page,
             "total_pages": total_pages,
             "total_images": total_images,

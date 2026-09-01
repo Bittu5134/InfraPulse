@@ -30,9 +30,12 @@ htmlcov/
 temp/
 .temp/
 
-# ML Training & Evaluation Datasets (Keep model code & checkpoints, ignore bulk images)
+# ML Training & Evaluation Datasets (Keep model code & lightweight baseline checkpoint, ignore bulk images and large weights)
 data/
 app/model/data/
+app/model/checkpoints/convnext_tiny_infrapulse.pt
+app/model/checkpoints/swin_tiny_infrapulse.pt
+app/model/checkpoints/infrapulse_model.onnx
 
 # IDE / Editor files
 .vscode/

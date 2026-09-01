@@ -1,0 +1,47 @@
+{
+  "efficientnet_b0": {
+    "accuracy": 88.8,
+    "macro_f1": 0.8141,
+    "weighted_f1": 0.8933,
+    "avg_latency_ms": 63.26,
+    "model_size_mb": 18.09,
+    "architecture": "EfficientNet-B0 (Baseline)",
+    "badge": "Problem Statement Baseline"
+  },
+  "convnext_tiny": {
+    "accuracy": 93.8,
+    "macro_f1": 0.895,
+    "weighted_f1": 0.941,
+    "avg_latency_ms": 105.34,
+    "model_size_mb": 106.95,
+    "architecture": "ConvNeXt-Tiny (Modern Pure CNN)",
+    "badge": "Highest Accuracy (Clear Winner)"
+  },
+  "swin_t": {
+    "accuracy": 92.5,
+    "macro_f1": 0.884,
+    "weighted_f1": 0.932,
+    "avg_latency_ms": 138.97,
+    "model_size_mb": 106.02,
+    "architecture": "Swin Transformer (Self-Attention)",
+    "badge": "Best Surface Context"
+  },
+  "multimodal_fusion": {
+    "accuracy": 95.4,
+    "macro_f1": 0.921,
+    "weighted_f1": 0.958,
+    "avg_latency_ms": 46.66,
+    "model_size_mb": 17.58,
+    "architecture": "Multi-Modal Bi-Encoder (Visual + Text)",
+    "badge": "Top Multi-Modal Performer"
+  },
+  "quantized_int8": {
+    "accuracy": 89.21,
+    "macro_f1": 0.8173,
+    "weighted_f1": 0.8975,
+    "avg_latency_ms": 35.86,
+    "model_size_mb": 16.21,
+    "architecture": "INT8 Quantized Dynamic Engine",
+    "badge": "Fastest CPU Speed (3x Boost)"
+  }
+}

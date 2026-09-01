@@ -238,7 +238,7 @@ Beyond the baseline specifications, InfraPulse incorporates the following 14 pro
 
 | # | Feature Area | Extra / QoL Feature | Architectural Implementation and Benefit |
 | :-: | :--- | :--- | :--- |
-| **1** | **Benchmarking** | **Interactive Benchmark Center (`/test`)** | Web GUI with memory-safe pagination (10/page) and prediction caching to evaluate holdout test datasets without CPU/RAM spikes. |
+| **1** | **Benchmarking** | **Multi-Model Benchmark & Leaderboard Suite (`/test`)** | Live comparison across 6 models (ConvNeXt-Tiny, Swin-T, Multi-Modal Bi-Encoder, INT8 Quantized, EfficientNet-B0, Rule Classifier) with global leaderboard, CPU-safe batch pagination, and per-sample Clear Winner highlights. |
 | **2** | **Rich Text** | **Embedded EasyMDE WYSIWYG Editor** | Client-side EasyMDE toolbar with side-by-side live preview and fullscreen distraction-free editing on ticket submission. |
 | **3** | **Security** | **Server-Side Safe Markdown Sanitizer** | Python `markdown` engine coupled with `bleach` whitelist tag sanitizer to render rich typography while guaranteeing protection against XSS. |
 | **4** | **Collaboration** | **Real-Time Live Discussion Feed** | Chronological comment timeline on ticket details with background polling for bidirectional communication. |

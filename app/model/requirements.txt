@@ -7,3 +7,5 @@ scikit-learn>=1.4
 tqdm>=4.66
 matplotlib>=3.8
 grad-cam
+onnx>=1.16
+onnxruntime>=1.18

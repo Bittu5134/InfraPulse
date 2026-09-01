@@ -176,5 +176,6 @@ async def test_benchmark_page():
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
         resp = await client.get("/test?page=1&page_size=5")
         assert resp.status_code == 200
-        assert "Model Evaluation & Benchmark" in resp.text
-        assert "EfficientNet-B0" in resp.text
+        assert "Multi-Model" in resp.text
+        assert "Leaderboard" in resp.text
+        assert "ConvNeXt" in resp.text or "EfficientNet" in resp.text
