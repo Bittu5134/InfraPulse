@@ -92,13 +92,22 @@
     <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
         <form action="/test" method="GET" class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3 text-xs">
-                <!-- Split Selector -->
+                <!-- Dataset Selector -->
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Dataset Split</label>
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Dataset</label>
                     <select name="split" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500">
-                        <option value="test" {% if split == 'test' %}selected{% endif %}>Holdout Test Split</option>
-                        <option value="val" {% if split == 'val' %}selected{% endif %}>Validation Split</option>
-                        <option value="train" {% if split == 'train' %}selected{% endif %}>Training Split</option>
+                        <option value="old" {% if split == 'old' or split == 'test' %}selected{% endif %}>Old Dataset (Holdout Test)</option>
+                        <option value="new_water" {% if split == 'new_water' or split == 'raw_water_dataset' %}selected{% endif %}>New Water Dataset</option>
+                    </select>
+                </div>
+
+                <!-- Sort Order Selector -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sort Order</label>
+                    <select name="sort_by" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                        <option value="default" {% if sort_by == 'default' or not sort_by %}selected{% endif %}>Default Order</option>
+                        <option value="priority_desc" {% if sort_by == 'priority_desc' %}selected{% endif %}>Priority Score (High to Low)</option>
+                        <option value="priority_asc" {% if sort_by == 'priority_asc' %}selected{% endif %}>Priority Score (Low to High)</option>
                     </select>
                 </div>
 
@@ -127,7 +136,7 @@
             <!-- Pagination Bar -->
             <div class="flex items-center gap-2">
                 {% if current_page > 1 %}
-                    <a href="/test?page={{ current_page - 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                    <a href="/test?page={{ current_page - 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}&sort_by={{ sort_by }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
                         <i class="fa-solid fa-chevron-left text-xs mr-1"></i> Previous
                     </a>
                 {% endif %}
@@ -135,7 +144,7 @@
                 <span class="text-xs text-slate-500 px-2">Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong></span>
 
                 {% if current_page < total_pages %}
-                    <a href="/test?page={{ current_page + 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
+                    <a href="/test?page={{ current_page + 1 }}&page_size={{ page_size }}&split={{ split }}&class_filter={{ class_filter }}&sort_by={{ sort_by }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-medium transition-colors">
                         Next <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
                     </a>
                 {% endif %}
@@ -163,6 +172,11 @@
                         {{ item.meta.ground_truth_name }}
                     </span>
                     <span class="text-xs text-slate-500">Department: <strong class="text-slate-800 dark:text-slate-200">{{ item.meta.ground_truth_category }}</strong></span>
+                    {% if item.priority_score %}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-orange-50 dark:bg-orange-950/50 text-[#ea580c] dark:text-[#f97316] border border-orange-200 dark:border-orange-900/60">
+                        Priority: {{ item.priority_score }}
+                    </span>
+                    {% endif %}
                 </div>
 
                 <!-- Clear Winner Highlight -->
