@@ -133,22 +133,11 @@
 
                 <div class="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
 
-                <!-- Combined Benchmark & Playground Option Dropdown -->
-                <div class="relative group">
-                    <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" title="Benchmark & Playground">
-                        <i class="fa-solid fa-flask-vial text-xs text-[#f38020]"></i>
-                        <span>Benchmark & Playground</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-                    </button>
-                    <div class="hidden group-hover:block absolute right-0 mt-1 w-48 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-1.5">
-                        <a href="/test" class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                            <i class="fa-solid fa-chart-column text-[#f38020]"></i> Benchmark Center
-                        </a>
-                        <a href="/test/playground" class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                            <i class="fa-solid fa-flask-vial text-[#f38020]"></i> Model Playground
-                        </a>
-                    </div>
-                </div>
+                <!-- Benchmark Link -->
+                <a href="/test" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Dataset Benchmark & Evaluation">
+                    <i class="fa-solid fa-chart-column text-xs text-[#f38020]"></i>
+                    <span>Benchmark</span>
+                </a>
 
                 <!-- Staff & Admin Links -->
                 {% if current_staff %}
