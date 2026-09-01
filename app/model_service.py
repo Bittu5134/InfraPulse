@@ -35,12 +35,27 @@ ENSEMBLE_OPTIMAL_WEIGHTS = {
 }
 
 # Category-Specialized Weighted Consensus Matrix W(c, m) (Optimized for Out-of-Distribution Generalization)
-PER_CATEGORY_OPTIMAL_WEIGHTS = {
+DEFAULT_PER_CATEGORY_WEIGHTS = {
     "cracked_tiles":  {"convnext_tiny": 0.50, "swin_t": 0.30, "quantized_int8": 0.10, "baseline": 0.10, "mtl_dual_branch": 0.00},
     "paint_peeling":  {"convnext_tiny": 0.50, "swin_t": 0.30, "quantized_int8": 0.10, "baseline": 0.10, "mtl_dual_branch": 0.00},
     "spalling":       {"convnext_tiny": 0.60, "baseline": 0.20, "quantized_int8": 0.20, "swin_t": 0.00, "mtl_dual_branch": 0.00},
     "stagnant_water": {"convnext_tiny": 0.85, "swin_t": 0.15, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
 }
+
+def load_consensus_weights() -> Dict[str, Dict[str, float]]:
+    """Dynamically loads per-category weights from app/model/consensus_weights.json if present."""
+    json_path = BASE_DIR / "app" / "model" / "consensus_weights.json"
+    if json_path.exists():
+        try:
+            with open(json_path, "r") as f:
+                weights = json.load(f)
+                if isinstance(weights, dict) and weights:
+                    return weights
+        except Exception as e:
+            print(f"[ModelService] Failed reading consensus_weights.json: {e}")
+    return DEFAULT_PER_CATEGORY_WEIGHTS
+
+PER_CATEGORY_OPTIMAL_WEIGHTS = load_consensus_weights()
 
 # Lazy-loaded model instances and prediction cache
 _loaded_models: Dict[str, Any] = {}
@@ -341,8 +356,9 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         n_classes = len(CLASS_NAMES)
         consensus_scores = np.zeros(n_classes, dtype=np.float64)
 
+        weights_matrix = load_consensus_weights()
         for c_idx, c_name in enumerate(CLASS_NAMES):
-            cat_weights = PER_CATEGORY_OPTIMAL_WEIGHTS.get(c_name, {})
+            cat_weights = weights_matrix.get(c_name, {})
             weighted_prob = 0.0
             total_w = 0.0
             for out, probs in zip(evaluated_outputs, probabilities_list):
