@@ -6,91 +6,91 @@ InfraPulse is an automated infrastructure defect triage and maintenance prioriti
 
 ## 1. Problem Statement Requirements (Core Deliverables)
 
-The platform fully implements all required defect intake, triage, ranking, and dispatch workflows:
+The platform fully implements the end-to-end defect detection, triage, scoring, and dispatch workflows specified in the Problem Statement:
 
-1. **Defect Photo Intake & Triage**:
-   - Web portal for users to report physical infrastructure defects with photographs, location details, and descriptions.
-   - Automatic triage into three designated operational departments:
-     - **Structural**: Critical structural hazards (e.g., Concrete Spalling, exposed rebar).
-     - **Functional**: Operational disruptions and safety hazards (e.g., Stagnant Water / Flooding, drainage issues).
-     - **Performance**: Aesthetic and surface wear (e.g., Cracked Floor Tiles, Paint Peeling).
+1. **Deep Learning Vision-Based Defect Classification**:
+   - **PyTorch Neural Network (`InfraPulseNet`)**: Built on an EfficientNet-B0 backbone fine-tuned for multi-class infrastructure defect detection.
+   - **Supported Defect Types**:
+     - **Spalling** (Concrete damage / exposed rebar) $\to$ Routed to **Structural Department**
+     - **Stagnant Water** (Puddles / drainage overflow) $\to$ Routed to **Functional Department**
+     - **Cracked Tiles** (Floor fractures) $\to$ Routed to **Performance Department**
+     - **Paint Peeling** (Wall surface flaking) $\to$ Routed to **Performance Department**
+   - **Holdout Evaluation Performance**: Achieved **88.8% accuracy** and **0.89 weighted F1-score** across 241 holdout test images.
 
-2. **Objective Priority Scoring Engine**:
-   - Mathematically orders queues to eliminate manual triage bottlenecks and human bias:
+2. **Computer Vision Damage Localization (Severity & Extent Calculation)**:
+   - **GradCAM++ Visual Explainability**: Computes class activation heatmaps from layer `backbone.features[-1]` to locate defect regions on the image pixels.
+   - **Dynamic Severity Calculation**: Computed directly from peak/mean heatmap activation and Canny edge contour density.
+   - **Dynamic Extent Calculation**: Computed directly from active damage coverage area and spatial fragmentation.
+
+3. **Objective Priority Scoring Engine**:
+   - Mathematically orders queues to eliminate human bias and manual triage bottlenecks:
      $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
    - **Category Weights ($W_{\text{cat}}$)**: Structural = `1.5`, Functional = `1.2`, Performance = `1.0`.
    - **Defect Boosts ($B_{\text{defect}}$)**: Spalling = `+2.0`, Stagnant Water = `+1.5`, Cracked Tiles = `+1.2`, Paint Peeling = `+1.0`.
 
-3. **Status Lifecycle & Queue Dispatch**:
-   - Tickets transition sequentially through `Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`.
-   - Resolved tickets are automatically removed from the active prioritization queue.
+4. **Lifecycle State Machine & Queue Dispatch**:
+   - Sequential ticket status progression: `Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`.
+   - Automatic removal of resolved tickets from the active prioritization queue.
 
-4. **Multi-Role Portals**:
+5. **Multi-Role Portals**:
    - **User Portal**: Report defects, track submission status, live queue standing, and post comments.
    - **Staff Operations Console**: Filter queues by department, claim tickets, update progress, and export records.
    - **Administrator Portal**: System-wide oversight, staff account provisioning, and record governance.
 
 ---
 
-## 2. Comprehensive Non-PS Features & Quality of Life (QoL) Enhancements
+## 2. Extra Features & Quality of Life (QoL) Enhancements
 
-Beyond the baseline specifications, InfraPulse incorporates the following 16 production-grade features:
+Beyond the baseline specifications, InfraPulse incorporates the following 14 production-grade capabilities:
 
-### 🧠 Computer Vision & Explainability (XAI)
-1. **PyTorch Deep Learning Model (`InfraPulseNet`)**:
-   - Transfer-learning model built on EfficientNet-B0 with a custom classification head (`Linear(1280, 512) -> ReLU -> Dropout -> Linear(512, 4)`).
-   - Evaluated on holdout test datasets achieving **88.8% accuracy** and **0.89 weighted F1-score**.
-2. **GradCAM++ Visual Localization & Physical Defect Math**:
-   - Extracts class activation heatmaps from layer `backbone.features[-1]` to visualize damaged regions.
-   - Dynamically calculates **Severity (0–100%)** from peak/mean activation and Canny edge contour density.
-   - Dynamically calculates **Extent (0–100%)** from active coverage area and spatial fragmentation.
-3. **Interactive Model Benchmark Center (`/test`)**:
-   - Web GUI to test and compare the PyTorch ML model against the baseline classifier across 1,500+ holdout dataset images.
-   - Side-by-side ground truth verification with visual `✓ Correct` / `✗ Mismatch` indicators.
-   - Memory-safe pagination (10 images per batch) and in-memory prediction caching to prevent CPU/RAM spikes.
-   - Dataset split filter (`test`, `val`, `train`) and category filter (`Spalling`, `Cracked Tiles`, `Paint Peeling`, `Stagnant Water`).
+### 🧪 Live Evaluation & Benchmarking
+1. **Interactive Model Benchmark Center (`/test`)**:
+   - Dedicated web GUI allowing evaluators to run side-by-side comparisons between the PyTorch ML Model and the baseline classifier across 1,500+ holdout dataset images.
+   - Ground truth verification with visual `✓ Correct` / `✗ Mismatch` status chips.
+   - Memory-safe batch pagination (10 images/page) and in-memory prediction caching to prevent CPU/RAM throttling.
+   - Split filtering (`test`, `val`, `train`) and defect category filters.
 
 ### ✍️ Rich Text & Markdown Support
-4. **Embedded EasyMDE WYSIWYG Markdown Editor**:
-   - Integrated EasyMDE toolbar on ticket submission supporting **Bold**, *Italic*, **H3 Headers**, **Blockquotes**, **Lists**, **Code blocks**, and **Tables**.
+2. **Embedded EasyMDE WYSIWYG Markdown Editor**:
+   - Client-side EasyMDE toolbar on ticket submission supporting **Bold**, *Italic*, **H3 Headers**, **Blockquotes**, **Lists**, **Code blocks**, and **Tables**.
    - Built-in **Side-by-Side Live Preview** and **Full-screen mode** with auto-syncing form inputs.
-5. **Server-Side Safe Markdown Rendering Pipeline**:
-   - Server-side Python `markdown` engine with `bleach` HTML tag sanitization to render rich typography while preventing XSS attacks.
+3. **Server-Side Safe Markdown Sanitization Pipeline**:
+   - Server-side Python `markdown` engine with `bleach` HTML tag sanitization to render rich typography while guaranteeing protection against XSS attacks.
 
 ### 💬 Real-Time Collaboration & Alerts
-6. **Real-Time Live Discussion Feed & Sound Chime**:
+4. **Real-Time Live Discussion Feed & Sound Chime**:
    - Chronological communication timeline on ticket detail pages between residents and assigned staff.
    - Live asynchronous polling with Web Audio API acoustic pop sound indicator when new comments arrive.
-7. **Centralized In-App Notification Center**:
+5. **Centralized In-App Notification Center**:
    - Global navbar notification bell with dynamic unread counter badge.
    - Real-time polling alerting users and staff on ticket assignments and status changes with direct deep-links.
 
 ### 🔒 Security, Governance & Privacy
-8. **Departmental RBAC & Cross-Domain Jurisdiction Enforcement**:
+6. **Departmental RBAC & Cross-Domain Jurisdiction Enforcement**:
    - Staff accounts are strictly bound to their department domain (`Structural`, `Functional`, `Performance`).
    - Server enforces `HTTP 403 Forbidden` checks preventing staff from claiming or modifying tickets outside their jurisdiction.
-9. **Privacy-Preserving Contact Information Masking**:
+7. **Privacy-Preserving Contact Information Masking**:
    - User phone numbers and emails are automatically masked (e.g., `+91 ••••• •••10` and `u•••••@example.com`) on public ticket views.
    - Full unmasked contact data is visible only to the ticket owner, assigned staff, and system administrators.
-10. **Enterprise CSV Queue Export**:
-    - Dedicated `/staff/export/csv` endpoint allowing operators to export filtered queue datasets for auditing and compliance.
+8. **Enterprise CSV Queue Export**:
+   - Dedicated `/staff/export/csv` endpoint allowing operators to export filtered queue datasets for auditing and compliance.
 
 ### 🎨 User Experience & Accessibility
-11. **Cloudflare-Inspired Ergonomic UI (Light & Dark Modes)**:
-    - Eye-friendly neutral slate palette (`#f8fafc` soft background, `#ffffff` cards, `#0b0f19` dark mode) paired with Cloudflare orange accents (`#f38020`).
-    - Crisp Inter typography system with custom smooth scrollbars and theme toggle persisted in `localStorage`.
-12. **Multi-Dimensional Search & Granular Queue Filtering**:
+9. **Cloudflare-Inspired Ergonomic UI (Light & Dark Modes)**:
+   - Eye-friendly neutral slate palette (`#f8fafc` soft background, `#ffffff` cards, `#0b0f19` dark mode) paired with Cloudflare orange accents (`#f38020`).
+   - Crisp Inter typography system with custom smooth scrollbars and theme toggle persisted in `localStorage`.
+10. **Multi-Dimensional Search & Granular Queue Filtering**:
     - User dashboard search by ticket ID, address, or defect description.
     - Staff console multi-filter by queue domain, resolution status, minimum severity threshold, and sorting options (priority descending, newest, oldest, severity).
-13. **Branded Custom 404 Error Page**:
+11. **Branded Custom 404 Error Page**:
     - Branded error interface maintaining visual consistency across invalid routes.
 
 ### ⚙️ Reliability & Infrastructure
-14. **100% Offline & Self-Contained Static Assets**:
+12. **100% Offline & Self-Contained Static Assets**:
     - Zero external CDN dependencies: bundled Tailwind JS, EasyMDE CSS/JS, and FontAwesome webfonts in `app/static/vendor/` for secure, air-gapped intranet deployments.
-15. **Automatic Image Format Normalization & Validation**:
+13. **Automatic Image Format Normalization & Validation**:
     - Pillow pipeline that validates image headers, strips malicious payloads, and converts incoming WEBP/JPEG/BMP photos into standardized PNG representations.
-16. **Multi-Stage Production Docker & Automated Seeding**:
+14. **Multi-Stage Production Docker & Automated Seeding**:
     - Optimized multi-stage `Dockerfile` and `docker-compose.yml` with automated database seeding on boot.
 
 ---
@@ -115,7 +115,7 @@ graph TD
         NotificationService[Notification Engine]
     end
 
-    subgraph ML & Computer Vision
+    subgraph ML & Computer Vision (Problem Statement Core)
         Net[EfficientNet-B0 Backbone]
         GradCAM[GradCAM++ Heatmap Analyzer]
         Weights[(best_infrapulse_v1.pt)]
@@ -230,7 +230,7 @@ InfraPulse/
 │   ├── priority_queue.py       # Priority scoring algorithms and queue filtering
 │   ├── auth.py                 # Password hashing and session auth helpers
 │   ├── templates_config.py     # Centralized Jinja2 templates and safe markdown filter
-│   ├── model/                  # Deep learning vision model package
+│   ├── model/                  # Deep learning vision model package (PS Core)
 │   │   ├── README.md           # Model documentation & architecture
 │   │   ├── requirements.txt    # ML dependencies (torch, torchvision, grad-cam)
 │   │   ├── pull_bd3_dataset.py # On-demand dataset downloader script

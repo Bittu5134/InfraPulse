@@ -9,11 +9,12 @@
 ## 1. System Overview
 
 ### 1.1 Problem Context
-Campus and institutional facilities receive hundreds of maintenance requests across diverse structural, plumbing, and aesthetic issues. Without structured prioritization, critical safety hazards (e.g., concrete spalling or structural beam fractures) are delayed behind cosmetic complaints (e.g., paint peeling).
+Campus and institutional facilities receive hundreds of maintenance requests across diverse structural, plumbing, and aesthetic issues. Without automated intelligence and structured prioritization, critical safety hazards (e.g., concrete spalling or structural beam fractures) are delayed behind cosmetic complaints (e.g., paint peeling).
 
 ### 1.2 Core Problem Statement Objectives
-- **Defect Ingestion & Classification**: Automate the intake of user photographs and route them into three designated operational departments: **Structural**, **Functional**, or **Performance**.
-- **Objective Priority Engine**: Mathematically score and order tickets to prevent manual triage bottlenecks using severity, surface extent, and category weighting.
+- **Computer Vision Defect Classification**: Ingest defect photographs and classify them into 4 distinct physical defect types across 3 operational departments (**Structural**, **Functional**, **Performance**).
+- **Physical Damage Quantification (Severity & Extent)**: Extract activation heatmaps using **GradCAM++** and Canny edge analysis to measure defect severity ($0-100\%$) and surface coverage extent ($0-100\%$) directly from pixels.
+- **Objective Priority Engine**: Mathematically score and order queues to prevent manual triage bottlenecks using severity, surface extent, and category weighting.
 - **Lifecycle Progression**: Enforce strict status transitions (`Submitted` $\to$ `Assigned` $\to$ `In Progress` $\to$ `Resolved`).
 - **Domain Access Governance**: Prevent staff from modifying tickets outside their designated domain.
 
@@ -44,7 +45,7 @@ graph TB
         ModelService["PyTorch Model Service"]
     end
 
-    subgraph Computer Vision Layer
+    subgraph Computer Vision Layer (Problem Statement Core)
         Net["InfraPulseNet (EfficientNet-B0)"]
         GradCAM["GradCAM++ Heatmap Analyzer"]
         Checkpoint[("best_infrapulse_v1.pt")]
@@ -151,8 +152,8 @@ Complaints are dynamically ordered within department queues by computed priority
 $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{Extent}}{100}\right) \times 4.0 + B_{\text{defect}} \right) \times W_{\text{cat}}$$
 
 ### Parameters
-- **Severity** $\in [1.0, 10.0]$ (or $0-100\%$): Computed from GradCAM++ mean activation, peak activation, and edge density.
-- **Extent** $\in [0\%, 100\%]$: Computed from GradCAM++ active area coverage ratio, component fragmentation, and spatial spread.
+- **Severity** $\in [1.0, 10.0]$ (or $0-100\%$): Computed directly via GradCAM++ mean activation, peak activation, and edge density.
+- **Extent** $\in [0\%, 100\%]$: Computed directly via GradCAM++ active area coverage ratio, component fragmentation, and spatial spread.
 - **Category Weight ($W_{\text{cat}}$)**:
   - Structural: `1.5`
   - Functional: `1.2`
@@ -176,28 +177,24 @@ $$\text{Priority Score} = \left( \text{Severity} \times 0.6 + \left(\frac{\text{
 
 ---
 
-## 6. Comprehensive Non-PS Features & Quality of Life (QoL) Architecture
+## 6. Comprehensive Extra Features & Quality of Life (QoL) Architecture
 
-### 6.1 Computer Vision & Explainability
-- **PyTorch Vision Backbone**: EfficientNet-B0 fine-tuned on infrastructure defects (88.8% test accuracy, 0.89 F1).
-- **GradCAM++ Visual Explanations**: Target layer `backbone.features[-1]` computes spatial class activation maps.
-- **Dynamic Defect Quantification**: Mathematical translation of activation heatmaps into physical Severity & Extent percentages.
-- **Live Dataset Benchmark (`/test`)**: Paginated benchmark route comparing deep learning vs baseline heuristic classifiers on holdout test datasets with in-memory inference caching.
+### 6.1 Evaluation & Benchmarking
+- **Live Dataset Benchmark Center (`/test`)**: Dedicated web GUI with batch pagination (10/page) and in-memory prediction caching comparing deep learning vs baseline heuristic classifiers on 1,500+ holdout images with zero CPU/RAM spikes.
 
-### 6.2 Rich Text & UX Ergonomics
-- **EasyMDE WYSIWYG Editor**: Embedded markdown editing suite with side-by-side live preview and full-screen modes.
-- **Server-Side Safe Sanitizer**: Markdown-to-HTML parser with `bleach` tag whitelisting preventing XSS vectors.
-- **Cloudflare-Inspired Theme**: Soft eye-friendly neutral slate with Cloudflare orange accents and dark mode persistence.
+### 6.2 Rich Text & Markdown Support
+- **Embedded EasyMDE WYSIWYG Editor**: Client-side markdown suite with toolbar, side-by-side live preview, and full-screen modes on ticket submission.
+- **Server-Side Safe Markdown Sanitizer**: Python `markdown` engine coupled with `bleach` whitelist tag sanitizer preventing XSS vectors.
 
 ### 6.3 Real-Time Interactivity & Alerts
-- **Bidirectional Ticket Discussion**: Threaded comment feed with asynchronous background polling.
-- **Web Audio API Feedback**: Acoustic audio pop chime played upon receiving incoming comments.
-- **Global In-App Notification Center**: Real-time polling with unread badge counter and deep linking.
+- **Bidirectional Ticket Discussion**: Chronological comment feed with asynchronous background polling.
+- **Web Audio API Feedback**: Acoustic audio pop chime synthesized when new comments or status updates arrive.
+- **Global In-App Notification Center**: Real-time polling with dynamic unread badge counter and deep linking.
 
 ### 6.4 Governance, Data & Privacy
-- **Cross-Domain Jurisdiction Protection**: Strict backend enforcement (`HTTP 403`) preventing cross-department modifications.
+- **Cross-Domain Jurisdiction Protection**: Strict backend enforcement (`HTTP 403 Forbidden`) preventing cross-department ticket modifications.
 - **Contact Privacy Redaction**: Automatic phone and email masking for unauthorized public viewers.
 - **Enterprise CSV Export**: Streaming CSV downloads with granular department and severity filters.
 - **100% Offline Static Assets**: Bundled vendor dependencies (Tailwind, FontAwesome, EasyMDE) for air-gapped intranet environments.
 - **Automated Pillow Image Normalization**: Converts multi-format inputs (WEBP/JPG/BMP) to secure, standard PNGs.
-- **Docker Compose Containerization**: Multi-stage Docker deployment with automated database seeding on boot.
+- **Production Docker & Compose**: Multi-stage Docker deployment with automated database seeding on boot.
