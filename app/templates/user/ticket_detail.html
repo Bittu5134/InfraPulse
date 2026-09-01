@@ -267,7 +267,10 @@
         canvas.width = w;
         canvas.height = h;
 
-        // Draw source image to a temp canvas for pixel access
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, w, h);
+
+        // Access raw image pixels via temporary canvas
         const tmpCanvas = document.createElement('canvas');
         tmpCanvas.width = w;
         tmpCanvas.height = h;
@@ -278,177 +281,241 @@
         try {
             srcData = tmpCtx.getImageData(0, 0, w, h);
         } catch(e) {
-            // CORS issue - generate a simulated overlay based on extent
             generateSimulatedOverlay(canvas, w, h);
             overlayGenerated = true;
             return;
         }
 
         const pixels = srcData.data;
-        const gray = new Float32Array(w * h);
+        const gridCols = 16, gridRows = 16;
+        const cellW = w / gridCols, cellH = h / gridRows;
+        const scores = new Float32Array(gridCols * gridRows);
 
-        // Convert to grayscale
-        for (let i = 0; i < w * h; i++) {
-            const r = pixels[i * 4];
-            const g = pixels[i * 4 + 1];
-            const b = pixels[i * 4 + 2];
-            gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-        }
+        // 1. Grid-based Patch Intensity Analysis (Edge + Contrast Anomaly Density)
+        let maxScore = 0;
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                let cellEdgeSum = 0;
+                let cellLumaSum = 0;
+                let count = 0;
 
-        // Sobel edge detection
-        const edges = new Float32Array(w * h);
-        let maxEdge = 0;
-        for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
-                const idx = y * w + x;
-                const gx = -gray[(y-1)*w+(x-1)] - 2*gray[y*w+(x-1)] - gray[(y+1)*w+(x-1)]
-                          + gray[(y-1)*w+(x+1)] + 2*gray[y*w+(x+1)] + gray[(y+1)*w+(x+1)];
-                const gy = -gray[(y-1)*w+(x-1)] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+(x+1)]
-                          + gray[(y+1)*w+(x-1)] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+(x+1)];
-                edges[idx] = Math.sqrt(gx * gx + gy * gy);
-                if (edges[idx] > maxEdge) maxEdge = edges[idx];
-            }
-        }
+                const startY = Math.floor(r * cellH);
+                const endY = Math.floor((r + 1) * cellH);
+                const startX = Math.floor(c * cellW);
+                const endX = Math.floor((c + 1) * cellW);
 
-        // Combine edge intensity + dark region detection for affected areas
-        const ctx = canvas.getContext('2d');
-        const overlayData = ctx.createImageData(w, h);
-        const out = overlayData.data;
-        const threshold = maxEdge * 0.15;
+                for (let y = startY; y < endY; y += 2) {
+                    for (let x = startX; x < endX; x += 2) {
+                        const i = (y * w + x) * 4;
+                        const rVal = pixels[i], gVal = pixels[i+1], bVal = pixels[i+2];
+                        const luma = 0.299 * rVal + 0.587 * gVal + 0.114 * bVal;
+                        cellLumaSum += luma;
 
-        for (let i = 0; i < w * h; i++) {
-            const edgeStrength = edges[i] / (maxEdge || 1);
-            const darkStrength = Math.max(0, 1.0 - gray[i] / 128.0);
-            const combined = Math.min(1.0, edgeStrength * 2.2 + darkStrength * 0.8);
-            const intensity = edges[i] > threshold ? combined : combined * 0.4;
-
-            // Super Vivid Red/Orange Heatmap Overlay
-            out[i * 4] = Math.min(255, Math.round(255 * intensity + 40));  // R
-            out[i * 4 + 1] = Math.round(25 * (1 - intensity));             // G
-            out[i * 4 + 2] = Math.round(20 * (1 - intensity));             // B
-            out[i * 4 + 3] = Math.round(intensity * 220);                  // A (Super High Opacity)
-        }
-
-        // Apply 3x3 box blur for smoother overlay
-        const blurred = new Uint8ClampedArray(out.length);
-        for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
-                for (let c = 0; c < 4; c++) {
-                    let sum = 0;
-                    for (let dy = -1; dy <= 1; dy++) {
-                        for (let dx = -1; dx <= 1; dx++) {
-                            sum += out[((y+dy)*w+(x+dx))*4+c];
+                        if (x < w - 2 && y < h - 2) {
+                            const rightI = (y * w + (x + 2)) * 4;
+                            const downI = ((y + 2) * w + x) * 4;
+                            const rDiff = Math.abs(rVal - pixels[rightI]) + Math.abs(rVal - pixels[downI]);
+                            const gDiff = Math.abs(gVal - pixels[rightI+1]) + Math.abs(gVal - pixels[downI+1]);
+                            const bDiff = Math.abs(bVal - pixels[rightI+2]) + Math.abs(bVal - pixels[downI+2]);
+                            cellEdgeSum += (rDiff + gDiff + bDiff);
                         }
+                        count++;
                     }
-                    blurred[(y*w+x)*4+c] = Math.round(sum / 9);
                 }
-            }
-        }
-        overlayData.data.set(blurred);
-        ctx.putImageData(overlayData, 0, 0);
-
-        // Calculate dynamic weighted centroid & bounding box of detected defect pixels
-        let sumX = 0, sumY = 0, totalWeight = 0;
-        let minX = w, maxX = 0, minY = h, maxY = 0;
-        let countAboveThresh = 0;
-
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                const idx = y * w + x;
-                const alpha = out[idx * 4 + 3];
-                if (alpha > 60) {
-                    sumX += x * alpha;
-                    sumY += y * alpha;
-                    totalWeight += alpha;
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                    countAboveThresh++;
-                }
+                const avgLuma = cellLumaSum / (count || 1);
+                const edgeDensity = cellEdgeSum / (count || 1);
+                const score = edgeDensity * 1.5 + Math.abs(128 - avgLuma) * 0.8;
+                scores[r * gridCols + c] = score;
+                if (score > maxScore) maxScore = score;
             }
         }
 
-        let cx = w * 0.5, cy = h * 0.5;
-        let rx = w * 0.25, ry = h * 0.25;
+        // 2. Find Primary Defect Area (cells exceeding threshold)
+        const scoreThresh = maxScore * 0.55;
+        let hotMinX = w, hotMaxX = 0, hotMinY = h, hotMaxY = 0;
+        let weightedSumX = 0, weightedSumY = 0, totalW = 0;
+        let hotCellCount = 0;
 
-        if (totalWeight > 0 && countAboveThresh > 10) {
-            cx = sumX / totalWeight;
-            cy = sumY / totalWeight;
-            rx = Math.max(25, (maxX - minX) * 0.5);
-            ry = Math.max(25, (maxY - minY) * 0.5);
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                const s = scores[r * gridCols + c];
+                if (s >= scoreThresh) {
+                    const cx = (c + 0.5) * cellW;
+                    const cy = (r + 0.5) * cellH;
+                    weightedSumX += cx * s;
+                    weightedSumY += cy * s;
+                    totalW += s;
+
+                    const cellX1 = c * cellW, cellX2 = (c + 1) * cellW;
+                    const cellY1 = r * cellH, cellY2 = (r + 1) * cellH;
+                    if (cellX1 < hotMinX) hotMinX = cellX1;
+                    if (cellX2 > hotMaxX) hotMaxX = cellX2;
+                    if (cellY1 < hotMinY) hotMinY = cellY1;
+                    if (cellY2 > hotMaxY) hotMaxY = cellY2;
+                    hotCellCount++;
+                }
+            }
         }
 
-        // Draw dynamic defect bounding box & glowing target reticle around ACTUAL defect position
+        let targetX = totalW > 0 ? (weightedSumX / totalW) : (w * 0.5);
+        let targetY = totalW > 0 ? (weightedSumY / totalW) : (h * 0.5);
+
+        if (hotCellCount === 0 || (hotMaxX - hotMinX) < 10) {
+            hotMinX = Math.max(0, targetX - w * 0.2);
+            hotMaxX = Math.min(w, targetX + w * 0.2);
+            hotMinY = Math.max(0, targetY - h * 0.2);
+            hotMaxY = Math.min(h, targetY + h * 0.2);
+        }
+
+        const padX = Math.max(15, cellW * 0.5);
+        const padY = Math.max(15, cellH * 0.5);
+        const boxX = Math.max(10, hotMinX - padX);
+        const boxY = Math.max(10, hotMinY - padY);
+        const boxW = Math.min(w - boxX - 10, (hotMaxX - hotMinX) + padX * 2);
+        const boxH = Math.min(h - boxY - 10, (hotMaxY - hotMinY) + padY * 2);
+
+        // 3. Render Focus Vignette (darkens surrounding area so defect spot pops)
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.40)';
+        ctx.fillRect(0, 0, w, h);
+
         ctx.save();
-
-        // 1. Defect Bounding Box
-        ctx.lineWidth = Math.max(3, Math.round(w / 180));
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.95)';
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
-        ctx.setLineDash([8, 4]);
-
-        const boxX = Math.max(5, minX - 10);
-        const boxY = Math.max(5, minY - 10);
-        const boxW = Math.min(w - boxX - 5, (maxX - minX) + 20);
-        const boxH = Math.min(h - boxY - 5, (maxY - minY) + 20);
-
-        if (countAboveThresh > 10) {
-            ctx.fillRect(boxX, boxY, boxW, boxH);
-            ctx.strokeRect(boxX, boxY, boxW, boxH);
-        }
-
-        // 2. Dashed Target Ellipse Ring around Centroid
+        ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-        ctx.lineWidth = Math.max(3, Math.round(w / 150));
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.setLineDash([10, 6]);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-        ctx.lineWidth = Math.max(2, Math.round(w / 200));
-        ctx.strokeStyle = 'rgba(245, 158, 11, 1.0)'; // Amber highlight ring
-        ctx.setLineDash([]);
-        ctx.stroke();
-
+        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+        else ctx.rect(boxX, boxY, boxW, boxH);
+        ctx.fill();
         ctx.restore();
 
+        // 4. Render Hotspot Highlight & Crisp Corner Bracket Target Frame
+        ctx.save();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+        else ctx.rect(boxX, boxY, boxW, boxH);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = Math.max(3, Math.round(w / 160));
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 8;
+
+        const cornerLen = Math.min(boxW, boxH) * 0.25;
+
+        // Top-Left Corner
+        ctx.beginPath();
+        ctx.moveTo(boxX, boxY + cornerLen); ctx.lineTo(boxX, boxY); ctx.lineTo(boxX + cornerLen, boxY);
+        ctx.stroke();
+
+        // Top-Right Corner
+        ctx.beginPath();
+        ctx.moveTo(boxX + boxW - cornerLen, boxY); ctx.lineTo(boxX + boxW, boxY); ctx.lineTo(boxX + boxW, boxY + cornerLen);
+        ctx.stroke();
+
+        // Bottom-Right Corner
+        ctx.beginPath();
+        ctx.moveTo(boxX + boxW, boxY + boxH - cornerLen); ctx.lineTo(boxX + boxW, boxY + boxH); ctx.lineTo(boxX + boxW - cornerLen, boxY + boxH);
+        ctx.stroke();
+
+        // Bottom-Left Corner
+        ctx.beginPath();
+        ctx.moveTo(boxX + cornerLen, boxY + boxH); ctx.lineTo(boxX, boxY + boxH); ctx.lineTo(boxX, boxY + boxH - cornerLen);
+        ctx.stroke();
+
+        // 5. Pinpoint Callout Badge Label Above Defect Hotspot
+        const badgeText = "🎯 Primary Defect Area";
+        const fontSize = Math.max(11, Math.round(w / 42));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        const textWidth = ctx.measureText(badgeText).width;
+        const badgeW = textWidth + 20;
+        const badgeH = Math.max(22, Math.round(w / 35));
+        const badgeX = Math.max(10, Math.min(w - badgeW - 10, boxX));
+        const badgeY = boxY > badgeH + 8 ? (boxY - badgeH - 6) : (boxY + 8);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+        else ctx.rect(badgeX, badgeY, badgeW, badgeH);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+        ctx.restore();
         overlayGenerated = true;
     }
 
     function generateSimulatedOverlay(canvas, w, h) {
-        // Fallback: generate a vibrant gradient + boundary ring when CORS blocks pixel access
         const ctx = canvas.getContext('2d');
-        const extent = {{ complaint.extent }};
-        
-        const cx = w * 0.5, cy = h * 0.5;
-        const rx = w * (extent / 100) * 0.45;
-        const ry = h * (extent / 100) * 0.45;
-        
-        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
-        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
-        gradient.addColorStop(0.65, 'rgba(220, 38, 38, 0.6)');
-        gradient.addColorStop(1, 'rgba(185, 28, 28, 0)');
-        
-        ctx.fillStyle = gradient;
+        const extent = {{ "%.1f"|format(complaint.extent) }};
+
+        ctx.clearRect(0, 0, w, h);
+
+        const boxW = Math.min(w * 0.7, Math.max(w * 0.35, w * (extent / 100)));
+        const boxH = Math.min(h * 0.7, Math.max(h * 0.35, h * (extent / 100)));
+        const boxX = (w - boxW) / 2;
+        const boxY = (h - boxH) / 2;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.40)';
         ctx.fillRect(0, 0, w, h);
 
-        // Vibrant Outline Ring
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.setLineDash([10, 6]);
-        ctx.stroke();
+        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+        else ctx.rect(boxX, boxY, boxW, boxH);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+        else ctx.rect(boxX, boxY, boxW, boxH);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = Math.max(3, Math.round(w / 160));
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 8;
+
+        const cornerLen = Math.min(boxW, boxH) * 0.25;
 
         ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(239, 68, 68, 1.0)';
-        ctx.setLineDash([]);
+        ctx.moveTo(boxX, boxY + cornerLen); ctx.lineTo(boxX, boxY); ctx.lineTo(boxX + cornerLen, boxY);
+        ctx.moveTo(boxX + boxW - cornerLen, boxY); ctx.lineTo(boxX + boxW, boxY); ctx.lineTo(boxX + boxW, boxY + cornerLen);
+        ctx.moveTo(boxX + boxW, boxY + boxH - cornerLen); ctx.lineTo(boxX + boxW, boxY + boxH); ctx.lineTo(boxX + boxW - cornerLen, boxY + boxH);
+        ctx.moveTo(boxX + cornerLen, boxY + boxH); ctx.lineTo(boxX, boxY + boxH); ctx.lineTo(boxX, boxY + boxH - cornerLen);
         ctx.stroke();
+
+        const badgeText = "🎯 Primary Defect Area";
+        const fontSize = Math.max(11, Math.round(w / 42));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        const textWidth = ctx.measureText(badgeText).width;
+        const badgeW = textWidth + 20;
+        const badgeH = Math.max(22, Math.round(w / 35));
+        const badgeX = Math.max(10, Math.min(w - badgeW - 10, boxX));
+        const badgeY = boxY > badgeH + 8 ? (boxY - badgeH - 6) : (boxY + 8);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+        else ctx.rect(badgeX, badgeY, badgeW, badgeH);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+        ctx.restore();
     }
 
     function toggleOverlay() {
