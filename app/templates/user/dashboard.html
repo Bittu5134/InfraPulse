@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}My Tickets - InfraPulse{% endblock %}
+{% block title %}My Reports - InfraPulse{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Header Card -->
     <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
         <div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">My Maintenance Tickets</h1>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">My Submitted Reports</h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Logged in as <strong class="text-slate-700 dark:text-slate-300">{{ current_user.name }}</strong> ({{ current_user.email }})
             </p>
@@ -15,7 +15,7 @@
         <div class="flex items-center gap-2">
             <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
                 <i class="fa-solid fa-plus text-xs"></i>
-                <span>Create Ticket</span>
+                <span>Report an Issue</span>
             </a>
             <a href="/user/logout" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors" title="Sign Out">
                 <i class="fa-solid fa-right-from-bracket text-xs"></i>
@@ -51,10 +51,10 @@
     {% if not complaints %}
     <div class="p-12 text-center rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]">
         <i class="fa-solid fa-ticket text-3xl text-slate-300 dark:text-slate-700 mb-3"></i>
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">No Tickets Found</h3>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">You have not submitted any maintenance complaints matching this filter.</p>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">No Reports Found</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">You have not submitted any issue reports matching this filter.</p>
         <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white transition-colors">
-            Submit Defect Report
+            Report an Issue
         </a>
     </div>
     {% else %}

@@ -52,13 +52,13 @@
                 <div class="p-6 space-y-5">
                     <!-- Photograph with Toggleable Affected Area Overlay -->
                     <div class="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 max-h-80 flex items-center justify-center" id="photo-container">
-                        <img id="defect-photo" src="{{ complaint.photo_path }}" alt="Defect Evidence" class="w-full h-full object-cover max-h-80" crossorigin="anonymous" />
+                        <img id="defect-photo" src="{{ complaint.photo_path }}" alt="Report Photo" class="w-full h-full object-cover max-h-80" crossorigin="anonymous" />
                         <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300 z-10"></canvas>
                         
                         <!-- Overlay Toggle Button -->
-                        <button id="overlay-toggle" onclick="toggleOverlay()" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-sm border border-white/20 shadow-lg transition-all" title="Toggle affected area heatmap overlay">
+                        <button id="overlay-toggle" onclick="toggleOverlay()" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-sm border border-white/20 shadow-lg transition-all" title="Toggle defect outline overlay">
                             <i class="fa-solid fa-eye text-[10px]"></i>
-                            <span>Show Affected Area</span>
+                            <span>Show Highlighted Defect</span>
                         </button>
 
                         <!-- Extent Badge -->
@@ -81,7 +81,7 @@
                         </div>
 
                         <div>
-                            <span class="text-slate-400 block font-medium mb-1">Problem Description</span>
+                            <span class="text-slate-400 block font-medium mb-1">Issue Description</span>
                             <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-4 rounded-lg border border-slate-200/80 dark:border-slate-700/60 space-y-2">
                                 {{ complaint.description | render_md | safe }}
                             </div>
@@ -93,13 +93,13 @@
             <!-- Activity & Discussion Feed -->
             <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-6 space-y-4">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-comments text-[#f38020]"></i> Activity & Discussion
+                    <i class="fa-solid fa-comments text-[#f38020]"></i> Updates & Activity
                 </h3>
 
                 <div id="chat-timeline-container" class="space-y-3 max-h-80 overflow-y-auto pr-1 text-xs">
                     {% if not comments %}
                         <div id="no-comments-msg" class="text-center py-8 text-slate-400 italic border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
-                            No messages logged for this ticket yet.
+                            No updates logged for this report yet.
                         </div>
                     {% else %}
                         {% for c in comments %}
@@ -126,18 +126,18 @@
                     </form>
                 {% else %}
                     <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <a href="/user/login?next=/ticket/{{ complaint.id }}" class="text-[#ea580c] dark:text-[#f97316] font-semibold hover:underline">Sign In</a> to post comments on this ticket.
+                        <a href="/user/login?next=/ticket/{{ complaint.id }}" class="text-[#ea580c] dark:text-[#f97316] font-semibold hover:underline">Sign In</a> to post comments on this report.
                     </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Right 1 Col: Triage Analysis, Actions, Contact -->
+        <!-- Right 1 Col: Issue Details & Actions -->
         <div class="space-y-6">
-            <!-- Staff Actions (If Staff Member of Matching Domain) -->
+            <!-- Staff Actions -->
             {% if current_staff %}
             <div class="rounded-xl border border-orange-200/80 dark:border-orange-900/80 bg-orange-50/40 dark:bg-orange-950/20 p-5 space-y-3">
-                <span class="text-xs font-bold text-orange-800 dark:text-orange-300 uppercase tracking-wider block">Staff Actions</span>
+                <span class="text-xs font-bold text-orange-800 dark:text-orange-300 uppercase tracking-wider block">Official Actions</span>
 
                 {% if not complaint.category or complaint.category == current_staff.domain %}
                     <div class="flex flex-col gap-2">
@@ -169,24 +169,24 @@
                 {% else %}
                     <div class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800/60">
                         <i class="fa-solid fa-lock text-xs mr-1"></i>
-                        <span>Domain Restricted: Assigned to {{ complaint.category.value }} Squad.</span>
+                        <span>Department Restricted: Assigned to {{ complaint.category.value }} Team.</span>
                     </div>
                 {% endif %}
             </div>
             {% endif %}
 
-            <!-- Triage & Priority Metrics Card -->
+            <!-- Issue Metrics Card -->
             <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-5 space-y-4">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Triage Analysis</span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Report Assessment</span>
 
                 <div class="space-y-2 text-xs">
                     <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                        <span class="text-slate-500">Defect Type</span>
+                        <span class="text-slate-500">Reported Issue</span>
                         <strong class="text-slate-900 dark:text-white">{{ complaint.defect_name or "Pending Analysis" }}</strong>
                     </div>
 
                     <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                        <span class="text-slate-500">Department Queue</span>
+                        <span class="text-slate-500">Department</span>
                         {% if complaint.category == "Structural" %}
                             <span class="font-semibold text-rose-600 dark:text-rose-400">Structural</span>
                         {% elif complaint.category == "Functional" %}
@@ -204,7 +204,7 @@
                     </div>
 
                     <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                        <span class="text-slate-500">Extent</span>
+                        <span class="text-slate-500">Affected Area</span>
                         <span class="font-mono font-semibold text-slate-900 dark:text-white">{{ "%.1f"|format(complaint.extent) }}%</span>
                     </div>
 
@@ -215,9 +215,9 @@
                 </div>
             </div>
 
-            <!-- Requester Contact Info (Privacy Protected) -->
+            <!-- Citizen Contact Info -->
             <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-5 space-y-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Requester Information</span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Citizen Information</span>
 
                 <div class="space-y-1.5 text-xs">
                     {% if is_authorized_viewer %}
@@ -234,9 +234,9 @@
                 </div>
             </div>
 
-            <!-- Assigned Staff Member Info -->
+            <!-- Assigned Repair Official Info -->
             <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-5 space-y-2 text-center text-xs">
-                <span class="text-slate-400 block uppercase font-bold text-[10px]">Assigned Operator</span>
+                <span class="text-slate-400 block uppercase font-bold text-[10px]">Assigned Official</span>
                 {% if complaint.assigned_staff_name %}
                     <div class="font-semibold text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-user-check text-[#f38020]"></i>
