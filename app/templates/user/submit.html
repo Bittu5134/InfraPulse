@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 sm:p-8 space-y-6">
+    <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-6 sm:p-8 space-y-6">
         <div>
             <h1 class="text-xl font-bold text-slate-900 dark:text-white">Submit Maintenance Report</h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -23,41 +23,41 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Full Name *</label>
-                    <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="e.g. Alex Morgan" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="text" name="user_name" value="{{ current_user.name if current_user else '' }}" placeholder="e.g. Alex Morgan" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
 
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Email Address *</label>
-                    <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. alex@example.com" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="email" name="user_email" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. alex@example.com" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Phone Number</label>
-                    <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="e.g. +91 9876543210" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                    <input type="tel" name="user_phone" value="{{ current_user.phone if current_user and current_user.phone else '' }}" placeholder="e.g. +91 9876543210" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500" />
                 </div>
 
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Location / Address *</label>
-                    <input type="text" name="address" placeholder="e.g. Block B, 3rd Floor Corridor" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="text" name="address" placeholder="e.g. Block B, 3rd Floor Corridor" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
             </div>
 
             <div class="space-y-1">
                 <label class="block font-medium text-slate-700 dark:text-slate-300">Problem Description *</label>
-                <textarea name="description" rows="3" placeholder="Describe the physical condition (e.g. spalling rebar on ceiling, stagnant water leaking from pipe, loose floor tiles)..." class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-3 focus:outline-none focus:ring-1 focus:ring-indigo-500" required></textarea>
+                <textarea name="description" rows="3" placeholder="Describe the physical condition (e.g. spalling rebar on ceiling, stagnant water leaking from pipe, loose floor tiles)..." class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-3 focus:outline-none focus:ring-1 focus:ring-orange-500" required></textarea>
             </div>
 
             <div class="space-y-1">
                 <label class="block font-medium text-slate-700 dark:text-slate-300">Defect Photograph *</label>
-                <input type="file" name="photo" accept="image/*" class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950 dark:file:text-indigo-300 hover:file:bg-indigo-100 border border-slate-200 dark:border-slate-700 rounded-lg p-1" required />
+                <input type="file" name="photo" accept="image/*" class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-[#c2410c] dark:file:bg-orange-950 dark:file:text-[#f97316] hover:file:bg-orange-100 border border-slate-200 dark:border-slate-700 rounded-lg p-1" required />
                 <span class="text-[11px] text-slate-400">Supported formats: JPG, PNG, WEBP (auto-converted to standard format).</span>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <a href="/" class="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</a>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
                     <i class="fa-solid fa-paper-plane text-xs"></i>
                     <span>Submit Ticket</span>
                 </button>

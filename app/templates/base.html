@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InfraPulse - Infrastructure Operations Portal{% endblock %}</title>
+    <title>{% block title %}InfraPulse - Infrastructure Maintenance Platform{% endblock %}</title>
     
     <!-- Local Tailwind CSS Engine -->
     <script src="/static/vendor/tailwind/tailwind.js"></script>
@@ -16,14 +16,19 @@
                         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
+                        cloudflare: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                            orange: '#f38020',
+                            orangeHover: '#fa8c16',
+                            dark: '#0b0f19',
+                            cardDark: '#111827',
+                            borderDark: '#1f2937',
                         }
                     }
                 }
@@ -31,7 +36,7 @@
         }
     </script>
     
-    <!-- Enterprise Custom Stylesheet & Font Stack -->
+    <!-- Cloudflare-Inspired Custom Stylesheet & Font Stack -->
     <link rel="stylesheet" href="/static/css/enterprise.css">
     
     <!-- Local FontAwesome Icons -->
@@ -59,33 +64,33 @@
     </script>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-orange-500 selection:text-white">
 
-    <!-- Enterprise Top Navigation Bar -->
-    <header class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <!-- Brand Identity -->
             <div class="flex items-center gap-6">
                 <a href="/" class="flex items-center gap-2.5 text-slate-900 dark:text-white font-semibold tracking-tight text-lg group">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-500/30 group-hover:bg-indigo-500 transition-colors">
-                        <i class="fa-solid fa-shield-halved text-sm"></i>
+                    <div class="w-8 h-8 rounded-lg bg-[#f38020] flex items-center justify-center text-white shadow-sm group-hover:bg-[#fa8c16] transition-colors">
+                        <i class="fa-solid fa-cloud-bolt text-sm"></i>
                     </div>
-                    <span>InfraPulse</span>
+                    <span class="font-bold text-slate-900 dark:text-white">InfraPulse</span>
                 </a>
             </div>
             
             <!-- Navigation Actions -->
             <div class="flex items-center gap-3">
                 <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
+                <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
                     <i class="fa-solid fa-moon text-sm hidden dark:block"></i>
-                    <i class="fa-solid fa-sun text-sm block dark:hidden"></i>
+                    <i class="fa-solid fa-sun text-sm block dark:hidden text-amber-500"></i>
                 </button>
 
                 <!-- Notification Dropdown -->
                 {% if current_user or current_staff or current_admin %}
                 <div class="relative" id="notif-dropdown-wrapper">
-                    <button onclick="document.getElementById('notif-panel').classList.toggle('hidden')" class="relative w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Notifications">
+                    <button onclick="document.getElementById('notif-panel').classList.toggle('hidden')" class="relative w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Notifications">
                         <i class="fa-solid fa-bell text-sm"></i>
                         <span id="notif-count-badge" class="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-600 text-white hidden">0</span>
                     </button>
@@ -93,9 +98,9 @@
                     <div id="notif-panel" class="hidden absolute right-0 mt-2 w-80 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-3">
                         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2 mb-2">
                             <span class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="fa-solid fa-bell text-indigo-500"></i> Notifications
+                                <i class="fa-solid fa-bell text-[#f38020]"></i> Notifications
                             </span>
-                            <button onclick="markAllNotificationsRead()" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline">Mark all read</button>
+                            <button onclick="markAllNotificationsRead()" class="text-[11px] text-[#ea580c] dark:text-[#f97316] hover:underline font-medium">Mark all read</button>
                         </div>
                         <div id="notif-list-container" class="space-y-1.5 max-h-64 overflow-y-auto text-xs">
                             <div class="text-center py-4 text-slate-400 italic">No notifications</div>
@@ -104,9 +109,9 @@
                 </div>
                 {% endif %}
 
-                <!-- Primary Action -->
+                <!-- Primary Create Action -->
                 {% if request.url.path != '/' %}
-                    <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                    <a href="/user/submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Create Ticket</span>
                     </a>
@@ -114,8 +119,8 @@
 
                 <!-- User Portal Links -->
                 {% if current_user %}
-                    <a href="/user/dashboard" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
-                        <i class="fa-solid fa-ticket text-indigo-500"></i>
+                    <a href="/user/dashboard" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                        <i class="fa-solid fa-ticket text-[#f38020]"></i>
                         <span>My Tickets</span>
                     </a>
                 {% else %}
@@ -128,7 +133,7 @@
 
                 <!-- Staff & Admin Links -->
                 {% if current_staff %}
-                    <a href="/staff/queue" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                    <a href="/staff/queue" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-orange-200 dark:border-orange-900/60 bg-orange-50/60 dark:bg-orange-950/30 text-orange-800 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors">
                         <i class="fa-solid fa-user-shield text-xs"></i>
                         <span>Staff Portal</span>
                     </a>
@@ -139,7 +144,7 @@
                 {% endif %}
 
                 {% if current_admin %}
-                    <a href="/admin" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    <a href="/admin" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         <i class="fa-solid fa-screwdriver-wrench text-xs"></i>
                         <span>Admin</span>
                     </a>
@@ -158,12 +163,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/50 py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+    <footer class="border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="flex items-center gap-2">
                 <span class="font-semibold text-slate-700 dark:text-slate-300">InfraPulse</span>
-                <span class="text-slate-400">•</span>
-                <span>Defect Prioritization & Maintenance Dispatch</span>
+                <span class="text-slate-300 dark:text-slate-700">•</span>
+                <span>Infrastructure Prioritization & Maintenance System</span>
             </div>
             <div>© 2026 InfraPulse</div>
         </div>
@@ -193,8 +198,8 @@
                 }
                 
                 container.innerHTML = data.notifications.map(n => `
-                    <a href="${n.link_url || '#'}" class="block p-2.5 rounded-lg ${n.is_read ? 'bg-slate-50 dark:bg-slate-800/40 text-slate-500' : 'bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-800/50 text-slate-800 dark:text-slate-200'} hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <div class="font-semibold text-xs text-indigo-600 dark:text-indigo-400 mb-0.5">${n.title}</div>
+                    <a href="${n.link_url || '#'}" class="block p-2.5 rounded-lg ${n.is_read ? 'bg-slate-50 dark:bg-slate-800/40 text-slate-500' : 'bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/70 dark:border-orange-900/50 text-slate-800 dark:text-slate-200'} hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <div class="font-semibold text-xs text-[#ea580c] dark:text-[#f97316] mb-0.5">${n.title}</div>
                         <div class="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">${n.message}</div>
                         <div class="text-[10px] text-slate-400 text-right mt-1">${n.created_at}</div>
                     </a>

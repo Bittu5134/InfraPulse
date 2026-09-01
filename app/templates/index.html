@@ -3,24 +3,29 @@
 {% block title %}InfraPulse - Infrastructure Operations & Priority Maintenance{% endblock %}
 
 {% block content %}
-<div class="space-y-12">
-    <!-- Hero Header -->
-    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 sm:p-12 shadow-sm">
+<div class="space-y-10">
+    <!-- Hero Header (Cloudflare Design Palette) -->
+    <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] p-8 sm:p-12 shadow-sm">
         <div class="max-w-3xl space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 dark:bg-orange-950/50 text-[#c2410c] dark:text-[#f97316] border border-orange-200/70 dark:border-orange-900/50">
+                <i class="fa-solid fa-cloud-bolt text-xs"></i>
+                <span>Automated Defect Triage & Dispatch Engine</span>
+            </div>
+
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
-                Facility Defect Reporting & Priority Maintenance Dispatch
+                Infrastructure Defect Prioritization & Maintenance Routing
             </h1>
             
             <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-                Automated triage system for campus infrastructure. Submissions are processed to compute objective priority metrics, routed to Structural, Functional, or Performance queues, and tracked to resolution.
+                Real-time incident response system for campus infrastructure. Submissions are processed to compute objective priority metrics, routed to dedicated department queues, and tracked to resolution.
             </p>
             
             <div class="flex flex-wrap gap-3 pt-2">
-                <a href="/user/submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors">
+                <a href="/user/submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors">
                     <i class="fa-solid fa-plus text-xs"></i>
-                    <span>Submit Maintenance Ticket</span>
+                    <span>Submit Maintenance Report</span>
                 </a>
-                <a href="/user/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+                <a href="/user/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
                     <i class="fa-solid fa-ticket text-slate-400"></i>
                     <span>Track Active Tickets</span>
                 </a>
@@ -31,38 +36,38 @@
     <!-- 3 Step Operational Pipeline -->
     <div class="space-y-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">System Workflow</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Automated triage and dispatch cycle</p>
+            <h2 class="text-base font-bold text-slate-900 dark:text-white tracking-tight">System Workflow</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Three-phase automated defect lifecycle</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+            <div class="p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-3">
                 <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-700 dark:text-slate-300">
                     01
                 </div>
-                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Defect Ingestion</h3>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Incident Ingestion</h3>
                 <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Users submit photographic evidence along with exact location details and defect descriptions.
+                    Users submit photographic evidence, precise campus location details, and defect descriptions.
                 </p>
             </div>
 
-            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
-                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+            <div class="p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-950/50 flex items-center justify-center text-sm font-bold text-[#ea580c] dark:text-[#f97316]">
                     02
                 </div>
                 <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Priority Routing</h3>
                 <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    The priority engine computes risk scores from severity, extent, and category weights to order queues.
+                    The algorithm computes risk scores from severity, extent, and category weights to order queues dynamically.
                 </p>
             </div>
 
-            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+            <div class="p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-3">
                 <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
                     03
                 </div>
                 <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Squad Resolution</h3>
                 <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Assigned staff transition tickets through lifecycle stages until verified resolution.
+                    Department staff claim tickets, manage physical remediation, and transition to resolved status.
                 </p>
             </div>
         </div>

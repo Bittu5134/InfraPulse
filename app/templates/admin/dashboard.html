@@ -5,7 +5,7 @@
 {% block content %}
 <div class="space-y-8">
     <!-- Admin Header -->
-    <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-user-gear"></i>
@@ -27,22 +27,22 @@
 
     <!-- Summary Metrics -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+        <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-1">
             <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Complaints</div>
             <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ metrics.tickets }}</div>
         </div>
 
-        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+        <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-1">
             <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Pending</div>
             <div class="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{{ metrics.pending }}</div>
         </div>
 
-        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+        <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-1">
             <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Staff Operators</div>
-            <div class="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">{{ metrics.staff }}</div>
+            <div class="text-2xl font-bold font-mono text-[#ea580c] dark:text-[#f97316]">{{ metrics.staff }}</div>
         </div>
 
-        <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+        <div class="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm space-y-1">
             <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Registered Users</div>
             <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ metrics.users }}</div>
         </div>
@@ -51,25 +51,25 @@
     <!-- Staff Management Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Create Staff Form -->
-        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4 h-fit">
+        <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-6 space-y-4 h-fit">
             <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-indigo-500"></i> Add Staff Member
+                <i class="fa-solid fa-user-plus text-[#f38020]"></i> Add Staff Member
             </h3>
 
             <form action="/admin/staff/create" method="POST" class="space-y-3 text-xs">
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Staff Name *</label>
-                    <input type="text" name="name" placeholder="Full Name" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="text" name="name" placeholder="Full Name" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
 
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Email *</label>
-                    <input type="email" name="email" placeholder="staff@infrapulse.org" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="email" name="email" placeholder="staff@infrapulse.org" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
 
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Department Domain *</label>
-                    <select name="domain" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required>
+                    <select name="domain" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500" required>
                         {% for cat in categories %}
                             <option value="{{ cat }}">{{ cat }} Department</option>
                         {% endfor %}
@@ -78,24 +78,24 @@
 
                 <div class="space-y-1">
                     <label class="block font-medium text-slate-700 dark:text-slate-300">Password *</label>
-                    <input type="password" name="password" placeholder="••••••••" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500" required />
+                    <input type="password" name="password" placeholder="••••••••" class="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500" required />
                 </div>
 
-                <button type="submit" class="w-full px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors mt-2">
+                <button type="submit" class="w-full px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#f38020] hover:bg-[#ea580c] text-white shadow-sm transition-colors mt-2">
                     Create Account
                 </button>
             </form>
         </div>
 
         <!-- Staff List Table -->
-        <div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4">
+        <div class="lg:col-span-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-6 space-y-4">
             <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-user-shield text-indigo-500"></i> Active Squad Members
+                <i class="fa-solid fa-user-shield text-[#f38020]"></i> Active Squad Members
             </h3>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-800">
-                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200/80 dark:divide-slate-800">
+                    <thead class="bg-slate-50/80 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                         <tr>
                             <th class="py-2.5 px-3">Name</th>
                             <th class="py-2.5 px-3">Email</th>
@@ -131,14 +131,14 @@
     </div>
 
     <!-- All Complaints Oversight Table -->
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-4">
+    <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm p-6 space-y-4">
         <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <i class="fa-solid fa-list-check text-slate-400"></i> All Maintenance Complaints
         </h3>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300 divide-y divide-slate-200/80 dark:divide-slate-800">
+                <thead class="bg-slate-50/80 dark:bg-slate-800/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                     <tr>
                         <th class="py-2.5 px-3">Ticket ID</th>
                         <th class="py-2.5 px-3">Defect & Category</th>
@@ -154,7 +154,7 @@
                     {% for t in tickets_list %}
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                         <td class="py-2.5 px-3 font-mono font-semibold">
-                            <a href="/ticket/{{ t.id }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">#{{ t.id }}</a>
+                            <a href="/ticket/{{ t.id }}" class="text-[#f38020] hover:underline">#{{ t.id }}</a>
                         </td>
                         <td class="py-2.5 px-3">
                             <div class="font-medium text-slate-900 dark:text-white">{{ t.defect_name or "Pending" }}</div>
@@ -162,7 +162,7 @@
                         </td>
                         <td class="py-2.5 px-3">{{ t.user_email }}</td>
                         <td class="py-2.5 px-3 truncate max-w-[150px]">{{ t.address }}</td>
-                        <td class="py-2.5 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ t.priority_score }}</td>
+                        <td class="py-2.5 px-3 font-mono font-bold text-[#ea580c] dark:text-[#f97316]">{{ t.priority_score }}</td>
                         <td class="py-2.5 px-3">{{ t.assigned_staff_name or "Unassigned" }}</td>
                         <td class="py-2.5 px-3">
                             {% if t.status.value == "Submitted" %}
@@ -170,7 +170,7 @@
                             {% elif t.status.value == "Assigned" %}
                                 <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">Assigned</span>
                             {% elif t.status.value == "In Progress" %}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">In Progress</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-orange-50 dark:bg-orange-950/40 text-[#c2410c] dark:text-[#f97316] border border-orange-200 dark:border-orange-900">In Progress</span>
                             {% else %}
                                 <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Resolved</span>
                             {% endif %}
