@@ -36,10 +36,10 @@ ENSEMBLE_OPTIMAL_WEIGHTS = {
 
 # Category-Specialized Weighted Consensus Matrix W(c, m) (Optimized for Out-of-Distribution Generalization)
 DEFAULT_PER_CATEGORY_WEIGHTS = {
-    "cracked_tiles":  {"convnext_tiny": 0.50, "swin_t": 0.30, "quantized_int8": 0.10, "baseline": 0.10, "mtl_dual_branch": 0.00},
-    "paint_peeling":  {"convnext_tiny": 0.50, "swin_t": 0.30, "quantized_int8": 0.10, "baseline": 0.10, "mtl_dual_branch": 0.00},
-    "spalling":       {"convnext_tiny": 0.60, "baseline": 0.20, "quantized_int8": 0.20, "swin_t": 0.00, "mtl_dual_branch": 0.00},
-    "stagnant_water": {"convnext_tiny": 0.85, "swin_t": 0.15, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
+    "cracked_tiles":  {"convnext_tiny": 0.70, "swin_t": 0.30, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
+    "paint_peeling":  {"convnext_tiny": 0.65, "swin_t": 0.35, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
+    "spalling":       {"convnext_tiny": 0.70, "swin_t": 0.15, "baseline": 0.15, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
+    "stagnant_water": {"convnext_tiny": 0.75, "swin_t": 0.25, "baseline": 0.00, "quantized_int8": 0.00, "mtl_dual_branch": 0.00},
 }
 
 def load_consensus_weights() -> Dict[str, Dict[str, float]]:
