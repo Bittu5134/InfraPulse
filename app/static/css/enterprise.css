@@ -44,3 +44,65 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.55);
 }
+
+/* EasyMDE Custom Theme */
+.EasyMDEContainer {
+  font-family: var(--font-sans) !important;
+}
+.EasyMDEContainer .editor-toolbar {
+  border-color: #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  opacity: 1 !important;
+  padding: 4px 8px;
+}
+.EasyMDEContainer .editor-toolbar button {
+  color: #475569 !important;
+  border-radius: 4px;
+}
+.EasyMDEContainer .editor-toolbar button:hover,
+.EasyMDEContainer .editor-toolbar button.active {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  border-color: transparent !important;
+}
+.EasyMDEContainer .CodeMirror {
+  border-color: #e2e8f0 !important;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  font-size: 0.75rem !important;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  min-height: 120px;
+}
+.EasyMDEContainer .editor-preview {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 0.75rem !important;
+  line-height: 1.6;
+}
+
+/* Dark mode EasyMDE adjustments */
+html.dark .EasyMDEContainer .editor-toolbar {
+  border-color: #334155 !important;
+  background-color: #1e293b !important;
+}
+html.dark .EasyMDEContainer .editor-toolbar button {
+  color: #cbd5e1 !important;
+}
+html.dark .EasyMDEContainer .editor-toolbar button:hover,
+html.dark .EasyMDEContainer .editor-toolbar button.active {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+html.dark .EasyMDEContainer .CodeMirror {
+  border-color: #334155 !important;
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+html.dark .EasyMDEContainer .editor-preview {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
