@@ -108,6 +108,10 @@ app.include_router(api.router)
 app.include_router(live.router)
 app.include_router(test_bench.router)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "system": "InfraPulse", "version": "3.0.0"}
+
 @app.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request):
     async with AsyncSessionLocal() as db:
