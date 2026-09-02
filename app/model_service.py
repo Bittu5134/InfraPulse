@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import json
+import gc
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -258,6 +259,7 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
             "model_name": f"Calibrated Weighted Consensus ({len(loaded)} Models)"
         }
         _prediction_cache[cache_key] = formatted
+        gc.collect()
         return formatted
     except Exception as e:
         print(f"[ModelService] Consensus inference failed: {e}")
