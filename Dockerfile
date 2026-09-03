@@ -28,8 +28,8 @@ COPY . .
 # Ensure upload directory exists
 RUN mkdir -p /app/app/static/uploads
 
-# Expose default port
-EXPOSE 8000
+# Expose port 8003 for Hack Club container reverse proxy
+EXPOSE 8003
 
-# Railway dynamic port binding with single worker for zero OOM crash guarantee
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]
+# Hetzner container port binding (Port 8003) with single worker for zero OOM crash guarantee
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8003} --workers 1"]
