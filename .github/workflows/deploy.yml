@@ -34,7 +34,7 @@ jobs:
       - name: Install Dependencies on Remote Server
         run: |
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "/opt/infrapulse/.venv/bin/pip install --upgrade pip && /opt/infrapulse/.venv/bin/pip install -r /opt/infrapulse/requirements.txt" || true
+            "/opt/infrapulse/.venv/bin/pip install --upgrade pip && /opt/infrapulse/.venv/bin/pip install --no-cache-dir --prefer-binary -r /opt/infrapulse/requirements.txt" || true
 
       - name: Restart Service and Reload Caddy
         run: |
