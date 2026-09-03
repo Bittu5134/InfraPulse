@@ -43,6 +43,7 @@ jobs:
 
       - name: Verify Health Endpoint
         run: |
+          sleep 3
           RESPONSE=$(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "curl -g -s http://[::1]:8003/health" || true)
           echo "Health Check Response: $RESPONSE"
