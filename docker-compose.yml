@@ -8,15 +8,16 @@ services:
     container_name: infrapulse-app
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8003:8003"
     environment:
       - APP_ENV=production
+      - PORT=8003
       - PYTHONPATH=/app
     volumes:
       - ./infrapulse.db:/app/infrapulse.db
       - ./app/static/uploads:/app/app/static/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/queue"]
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 15s
       timeout: 5s
       retries: 3

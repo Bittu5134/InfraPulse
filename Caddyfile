@@ -1,0 +1,10 @@
+# Caddyfile configuration for InfraPulse on bittu@hackclub.app (Hetzner Container)
+infrapulse.hackclub.app {
+    reverse_proxy 127.0.0.1:8003
+
+    # Disable buffering for real-time SSE live queue streams
+    header {
+        Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        X-Accel-Buffering "no"
+    }
+}

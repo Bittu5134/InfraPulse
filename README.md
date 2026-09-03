@@ -229,13 +229,23 @@ python3 reset_db.py
 
 ### 3. Run Web Application
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
 ```
-Access the application at `http://localhost:8000`.
+Access the application at `http://localhost:8003`.
 
-### 4. Docker Deployment
+### 4. Production Container Deployment (`infrapulse.hackclub.app`)
+InfraPulse is deployed on `bittu@hackclub.app` (Hetzner VPS container) listening on **Port 8003** reverse-proxied via **Caddy**.
+
 ```bash
+# Docker Compose Run (Port 8003)
 docker-compose up --build -d
+```
+
+**Caddyfile Reverse Proxy Configuration**:
+```caddy
+infrapulse.hackclub.app {
+    reverse_proxy 127.0.0.1:8003
+}
 ```
 
 ---
