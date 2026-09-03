@@ -53,3 +53,6 @@ Thumbs.db
 
 # Disposable scratch and junk files
 junk/
+# Git LFS tool files (ignore binary and tarball)
+git-lfs-3.5.1/
+git-lfs.tar.gz
