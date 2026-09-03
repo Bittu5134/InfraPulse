@@ -87,6 +87,15 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
         )
     return HTMLResponse(content=str(exc.detail), status_code=exc.status_code)
 
+# Middleware to disable all HTTP caching across all routes, static assets, and APIs
+@app.middleware("http")
+async def add_no_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # Session Middleware for User, Staff, Admin Auth
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
