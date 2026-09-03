@@ -35,10 +35,11 @@ data/
 app/model/data/
 app/model/checkpoints/archive/
 app/model/checkpoints/checkpoints.zip
-app/model/checkpoints/convnext_tiny_infrapulse.pt
 app/model/checkpoints/swin_tiny_infrapulse.pt
 app/model/checkpoints/multitask_mtl_infrapulse.pt
-app/model/checkpoints/infrapulse_model.onnx
+!app/model/checkpoints/convnext_tiny_infrapulse.pt
+!app/model/checkpoints/infrapulse_int8_quantized.pt
+!app/model/checkpoints/best_infrapulse_v1.pt
 
 # IDE / Editor files
 .vscode/

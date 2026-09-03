@@ -247,6 +247,25 @@ async def analyze_custom_playground(
             "winner": evaluation["winner"],
         }
 
+        def sanitize_for_json(obj):
+            import numpy as np
+            from enum import Enum
+            if isinstance(obj, dict):
+                return {k: sanitize_for_json(v) for k, v in obj.items()}
+            elif isinstance(obj, (list, tuple)):
+                return [sanitize_for_json(v) for v in obj]
+            elif isinstance(obj, (np.floating, float)):
+                return float(obj)
+            elif isinstance(obj, (np.integer, int)):
+                return int(obj)
+            elif isinstance(obj, (np.bool_, bool)):
+                return bool(obj)
+            elif isinstance(obj, Enum):
+                return obj.value
+            return obj
+
+        result_data = sanitize_for_json(result_data)
+
         # If AJAX request or API endpoint, return JSON
         if request.headers.get("accept") == "application/json" or request.url.path.startswith("/api/"):
             return JSONResponse(result_data)

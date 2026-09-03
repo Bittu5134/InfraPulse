@@ -1,305 +1,351 @@
 {
   "standalone": {
     "convnext_tiny": {
-      "accuracy": 82.99,
-      "macro_f1": 0.8413,
-      "weighted_f1": 0.8283,
+      "accuracy": 76.67,
+      "macro_f1": 0.7628,
+      "weighted_f1": 0.7628,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 89.16,
-          "f1": 0.8655,
-          "precision": 0.8409,
-          "recall": 0.8916,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.7692,
+          "precision": 0.625,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 87.18,
-          "f1": 0.8395,
-          "precision": 0.8095,
-          "recall": 0.8718,
-          "sample_count": 78
+          "accuracy": 53.33,
+          "f1": 0.6154,
+          "precision": 0.7273,
+          "recall": 0.5333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 72.0,
-          "f1": 0.7714,
-          "precision": 0.8308,
-          "recall": 0.72,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.8667,
+          "precision": 0.8667,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 80.0,
-          "f1": 0.8889,
+          "accuracy": 66.67,
+          "f1": 0.8,
           "precision": 1.0,
-          "recall": 0.8,
-          "sample_count": 5
+          "recall": 0.6667,
+          "sample_count": 30
         }
       },
-      "latency_ms": 114.76
+      "latency_ms": 82.56
     },
     "mtl_dual_branch": {
-      "accuracy": 31.95,
-      "macro_f1": 0.2451,
-      "weighted_f1": 0.3004,
+      "accuracy": 50.0,
+      "macro_f1": 0.4588,
+      "weighted_f1": 0.4588,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 61.45,
-          "f1": 0.4857,
-          "precision": 0.4016,
-          "recall": 0.6145,
-          "sample_count": 83
+          "accuracy": 96.67,
+          "f1": 0.6237,
+          "precision": 0.4603,
+          "recall": 0.9667,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 1.28,
-          "f1": 0.0253,
-          "precision": 1.0,
-          "recall": 0.0128,
-          "sample_count": 78
+          "accuracy": 16.67,
+          "f1": 0.25,
+          "precision": 0.5,
+          "recall": 0.1667,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 29.33,
-          "f1": 0.3964,
-          "precision": 0.6111,
-          "recall": 0.2933,
-          "sample_count": 75
+          "accuracy": 56.67,
+          "f1": 0.5,
+          "precision": 0.4474,
+          "recall": 0.5667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 60.0,
-          "f1": 0.0732,
-          "precision": 0.039,
-          "recall": 0.6,
-          "sample_count": 5
+          "accuracy": 30.0,
+          "f1": 0.4615,
+          "precision": 1.0,
+          "recall": 0.3,
+          "sample_count": 30
         }
       },
-      "latency_ms": 39.27
+      "latency_ms": 27.97
     },
     "swin_t": {
-      "accuracy": 81.74,
-      "macro_f1": 0.8197,
-      "weighted_f1": 0.8161,
+      "accuracy": 88.33,
+      "macro_f1": 0.8839,
+      "weighted_f1": 0.8839,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.8398,
-          "precision": 0.7755,
-          "recall": 0.9157,
-          "sample_count": 83
+          "accuracy": 96.67,
+          "f1": 0.9062,
+          "precision": 0.8529,
+          "recall": 0.9667,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 75.64,
-          "f1": 0.8027,
-          "precision": 0.8551,
-          "recall": 0.7564,
-          "sample_count": 78
+          "accuracy": 90.0,
+          "f1": 0.8438,
+          "precision": 0.7941,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 76.0,
-          "f1": 0.8028,
-          "precision": 0.8507,
-          "recall": 0.76,
-          "sample_count": 75
+          "accuracy": 80.0,
+          "f1": 0.8571,
+          "precision": 0.9231,
+          "recall": 0.8,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.8333,
-          "precision": 0.7143,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 86.67,
+          "f1": 0.9286,
+          "precision": 1.0,
+          "recall": 0.8667,
+          "sample_count": 30
         }
       },
-      "latency_ms": 138.69
+      "latency_ms": 102.26
     },
     "efficientnet_b0": {
-      "accuracy": 86.72,
-      "macro_f1": 0.7696,
-      "weighted_f1": 0.8825,
+      "accuracy": 82.5,
+      "macro_f1": 0.8252,
+      "weighted_f1": 0.8252,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 87.95,
-          "f1": 0.8957,
-          "precision": 0.9125,
-          "recall": 0.8795,
-          "sample_count": 83
+          "accuracy": 80.0,
+          "f1": 0.7869,
+          "precision": 0.7742,
+          "recall": 0.8,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 84.62,
-          "f1": 0.88,
-          "precision": 0.9167,
-          "recall": 0.8462,
-          "sample_count": 78
+          "accuracy": 70.0,
+          "f1": 0.7925,
+          "precision": 0.913,
+          "recall": 0.7,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 86.67,
-          "f1": 0.9028,
-          "precision": 0.942,
-          "recall": 0.8667,
-          "sample_count": 75
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.4,
-          "precision": 0.25,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.8286,
+          "precision": 0.725,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
-      "latency_ms": 44.44
+      "latency_ms": 28.35
     },
     "quantized_int8": {
-      "accuracy": 87.14,
-      "macro_f1": 0.7729,
-      "weighted_f1": 0.8868,
+      "accuracy": 83.33,
+      "macro_f1": 0.8339,
+      "weighted_f1": 0.8339,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 87.95,
-          "f1": 0.9012,
-          "precision": 0.9241,
-          "recall": 0.8795,
-          "sample_count": 83
+          "accuracy": 80.0,
+          "f1": 0.7869,
+          "precision": 0.7742,
+          "recall": 0.8,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 85.9,
-          "f1": 0.8874,
-          "precision": 0.9178,
-          "recall": 0.859,
-          "sample_count": 78
+          "accuracy": 70.0,
+          "f1": 0.8077,
+          "precision": 0.9545,
+          "recall": 0.7,
+          "sample_count": 30
         },
         "spalling": {
           "accuracy": 86.67,
-          "f1": 0.9028,
-          "precision": 0.942,
+          "f1": 0.9123,
+          "precision": 0.963,
           "recall": 0.8667,
-          "sample_count": 75
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.4,
-          "precision": 0.25,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.8286,
+          "precision": 0.725,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
-      "latency_ms": 45.85
+      "latency_ms": 28.51
     }
   },
   "uniform_combinations": [
     {
-      "accuracy": 91.7,
-      "macro_f1": 0.8828,
-      "weighted_f1": 0.918,
+      "accuracy": 91.67,
+      "macro_f1": 0.917,
+      "weighted_f1": 0.917,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.939,
-          "precision": 0.9506,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 92.31,
-          "f1": 0.9114,
-          "precision": 0.9,
-          "recall": 0.9231,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9116,
-          "precision": 0.9306,
-          "recall": 0.8933,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9831,
+          "precision": 1.0,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
-        "convnext_tiny",
+        "mtl_dual_branch",
+        "swin_t",
         "efficientnet_b0"
       ],
-      "combination_name": "convnext_tiny + efficientnet_b0",
-      "model_count": 2,
-      "sequential_latency_ms": 159.2,
-      "parallel_latency_ms": 116.76
+      "combination_name": "mtl_dual_branch + swin_t + efficientnet_b0",
+      "model_count": 3,
+      "sequential_latency_ms": 158.58,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 91.7,
-      "macro_f1": 0.8828,
-      "weighted_f1": 0.918,
+      "accuracy": 91.67,
+      "macro_f1": 0.917,
+      "weighted_f1": 0.917,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.939,
-          "precision": 0.9506,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 92.31,
-          "f1": 0.9114,
-          "precision": 0.9,
-          "recall": 0.9231,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9116,
-          "precision": 0.9306,
-          "recall": 0.8933,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.9831,
+          "precision": 1.0,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "mtl_dual_branch",
+        "swin_t",
+        "quantized_int8"
+      ],
+      "combination_name": "mtl_dual_branch + swin_t + quantized_int8",
+      "model_count": 3,
+      "sequential_latency_ms": 158.74,
+      "parallel_latency_ms": 104.26
+    },
+    {
+      "accuracy": 90.83,
+      "macro_f1": 0.9087,
+      "weighted_f1": 0.9087,
+      "per_class": {
+        "cracked_tiles": {
           "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
+          "f1": 0.8955,
+          "precision": 0.8108,
           "recall": 1.0,
-          "sample_count": 5
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 86.67,
+          "f1": 0.8966,
+          "precision": 0.9286,
+          "recall": 0.8667,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 93.33,
+          "f1": 0.9655,
+          "precision": 1.0,
+          "recall": 0.9333,
+          "sample_count": 30
         }
       },
       "models": [
         "convnext_tiny",
+        "swin_t",
         "quantized_int8"
       ],
-      "combination_name": "convnext_tiny + quantized_int8",
-      "model_count": 2,
-      "sequential_latency_ms": 160.61,
-      "parallel_latency_ms": 116.76
+      "combination_name": "convnext_tiny + swin_t + quantized_int8",
+      "model_count": 3,
+      "sequential_latency_ms": 213.33,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 91.29,
-      "macro_f1": 0.8796,
-      "weighted_f1": 0.9136,
+      "accuracy": 90.83,
+      "macro_f1": 0.9087,
+      "weighted_f1": 0.9087,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 95.18,
-          "f1": 0.9294,
-          "precision": 0.908,
-          "recall": 0.9518,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 89.74,
-          "f1": 0.9032,
-          "precision": 0.9091,
-          "recall": 0.8974,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9167,
-          "precision": 0.9565,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.8966,
+          "precision": 0.9286,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 93.33,
+          "f1": 0.9655,
+          "precision": 1.0,
+          "recall": 0.9333,
+          "sample_count": 30
         }
       },
       "models": [
@@ -310,41 +356,41 @@
       ],
       "combination_name": "convnext_tiny + mtl_dual_branch + swin_t + efficientnet_b0",
       "model_count": 4,
-      "sequential_latency_ms": 337.16,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 241.14,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 91.29,
-      "macro_f1": 0.8796,
-      "weighted_f1": 0.9136,
+      "accuracy": 90.83,
+      "macro_f1": 0.9087,
+      "weighted_f1": 0.9087,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 95.18,
-          "f1": 0.9294,
-          "precision": 0.908,
-          "recall": 0.9518,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 89.74,
-          "f1": 0.9032,
-          "precision": 0.9091,
-          "recall": 0.8974,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9167,
-          "precision": 0.9565,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.8966,
+          "precision": 0.9286,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 93.33,
+          "f1": 0.9655,
+          "precision": 1.0,
+          "recall": 0.9333,
+          "sample_count": 30
         }
       },
       "models": [
@@ -355,41 +401,171 @@
       ],
       "combination_name": "convnext_tiny + mtl_dual_branch + swin_t + quantized_int8",
       "model_count": 4,
-      "sequential_latency_ms": 338.57,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 241.3,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 90.87,
-      "macro_f1": 0.8764,
-      "weighted_f1": 0.9096,
+      "accuracy": 90.83,
+      "macro_f1": 0.9079,
+      "weighted_f1": 0.9079,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.9277,
-          "precision": 0.9277,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 93.33,
+          "f1": 0.8615,
+          "precision": 0.8,
+          "recall": 0.9333,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 91.03,
-          "f1": 0.9045,
-          "precision": 0.8987,
-          "recall": 0.9103,
-          "sample_count": 78
+          "accuracy": 76.67,
+          "f1": 0.8679,
+          "precision": 1.0,
+          "recall": 0.7667,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9041,
-          "precision": 0.9296,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 96.67,
+          "f1": 0.9667,
+          "precision": 0.9667,
+          "recall": 0.9667,
+          "sample_count": 30
         },
         "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.9355,
+          "precision": 0.9062,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "convnext_tiny",
+        "quantized_int8"
+      ],
+      "combination_name": "convnext_tiny + quantized_int8",
+      "model_count": 2,
+      "sequential_latency_ms": 111.07,
+      "parallel_latency_ms": 84.56
+    },
+    {
+      "accuracy": 90.83,
+      "macro_f1": 0.9073,
+      "weighted_f1": 0.9073,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 90.0,
+          "f1": 0.8571,
+          "precision": 0.8182,
+          "recall": 0.9,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 76.67,
+          "f1": 0.8679,
+          "precision": 1.0,
+          "recall": 0.7667,
+          "sample_count": 30
+        },
+        "spalling": {
           "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
+          "f1": 0.9836,
+          "precision": 0.9677,
           "recall": 1.0,
-          "sample_count": 5
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.9206,
+          "precision": 0.8788,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "convnext_tiny",
+        "efficientnet_b0"
+      ],
+      "combination_name": "convnext_tiny + efficientnet_b0",
+      "model_count": 2,
+      "sequential_latency_ms": 110.91,
+      "parallel_latency_ms": 84.56
+    },
+    {
+      "accuracy": 90.83,
+      "macro_f1": 0.9064,
+      "weighted_f1": 0.9064,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 73.33,
+          "f1": 0.8302,
+          "precision": 0.9565,
+          "recall": 0.7333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 96.67,
+          "f1": 0.9508,
+          "precision": 0.9355,
+          "recall": 0.9667,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 93.33,
+          "f1": 0.9492,
+          "precision": 0.9655,
+          "recall": 0.9333,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "convnext_tiny",
+        "mtl_dual_branch",
+        "quantized_int8"
+      ],
+      "combination_name": "convnext_tiny + mtl_dual_branch + quantized_int8",
+      "model_count": 3,
+      "sequential_latency_ms": 139.04,
+      "parallel_latency_ms": 84.56
+    },
+    {
+      "accuracy": 90.0,
+      "macro_f1": 0.9004,
+      "weighted_f1": 0.9004,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 100.0,
+          "f1": 0.8824,
+          "precision": 0.7895,
+          "recall": 1.0,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 80.0,
+          "f1": 0.8571,
+          "precision": 0.9231,
+          "recall": 0.8,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 86.67,
+          "f1": 0.8966,
+          "precision": 0.9286,
+          "recall": 0.8667,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 93.33,
+          "f1": 0.9655,
+          "precision": 1.0,
+          "recall": 0.9333,
+          "sample_count": 30
         }
       },
       "models": [
@@ -399,85 +575,85 @@
       ],
       "combination_name": "convnext_tiny + swin_t + efficientnet_b0",
       "model_count": 3,
-      "sequential_latency_ms": 297.89,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 213.17,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 90.87,
-      "macro_f1": 0.8764,
-      "weighted_f1": 0.9096,
+      "accuracy": 90.0,
+      "macro_f1": 0.8982,
+      "weighted_f1": 0.8982,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.9277,
-          "precision": 0.9277,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8955,
+          "precision": 0.8108,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 91.03,
-          "f1": 0.9045,
-          "precision": 0.8987,
-          "recall": 0.9103,
-          "sample_count": 78
+          "accuracy": 73.33,
+          "f1": 0.8148,
+          "precision": 0.9167,
+          "recall": 0.7333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9041,
-          "precision": 0.9296,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 93.33,
+          "f1": 0.9333,
+          "precision": 0.9333,
+          "recall": 0.9333,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.7692,
-          "precision": 0.625,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 93.33,
+          "f1": 0.9492,
+          "precision": 0.9655,
+          "recall": 0.9333,
+          "sample_count": 30
         }
       },
       "models": [
         "convnext_tiny",
-        "swin_t",
-        "quantized_int8"
+        "mtl_dual_branch",
+        "efficientnet_b0"
       ],
-      "combination_name": "convnext_tiny + swin_t + quantized_int8",
+      "combination_name": "convnext_tiny + mtl_dual_branch + efficientnet_b0",
       "model_count": 3,
-      "sequential_latency_ms": 299.3,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 138.88,
+      "parallel_latency_ms": 84.56
     },
     {
-      "accuracy": 90.87,
-      "macro_f1": 0.8448,
-      "weighted_f1": 0.9124,
+      "accuracy": 89.17,
+      "macro_f1": 0.8922,
+      "weighted_f1": 0.8922,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.9333,
-          "precision": 0.939,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 90.0,
+          "f1": 0.8438,
+          "precision": 0.7941,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 89.74,
-          "f1": 0.9032,
-          "precision": 0.9091,
-          "recall": 0.8974,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9178,
-          "precision": 0.9437,
-          "recall": 0.8933,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.625,
-          "precision": 0.4545,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9355,
+          "precision": 0.9062,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -486,86 +662,41 @@
       ],
       "combination_name": "swin_t + efficientnet_b0",
       "model_count": 2,
-      "sequential_latency_ms": 183.13,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 130.61,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 90.46,
-      "macro_f1": 0.8505,
-      "weighted_f1": 0.9071,
+      "accuracy": 89.17,
+      "macro_f1": 0.8922,
+      "weighted_f1": 0.8922,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.9333,
-          "precision": 0.939,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 90.0,
+          "f1": 0.8438,
+          "precision": 0.7941,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.8903,
-          "precision": 0.8961,
-          "recall": 0.8846,
-          "sample_count": 78
+          "accuracy": 83.33,
+          "f1": 0.8772,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9116,
-          "precision": 0.9306,
-          "recall": 0.8933,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.6667,
-          "precision": 0.5,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "swin_t",
-        "efficientnet_b0",
-        "quantized_int8"
-      ],
-      "combination_name": "convnext_tiny + swin_t + efficientnet_b0 + quantized_int8",
-      "model_count": 4,
-      "sequential_latency_ms": 343.74,
-      "parallel_latency_ms": 140.69
-    },
-    {
-      "accuracy": 90.46,
-      "macro_f1": 0.8415,
-      "weighted_f1": 0.9081,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.9333,
-          "precision": 0.939,
-          "recall": 0.9277,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.8961,
-          "precision": 0.9079,
-          "recall": 0.8846,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9116,
-          "precision": 0.9306,
-          "recall": 0.8933,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.625,
-          "precision": 0.4545,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9355,
+          "precision": 0.9062,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -574,85 +705,41 @@
       ],
       "combination_name": "swin_t + quantized_int8",
       "model_count": 2,
-      "sequential_latency_ms": 184.54,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 130.77,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 90.46,
-      "macro_f1": 0.834,
-      "weighted_f1": 0.9093,
+      "accuracy": 89.17,
+      "macro_f1": 0.8913,
+      "weighted_f1": 0.8913,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9268,
-          "precision": 0.9383,
-          "recall": 0.9157,
-          "sample_count": 83
+          "accuracy": 96.67,
+          "f1": 0.8657,
+          "precision": 0.7838,
+          "recall": 0.9667,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.902,
+          "accuracy": 76.67,
+          "f1": 0.8364,
           "precision": 0.92,
-          "recall": 0.8846,
-          "sample_count": 78
+          "recall": 0.7667,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 90.67,
-          "f1": 0.9189,
-          "precision": 0.9315,
-          "recall": 0.9067,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5882,
-          "precision": 0.4167,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "efficientnet_b0",
-        "quantized_int8"
-      ],
-      "combination_name": "convnext_tiny + efficientnet_b0 + quantized_int8",
-      "model_count": 3,
-      "sequential_latency_ms": 205.05,
-      "parallel_latency_ms": 116.76
-    },
-    {
-      "accuracy": 90.46,
-      "macro_f1": 0.834,
-      "weighted_f1": 0.9093,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9268,
-          "precision": 0.9383,
-          "recall": 0.9157,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.902,
-          "precision": 0.92,
-          "recall": 0.8846,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 90.67,
-          "f1": 0.9189,
-          "precision": 0.9315,
-          "recall": 0.9067,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5882,
-          "precision": 0.4167,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9508,
+          "precision": 0.9355,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -664,173 +751,86 @@
       ],
       "combination_name": "convnext_tiny + mtl_dual_branch + swin_t + efficientnet_b0 + quantized_int8",
       "model_count": 5,
-      "sequential_latency_ms": 383.01,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 269.65,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 90.04,
-      "macro_f1": 0.8181,
-      "weighted_f1": 0.9076,
+      "accuracy": 87.5,
+      "macro_f1": 0.875,
+      "weighted_f1": 0.875,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9268,
-          "precision": 0.9383,
-          "recall": 0.9157,
-          "sample_count": 83
+          "accuracy": 90.0,
+          "f1": 0.8308,
+          "precision": 0.7714,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 89.74,
-          "f1": 0.9091,
-          "precision": 0.9211,
-          "recall": 0.8974,
-          "sample_count": 78
+          "accuracy": 76.67,
+          "f1": 0.8364,
+          "precision": 0.92,
+          "recall": 0.7667,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9103,
-          "precision": 0.9429,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5263,
-          "precision": 0.3571,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9206,
+          "precision": 0.8788,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
+        "convnext_tiny",
         "swin_t",
         "efficientnet_b0",
         "quantized_int8"
       ],
-      "combination_name": "swin_t + efficientnet_b0 + quantized_int8",
-      "model_count": 3,
-      "sequential_latency_ms": 228.98,
-      "parallel_latency_ms": 140.69
+      "combination_name": "convnext_tiny + swin_t + efficientnet_b0 + quantized_int8",
+      "model_count": 4,
+      "sequential_latency_ms": 241.68,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 89.63,
-      "macro_f1": 0.8355,
-      "weighted_f1": 0.8998,
+      "accuracy": 87.5,
+      "macro_f1": 0.8746,
+      "weighted_f1": 0.8746,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9048,
-          "precision": 0.8941,
-          "recall": 0.9157,
-          "sample_count": 83
+          "accuracy": 90.0,
+          "f1": 0.8308,
+          "precision": 0.7714,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.902,
-          "precision": 0.92,
-          "recall": 0.8846,
-          "sample_count": 78
+          "accuracy": 73.33,
+          "f1": 0.8302,
+          "precision": 0.9565,
+          "recall": 0.7333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9103,
-          "precision": 0.9429,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 90.0,
+          "f1": 0.931,
+          "precision": 0.9643,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.625,
-          "precision": 0.4545,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "mtl_dual_branch",
-        "efficientnet_b0"
-      ],
-      "combination_name": "convnext_tiny + mtl_dual_branch + efficientnet_b0",
-      "model_count": 3,
-      "sequential_latency_ms": 198.47,
-      "parallel_latency_ms": 116.76
-    },
-    {
-      "accuracy": 89.63,
-      "macro_f1": 0.8355,
-      "weighted_f1": 0.8998,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9048,
-          "precision": 0.8941,
-          "recall": 0.9157,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 88.46,
-          "f1": 0.902,
-          "precision": 0.92,
-          "recall": 0.8846,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9103,
-          "precision": 0.9429,
-          "recall": 0.88,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.625,
-          "precision": 0.4545,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "mtl_dual_branch",
-        "quantized_int8"
-      ],
-      "combination_name": "convnext_tiny + mtl_dual_branch + quantized_int8",
-      "model_count": 3,
-      "sequential_latency_ms": 199.88,
-      "parallel_latency_ms": 116.76
-    },
-    {
-      "accuracy": 89.63,
-      "macro_f1": 0.8208,
-      "weighted_f1": 0.9021,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9212,
-          "precision": 0.9268,
-          "recall": 0.9157,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 87.18,
-          "f1": 0.8947,
-          "precision": 0.9189,
-          "recall": 0.8718,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 89.33,
-          "f1": 0.9116,
-          "precision": 0.9306,
-          "recall": 0.8933,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5556,
-          "precision": 0.3846,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9062,
+          "precision": 0.8529,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -841,129 +841,172 @@
       ],
       "combination_name": "convnext_tiny + mtl_dual_branch + efficientnet_b0 + quantized_int8",
       "model_count": 4,
-      "sequential_latency_ms": 244.32,
-      "parallel_latency_ms": 116.76
+      "sequential_latency_ms": 167.39,
+      "parallel_latency_ms": 84.56
     },
     {
-      "accuracy": 88.38,
-      "macro_f1": 0.8116,
-      "weighted_f1": 0.8895,
+      "accuracy": 86.67,
+      "macro_f1": 0.8681,
+      "weighted_f1": 0.8681,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.8953,
-          "precision": 0.8652,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.9231,
+          "precision": 0.8571,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
           "accuracy": 83.33,
-          "f1": 0.8725,
-          "precision": 0.9155,
+          "f1": 0.7692,
+          "precision": 0.7143,
           "recall": 0.8333,
-          "sample_count": 78
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9231,
-          "precision": 0.9706,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 86.67,
+          "f1": 0.9123,
+          "precision": 0.963,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5556,
-          "precision": 0.3846,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 76.67,
+          "f1": 0.8679,
+          "precision": 1.0,
+          "recall": 0.7667,
+          "sample_count": 30
         }
       },
       "models": [
-        "mtl_dual_branch",
-        "swin_t",
+        "convnext_tiny",
+        "swin_t"
+      ],
+      "combination_name": "convnext_tiny + swin_t",
+      "model_count": 2,
+      "sequential_latency_ms": 184.82,
+      "parallel_latency_ms": 104.26
+    },
+    {
+      "accuracy": 86.67,
+      "macro_f1": 0.8669,
+      "weighted_f1": 0.8669,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 83.33,
+          "f1": 0.7937,
+          "precision": 0.7576,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 73.33,
+          "f1": 0.8462,
+          "precision": 1.0,
+          "recall": 0.7333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 93.33,
+          "f1": 0.9492,
+          "precision": 0.9655,
+          "recall": 0.9333,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.8788,
+          "precision": 0.8056,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "convnext_tiny",
+        "efficientnet_b0",
         "quantized_int8"
       ],
-      "combination_name": "mtl_dual_branch + swin_t + quantized_int8",
+      "combination_name": "convnext_tiny + efficientnet_b0 + quantized_int8",
       "model_count": 3,
-      "sequential_latency_ms": 223.81,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 139.42,
+      "parallel_latency_ms": 84.56
     },
     {
-      "accuracy": 87.97,
-      "macro_f1": 0.8084,
-      "weighted_f1": 0.8853,
+      "accuracy": 86.67,
+      "macro_f1": 0.8661,
+      "weighted_f1": 0.8661,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.8902,
-          "precision": 0.8556,
-          "recall": 0.9277,
-          "sample_count": 83
+          "accuracy": 100.0,
+          "f1": 0.8696,
+          "precision": 0.7692,
+          "recall": 1.0,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 82.05,
-          "f1": 0.8649,
-          "precision": 0.9143,
-          "recall": 0.8205,
-          "sample_count": 78
+          "accuracy": 73.33,
+          "f1": 0.7857,
+          "precision": 0.8462,
+          "recall": 0.7333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9231,
-          "precision": 0.9706,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 90.0,
+          "f1": 0.9,
+          "precision": 0.9,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.5556,
-          "precision": 0.3846,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 83.33,
+          "f1": 0.9091,
+          "precision": 1.0,
+          "recall": 0.8333,
+          "sample_count": 30
         }
       },
       "models": [
+        "convnext_tiny",
         "mtl_dual_branch",
-        "swin_t",
-        "efficientnet_b0"
+        "swin_t"
       ],
-      "combination_name": "mtl_dual_branch + swin_t + efficientnet_b0",
+      "combination_name": "convnext_tiny + mtl_dual_branch + swin_t",
       "model_count": 3,
-      "sequential_latency_ms": 222.4,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 212.79,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 87.97,
-      "macro_f1": 0.7883,
-      "weighted_f1": 0.8905,
+      "accuracy": 85.83,
+      "macro_f1": 0.858,
+      "weighted_f1": 0.858,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 91.57,
-          "f1": 0.9157,
-          "precision": 0.9157,
-          "recall": 0.9157,
-          "sample_count": 83
+          "accuracy": 90.0,
+          "f1": 0.8182,
+          "precision": 0.75,
+          "recall": 0.9,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 83.33,
-          "f1": 0.8725,
-          "precision": 0.9155,
-          "recall": 0.8333,
-          "sample_count": 78
+          "accuracy": 73.33,
+          "f1": 0.8148,
+          "precision": 0.9167,
+          "recall": 0.7333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 88.0,
-          "f1": 0.9103,
-          "precision": 0.9429,
-          "recall": 0.88,
-          "sample_count": 75
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.4545,
-          "precision": 0.2941,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.9062,
+          "precision": 0.8529,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -974,41 +1017,171 @@
       ],
       "combination_name": "mtl_dual_branch + swin_t + efficientnet_b0 + quantized_int8",
       "model_count": 4,
-      "sequential_latency_ms": 268.25,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 187.09,
+      "parallel_latency_ms": 104.26
     },
     {
-      "accuracy": 86.72,
-      "macro_f1": 0.7696,
-      "weighted_f1": 0.8825,
+      "accuracy": 85.0,
+      "macro_f1": 0.85,
+      "weighted_f1": 0.85,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 87.95,
-          "f1": 0.8957,
-          "precision": 0.9125,
-          "recall": 0.8795,
-          "sample_count": 83
+          "accuracy": 86.67,
+          "f1": 0.8,
+          "precision": 0.7429,
+          "recall": 0.8667,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 84.62,
-          "f1": 0.88,
+          "accuracy": 73.33,
+          "f1": 0.8148,
           "precision": 0.9167,
-          "recall": 0.8462,
-          "sample_count": 78
+          "recall": 0.7333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.8923,
+          "precision": 0.8286,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "mtl_dual_branch",
+        "efficientnet_b0"
+      ],
+      "combination_name": "mtl_dual_branch + efficientnet_b0",
+      "model_count": 2,
+      "sequential_latency_ms": 56.32,
+      "parallel_latency_ms": 30.35
+    },
+    {
+      "accuracy": 85.0,
+      "macro_f1": 0.85,
+      "weighted_f1": 0.85,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 86.67,
+          "f1": 0.8,
+          "precision": 0.7429,
+          "recall": 0.8667,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 73.33,
+          "f1": 0.8148,
+          "precision": 0.9167,
+          "recall": 0.7333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.8923,
+          "precision": 0.8286,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "mtl_dual_branch",
+        "quantized_int8"
+      ],
+      "combination_name": "mtl_dual_branch + quantized_int8",
+      "model_count": 2,
+      "sequential_latency_ms": 56.48,
+      "parallel_latency_ms": 30.51
+    },
+    {
+      "accuracy": 84.17,
+      "macro_f1": 0.8419,
+      "weighted_f1": 0.8419,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 83.33,
+          "f1": 0.7812,
+          "precision": 0.7353,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 73.33,
+          "f1": 0.8148,
+          "precision": 0.9167,
+          "recall": 0.7333,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 96.67,
+          "f1": 0.8788,
+          "precision": 0.8056,
+          "recall": 0.9667,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "swin_t",
+        "efficientnet_b0",
+        "quantized_int8"
+      ],
+      "combination_name": "swin_t + efficientnet_b0 + quantized_int8",
+      "model_count": 3,
+      "sequential_latency_ms": 159.12,
+      "parallel_latency_ms": 104.26
+    },
+    {
+      "accuracy": 83.33,
+      "macro_f1": 0.8339,
+      "weighted_f1": 0.8339,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 80.0,
+          "f1": 0.7869,
+          "precision": 0.7742,
+          "recall": 0.8,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 70.0,
+          "f1": 0.8077,
+          "precision": 0.9545,
+          "recall": 0.7,
+          "sample_count": 30
         },
         "spalling": {
           "accuracy": 86.67,
-          "f1": 0.9028,
-          "precision": 0.942,
+          "f1": 0.9123,
+          "precision": 0.963,
           "recall": 0.8667,
-          "sample_count": 75
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.4,
-          "precision": 0.25,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.8286,
+          "precision": 0.725,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -1017,128 +1190,41 @@
       ],
       "combination_name": "efficientnet_b0 + quantized_int8",
       "model_count": 2,
-      "sequential_latency_ms": 90.29,
-      "parallel_latency_ms": 47.85
+      "sequential_latency_ms": 56.86,
+      "parallel_latency_ms": 30.51
     },
     {
-      "accuracy": 85.48,
-      "macro_f1": 0.8869,
-      "weighted_f1": 0.8532,
+      "accuracy": 83.33,
+      "macro_f1": 0.8331,
+      "weighted_f1": 0.8331,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 96.39,
-          "f1": 0.884,
-          "precision": 0.8163,
-          "recall": 0.9639,
-          "sample_count": 83
+          "accuracy": 83.33,
+          "f1": 0.8065,
+          "precision": 0.7812,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 79.49,
-          "f1": 0.8267,
-          "precision": 0.8611,
-          "recall": 0.7949,
-          "sample_count": 78
+          "accuracy": 70.0,
+          "f1": 0.7925,
+          "precision": 0.913,
+          "recall": 0.7,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 78.67,
-          "f1": 0.8369,
-          "precision": 0.8939,
-          "recall": 0.7867,
-          "sample_count": 75
+          "accuracy": 83.33,
+          "f1": 0.8929,
+          "precision": 0.9615,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 1.0,
-          "precision": 1.0,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "mtl_dual_branch",
-        "swin_t"
-      ],
-      "combination_name": "convnext_tiny + mtl_dual_branch + swin_t",
-      "model_count": 3,
-      "sequential_latency_ms": 292.72,
-      "parallel_latency_ms": 140.69
-    },
-    {
-      "accuracy": 85.48,
-      "macro_f1": 0.8867,
-      "weighted_f1": 0.8532,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 92.77,
-          "f1": 0.88,
-          "precision": 0.837,
-          "recall": 0.9277,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 87.18,
-          "f1": 0.8553,
-          "precision": 0.8395,
-          "recall": 0.8718,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 74.67,
-          "f1": 0.8116,
-          "precision": 0.8889,
-          "recall": 0.7467,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 1.0,
-          "precision": 1.0,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "swin_t"
-      ],
-      "combination_name": "convnext_tiny + swin_t",
-      "model_count": 2,
-      "sequential_latency_ms": 253.45,
-      "parallel_latency_ms": 140.69
-    },
-    {
-      "accuracy": 85.06,
-      "macro_f1": 0.7501,
-      "weighted_f1": 0.8701,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 86.75,
-          "f1": 0.8834,
-          "precision": 0.9,
-          "recall": 0.8675,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 82.05,
-          "f1": 0.8649,
-          "precision": 0.9143,
-          "recall": 0.8205,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 85.33,
-          "f1": 0.8951,
-          "precision": 0.9412,
-          "recall": 0.8533,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.3571,
-          "precision": 0.2174,
-          "recall": 1.0,
-          "sample_count": 5
+          "accuracy": 96.67,
+          "f1": 0.8406,
+          "precision": 0.7436,
+          "recall": 0.9667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -1148,170 +1234,41 @@
       ],
       "combination_name": "mtl_dual_branch + efficientnet_b0 + quantized_int8",
       "model_count": 3,
-      "sequential_latency_ms": 129.56,
-      "parallel_latency_ms": 47.85
+      "sequential_latency_ms": 84.83,
+      "parallel_latency_ms": 30.51
     },
     {
-      "accuracy": 83.82,
-      "macro_f1": 0.7356,
-      "weighted_f1": 0.8618,
+      "accuracy": 83.33,
+      "macro_f1": 0.8329,
+      "weighted_f1": 0.8329,
       "per_class": {
         "cracked_tiles": {
-          "accuracy": 87.95,
-          "f1": 0.8848,
-          "precision": 0.8902,
-          "recall": 0.8795,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 78.21,
-          "f1": 0.8414,
-          "precision": 0.9104,
-          "recall": 0.7821,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 84.0,
-          "f1": 0.8936,
-          "precision": 0.9545,
-          "recall": 0.84,
-          "sample_count": 75
-        },
-        "stagnant_water": {
           "accuracy": 100.0,
-          "f1": 0.3226,
-          "precision": 0.1923,
+          "f1": 0.8571,
+          "precision": 0.75,
           "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "mtl_dual_branch",
-        "quantized_int8"
-      ],
-      "combination_name": "mtl_dual_branch + quantized_int8",
-      "model_count": 2,
-      "sequential_latency_ms": 85.12,
-      "parallel_latency_ms": 47.85
-    },
-    {
-      "accuracy": 83.82,
-      "macro_f1": 0.735,
-      "weighted_f1": 0.8638,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 86.75,
-          "f1": 0.878,
-          "precision": 0.8889,
-          "recall": 0.8675,
-          "sample_count": 83
+          "sample_count": 30
         },
         "paint_peeling": {
-          "accuracy": 79.49,
-          "f1": 0.8493,
-          "precision": 0.9118,
-          "recall": 0.7949,
-          "sample_count": 78
+          "accuracy": 73.33,
+          "f1": 0.8,
+          "precision": 0.88,
+          "recall": 0.7333,
+          "sample_count": 30
         },
         "spalling": {
-          "accuracy": 84.0,
-          "f1": 0.9,
-          "precision": 0.9692,
-          "recall": 0.84,
-          "sample_count": 75
+          "accuracy": 83.33,
+          "f1": 0.8065,
+          "precision": 0.7812,
+          "recall": 0.8333,
+          "sample_count": 30
         },
         "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.3125,
-          "precision": 0.1852,
-          "recall": 1.0,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "mtl_dual_branch",
-        "efficientnet_b0"
-      ],
-      "combination_name": "mtl_dual_branch + efficientnet_b0",
-      "model_count": 2,
-      "sequential_latency_ms": 83.71,
-      "parallel_latency_ms": 46.44
-    },
-    {
-      "accuracy": 81.74,
-      "macro_f1": 0.8323,
-      "weighted_f1": 0.8159,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 95.18,
-          "f1": 0.836,
-          "precision": 0.7453,
-          "recall": 0.9518,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 76.92,
-          "f1": 0.8219,
-          "precision": 0.8824,
-          "recall": 0.7692,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 72.0,
-          "f1": 0.7826,
-          "precision": 0.8571,
-          "recall": 0.72,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 80.0,
-          "f1": 0.8889,
+          "accuracy": 76.67,
+          "f1": 0.8679,
           "precision": 1.0,
-          "recall": 0.8,
-          "sample_count": 5
-        }
-      },
-      "models": [
-        "convnext_tiny",
-        "mtl_dual_branch"
-      ],
-      "combination_name": "convnext_tiny + mtl_dual_branch",
-      "model_count": 2,
-      "sequential_latency_ms": 154.03,
-      "parallel_latency_ms": 116.76
-    },
-    {
-      "accuracy": 72.2,
-      "macro_f1": 0.7133,
-      "weighted_f1": 0.712,
-      "per_class": {
-        "cracked_tiles": {
-          "accuracy": 93.98,
-          "f1": 0.7324,
-          "precision": 0.6,
-          "recall": 0.9398,
-          "sample_count": 83
-        },
-        "paint_peeling": {
-          "accuracy": 43.59,
-          "f1": 0.5862,
-          "precision": 0.8947,
-          "recall": 0.4359,
-          "sample_count": 78
-        },
-        "spalling": {
-          "accuracy": 76.0,
-          "f1": 0.8201,
-          "precision": 0.8906,
-          "recall": 0.76,
-          "sample_count": 75
-        },
-        "stagnant_water": {
-          "accuracy": 100.0,
-          "f1": 0.7143,
-          "precision": 0.5556,
-          "recall": 1.0,
-          "sample_count": 5
+          "recall": 0.7667,
+          "sample_count": 30
         }
       },
       "models": [
@@ -1320,162 +1277,205 @@
       ],
       "combination_name": "mtl_dual_branch + swin_t",
       "model_count": 2,
-      "sequential_latency_ms": 177.96,
-      "parallel_latency_ms": 140.69
+      "sequential_latency_ms": 130.23,
+      "parallel_latency_ms": 104.26
+    },
+    {
+      "accuracy": 69.17,
+      "macro_f1": 0.6745,
+      "weighted_f1": 0.6745,
+      "per_class": {
+        "cracked_tiles": {
+          "accuracy": 100.0,
+          "f1": 0.6897,
+          "precision": 0.5263,
+          "recall": 1.0,
+          "sample_count": 30
+        },
+        "paint_peeling": {
+          "accuracy": 30.0,
+          "f1": 0.439,
+          "precision": 0.8182,
+          "recall": 0.3,
+          "sample_count": 30
+        },
+        "spalling": {
+          "accuracy": 83.33,
+          "f1": 0.7937,
+          "precision": 0.7576,
+          "recall": 0.8333,
+          "sample_count": 30
+        },
+        "stagnant_water": {
+          "accuracy": 63.33,
+          "f1": 0.7755,
+          "precision": 1.0,
+          "recall": 0.6333,
+          "sample_count": 30
+        }
+      },
+      "models": [
+        "convnext_tiny",
+        "mtl_dual_branch"
+      ],
+      "combination_name": "convnext_tiny + mtl_dual_branch",
+      "model_count": 2,
+      "sequential_latency_ms": 110.53,
+      "parallel_latency_ms": 84.56
     }
   ],
   "hard_voting_ensemble": {
-    "accuracy": 87.14,
-    "macro_f1": 0.7895,
-    "weighted_f1": 0.8786,
+    "accuracy": 85.83,
+    "macro_f1": 0.8595,
+    "weighted_f1": 0.8595,
     "per_class": {
       "cracked_tiles": {
-        "accuracy": 95.18,
-        "f1": 0.908,
-        "precision": 0.8681,
-        "recall": 0.9518,
-        "sample_count": 83
+        "accuracy": 100.0,
+        "f1": 0.8451,
+        "precision": 0.7317,
+        "recall": 1.0,
+        "sample_count": 30
       },
       "paint_peeling": {
-        "accuracy": 84.62,
-        "f1": 0.8742,
-        "precision": 0.9041,
-        "recall": 0.8462,
-        "sample_count": 78
+        "accuracy": 76.67,
+        "f1": 0.807,
+        "precision": 0.8519,
+        "recall": 0.7667,
+        "sample_count": 30
       },
       "spalling": {
         "accuracy": 80.0,
-        "f1": 0.8759,
-        "precision": 0.9677,
+        "f1": 0.8571,
+        "precision": 0.9231,
         "recall": 0.8,
-        "sample_count": 75
+        "sample_count": 30
       },
       "stagnant_water": {
-        "accuracy": 100.0,
-        "f1": 0.5,
-        "precision": 0.3333,
-        "recall": 1.0,
-        "sample_count": 5
+        "accuracy": 86.67,
+        "f1": 0.9286,
+        "precision": 1.0,
+        "recall": 0.8667,
+        "sample_count": 30
       }
     }
   },
   "optimal_weighted_ensemble": {
-    "accuracy": 92.95,
-    "macro_f1": 0.9454,
-    "weighted_f1": 0.9293,
+    "accuracy": 93.33,
+    "macro_f1": 0.9333,
+    "weighted_f1": 0.9333,
     "per_class": {
       "cracked_tiles": {
-        "accuracy": 96.39,
+        "accuracy": 100.0,
         "f1": 0.9524,
-        "precision": 0.9412,
-        "recall": 0.9639,
-        "sample_count": 83
+        "precision": 0.9091,
+        "recall": 1.0,
+        "sample_count": 30
       },
       "paint_peeling": {
-        "accuracy": 92.31,
-        "f1": 0.9114,
+        "accuracy": 90.0,
+        "f1": 0.9,
         "precision": 0.9,
-        "recall": 0.9231,
-        "sample_count": 78
+        "recall": 0.9,
+        "sample_count": 30
       },
       "spalling": {
-        "accuracy": 89.33,
-        "f1": 0.9178,
-        "precision": 0.9437,
-        "recall": 0.8933,
-        "sample_count": 75
+        "accuracy": 90.0,
+        "f1": 0.9153,
+        "precision": 0.931,
+        "recall": 0.9,
+        "sample_count": 30
       },
       "stagnant_water": {
-        "accuracy": 100.0,
-        "f1": 1.0,
+        "accuracy": 93.33,
+        "f1": 0.9655,
         "precision": 1.0,
-        "recall": 1.0,
-        "sample_count": 5
+        "recall": 0.9333,
+        "sample_count": 30
       }
     },
     "weights": {
-      "convnext_tiny": 0.5155,
+      "convnext_tiny": 0.3299,
       "mtl_dual_branch": 0.0515,
-      "swin_t": 0.2371,
+      "swin_t": 0.5155,
       "efficientnet_b0": 0.0515,
-      "quantized_int8": 0.1443
+      "quantized_int8": 0.0515
     }
   },
   "oracle_upper_bound": {
-    "accuracy": 94.61,
-    "total_samples": 241,
-    "correctly_solvable_samples": 228
+    "accuracy": 97.5,
+    "total_samples": 120,
+    "correctly_solvable_samples": 117
   },
   "complementarity_matrix": {
     "convnext_tiny <-> mtl_dual_branch": {
-      "joint_accuracy_if_oracled": 85.89,
-      "both_correct_pct": 29.05,
-      "mtl_dual_branch_rescued_convnext_tiny_errors": 7,
-      "convnext_tiny_rescued_mtl_dual_branch_errors": 130
+      "joint_accuracy_if_oracled": 79.17,
+      "both_correct_pct": 47.5,
+      "mtl_dual_branch_rescued_convnext_tiny_errors": 3,
+      "convnext_tiny_rescued_mtl_dual_branch_errors": 35
     },
     "convnext_tiny <-> swin_t": {
-      "joint_accuracy_if_oracled": 89.21,
-      "both_correct_pct": 75.52,
-      "swin_t_rescued_convnext_tiny_errors": 15,
-      "convnext_tiny_rescued_swin_t_errors": 18
+      "joint_accuracy_if_oracled": 92.5,
+      "both_correct_pct": 72.5,
+      "swin_t_rescued_convnext_tiny_errors": 19,
+      "convnext_tiny_rescued_swin_t_errors": 5
     },
     "convnext_tiny <-> efficientnet_b0": {
-      "joint_accuracy_if_oracled": 93.78,
-      "both_correct_pct": 75.93,
-      "efficientnet_b0_rescued_convnext_tiny_errors": 26,
-      "convnext_tiny_rescued_efficientnet_b0_errors": 17
+      "joint_accuracy_if_oracled": 93.33,
+      "both_correct_pct": 65.83,
+      "efficientnet_b0_rescued_convnext_tiny_errors": 20,
+      "convnext_tiny_rescued_efficientnet_b0_errors": 13
     },
     "convnext_tiny <-> quantized_int8": {
-      "joint_accuracy_if_oracled": 93.78,
-      "both_correct_pct": 76.35,
-      "quantized_int8_rescued_convnext_tiny_errors": 26,
-      "convnext_tiny_rescued_quantized_int8_errors": 16
+      "joint_accuracy_if_oracled": 93.33,
+      "both_correct_pct": 66.67,
+      "quantized_int8_rescued_convnext_tiny_errors": 20,
+      "convnext_tiny_rescued_quantized_int8_errors": 12
     },
     "mtl_dual_branch <-> swin_t": {
-      "joint_accuracy_if_oracled": 83.82,
-      "both_correct_pct": 29.88,
-      "swin_t_rescued_mtl_dual_branch_errors": 125,
-      "mtl_dual_branch_rescued_swin_t_errors": 5
+      "joint_accuracy_if_oracled": 90.0,
+      "both_correct_pct": 48.33,
+      "swin_t_rescued_mtl_dual_branch_errors": 48,
+      "mtl_dual_branch_rescued_swin_t_errors": 2
     },
     "mtl_dual_branch <-> efficientnet_b0": {
-      "joint_accuracy_if_oracled": 88.38,
-      "both_correct_pct": 30.29,
-      "efficientnet_b0_rescued_mtl_dual_branch_errors": 136,
-      "mtl_dual_branch_rescued_efficientnet_b0_errors": 4
+      "joint_accuracy_if_oracled": 89.17,
+      "both_correct_pct": 43.33,
+      "efficientnet_b0_rescued_mtl_dual_branch_errors": 47,
+      "mtl_dual_branch_rescued_efficientnet_b0_errors": 8
     },
     "mtl_dual_branch <-> quantized_int8": {
-      "joint_accuracy_if_oracled": 88.8,
-      "both_correct_pct": 30.29,
-      "quantized_int8_rescued_mtl_dual_branch_errors": 137,
-      "mtl_dual_branch_rescued_quantized_int8_errors": 4
+      "joint_accuracy_if_oracled": 90.0,
+      "both_correct_pct": 43.33,
+      "quantized_int8_rescued_mtl_dual_branch_errors": 48,
+      "mtl_dual_branch_rescued_quantized_int8_errors": 8
     },
     "swin_t <-> efficientnet_b0": {
-      "joint_accuracy_if_oracled": 92.95,
-      "both_correct_pct": 75.52,
-      "efficientnet_b0_rescued_swin_t_errors": 27,
-      "swin_t_rescued_efficientnet_b0_errors": 15
+      "joint_accuracy_if_oracled": 94.17,
+      "both_correct_pct": 76.67,
+      "efficientnet_b0_rescued_swin_t_errors": 7,
+      "swin_t_rescued_efficientnet_b0_errors": 14
     },
     "swin_t <-> quantized_int8": {
-      "joint_accuracy_if_oracled": 92.95,
-      "both_correct_pct": 75.93,
-      "quantized_int8_rescued_swin_t_errors": 27,
+      "joint_accuracy_if_oracled": 95.0,
+      "both_correct_pct": 76.67,
+      "quantized_int8_rescued_swin_t_errors": 8,
       "swin_t_rescued_quantized_int8_errors": 14
     },
     "efficientnet_b0 <-> quantized_int8": {
-      "joint_accuracy_if_oracled": 87.14,
-      "both_correct_pct": 86.72,
+      "joint_accuracy_if_oracled": 83.33,
+      "both_correct_pct": 82.5,
       "quantized_int8_rescued_efficientnet_b0_errors": 1,
       "efficientnet_b0_rescued_quantized_int8_errors": 0
     }
   },
   "dataset_info": {
     "split": "test",
-    "sample_count": 241,
+    "sample_count": 120,
     "class_distribution": {
-      "cracked_tiles": 83,
-      "paint_peeling": 78,
-      "spalling": 75,
-      "stagnant_water": 5
+      "cracked_tiles": 30,
+      "paint_peeling": 30,
+      "spalling": 30,
+      "stagnant_water": 30
     }
   }
 }

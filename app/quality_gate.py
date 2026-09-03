@@ -66,10 +66,10 @@ def check_image_quality(
         message = f"Quality warning: Photograph appears blurry (Laplacian variance: {sharpness:.1f} < {blur_threshold:.1f}). Please consider capturing a sharper, well-lit photo."
 
     return {
-        "passed": passed,
-        "sharpness_score": round(sharpness, 1),
-        "blur_threshold": blur_threshold,
-        "is_blurry": is_blurry,
+        "passed": bool(passed),
+        "sharpness_score": float(round(sharpness, 1)),
+        "blur_threshold": float(blur_threshold),
+        "is_blurry": bool(is_blurry),
         "quality_tier": quality_tier,
         "badge_color": badge_color,
         "message": message

@@ -6,7 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     TORCH_NUM_THREADS=2 \
     OMP_NUM_THREADS=2 \
-    MKL_NUM_THREADS=2
+    MKL_NUM_THREADS=2 \
+    LIGHT_MODE=1
 
 WORKDIR /app
 
@@ -31,5 +32,5 @@ RUN mkdir -p /app/app/static/uploads
 # Expose port 8003 for Hack Club container reverse proxy
 EXPOSE 8003
 
-# Hetzner container port binding (Port 8003) with single worker for zero OOM crash guarantee
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8003} --workers 1"]
+# Railway container port binding with proxy headers and single worker for zero OOM crash guarantee
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*' --workers 1"]
