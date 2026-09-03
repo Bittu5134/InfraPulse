@@ -207,13 +207,19 @@ ctx.shadowBlur = 12;
 
 ---
 
-## Installation & Deployment Guide
+## Installation & Live Deployment Guide
 
-### Prerequisites
-* Python 3.10+ (Tested on Python 3.14.7)
-* PyTorch 2.0+ & Torchvision
+### Live Production Deployment
+- **Live URL**: [https://infrapulse.bittu.dev](https://infrapulse.bittu.dev)
+- **Health Check Endpoint**: [https://infrapulse.bittu.dev/health](https://infrapulse.bittu.dev/health)
+- **Deployment Platform**: `bittu@hackclub.app` (Hetzner VPS container running systemd daemon on IPv6 port `8003`)
+- **Automated CI/CD**: GitHub Actions workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) triggered on `push` to `main`
 
-### 1. Clone & Setup Virtual Environment
+---
+
+### Local Development Setup
+
+#### 1. Clone & Setup Virtual Environment
 ```bash
 git clone https://github.com/Bittu5134/InfraPulse.git
 cd InfraPulse
@@ -222,31 +228,55 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Reset Database & Seed Demo Accounts
+#### 2. Reset Database & Seed Demo Accounts
 ```bash
 python3 reset_db.py
 ```
 
-### 3. Run Web Application
+#### 3. Run Web Application
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
 ```
-Access the application at `http://localhost:8003`.
+Access the application locally at `http://localhost:8003`.
 
-### 4. Production Container Deployment (`infrapulse.hackclub.app`)
-InfraPulse is deployed on `bittu@hackclub.app` (Hetzner VPS container) listening on **Port 8003** reverse-proxied via **Caddy**.
+---
 
-```bash
-# Docker Compose Run (Port 8003)
-docker-compose up --build -d
-```
+### Automated Server Deployment Architecture (`bittu@hackclub.app`)
 
-**Caddyfile Reverse Proxy Configuration**:
-```caddy
-infrapulse.hackclub.app {
-    reverse_proxy 127.0.0.1:8003
-}
-```
+1. **Systemd Service Unit (`/etc/systemd/system/infrapulse.service`)**:
+   ```ini
+   [Unit]
+   Description=InfraPulse Infrastructure Monitoring & AI Queue Server
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=root
+   WorkingDirectory=/opt/infrapulse
+   ExecStart=/opt/infrapulse/.venv/bin/uvicorn app.main:app --host :: --port 8003
+   Restart=always
+   RestartSec=5
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+2. **Caddy Reverse Proxy Configuration (`/etc/caddy/Caddyfile`)**:
+   ```caddy
+   infrapulse.bittu.dev, infrapulse.hackclub.app {
+       reverse_proxy [::1]:8003
+
+       # Disable buffering for real-time SSE live queue streams
+       header {
+           Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+           X-Accel-Buffering "no"
+       }
+   }
+   ```
+
+3. **Memory Safeguards for Low-RAM Container**:
+   - `requirements.txt` specifies `--extra-index-url https://download.pytorch.org/whl/cpu` to fetch lightweight CPU wheels.
+   - Deployment pipeline executes `pip install --no-cache-dir --prefer-binary` to prevent memory killer drops on 2GB RAM containers.
 
 ---
 
