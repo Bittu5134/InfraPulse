@@ -49,3 +49,6 @@ app/model/checkpoints/infrapulse_model.onnx
 
 # OS generated files
 Thumbs.db
+
+# Disposable scratch and junk files
+junk/
