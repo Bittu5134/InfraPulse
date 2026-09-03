@@ -160,10 +160,6 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
     Performs multi-model vision inference and computes Calibrated Weighted Consensus prediction
     using dynamically loaded weights from app/model/consensus_weights.json.
     """
-    cache_key = f"single_{image_path}_{description}"
-    if cache_key in _prediction_cache:
-        return _prediction_cache[cache_key]
-
     model_keys = ["convnext_tiny", "swin_t", "baseline", "quantized_int8", "mtl_dual_branch"]
     loaded = {}
     for mk in model_keys:
@@ -258,7 +254,6 @@ def predict_single_image(image_path: str, age_hours: float = 0.0, description: s
             "latency_ms": latency_ms,
             "model_name": f"Calibrated Weighted Consensus ({len(loaded)} Models)"
         }
-        _prediction_cache[cache_key] = formatted
         gc.collect()
         return formatted
     except Exception as e:
@@ -299,10 +294,6 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
     """
     Runs multi-model benchmark evaluation across all architectures and identifies the Clear Winner.
     """
-    cache_key = f"multi_{image_path}_{description}_{ground_truth_name}"
-    if cache_key in _comparison_cache:
-        return _comparison_cache[cache_key]
-
     from model import CATEGORY_MAP, CLASS_NAMES
     from app.quality_gate import check_image_quality
 
@@ -439,7 +430,6 @@ def predict_all_models(image_path: str, description: str = "", ground_truth_name
         "winner": winner,
         "quality_gate": quality_info
     }
-    _comparison_cache[cache_key] = result
     return result
 
 def get_models_leaderboard() -> List[Dict[str, Any]]:
