@@ -96,6 +96,10 @@ async def add_no_cache_headers(request: Request, call_next):
     response.headers["Expires"] = "0"
     return response
 
+# Proxy Headers Middleware for reverse proxies (Cloudflare / Railway)
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 # Session Middleware for User, Staff, Admin Auth
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 

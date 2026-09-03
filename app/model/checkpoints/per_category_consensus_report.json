@@ -65,27 +65,27 @@
     "convnext_tiny": {
       "accuracy": 78.5,
       "macro_f1": 0.7801,
-      "latency_ms": 93.2
+      "latency_ms": 84.8
     },
     "mtl_dual_branch": {
       "accuracy": 61.25,
       "macro_f1": 0.5795,
-      "latency_ms": 25.6
+      "latency_ms": 20.9
     },
     "swin_t": {
       "accuracy": 86.25,
       "macro_f1": 0.8618,
-      "latency_ms": 122.7
+      "latency_ms": 99.0
     },
     "baseline": {
       "accuracy": 81.5,
       "macro_f1": 0.8136,
-      "latency_ms": 44.2
+      "latency_ms": 35.6
     },
     "quantized_int8": {
       "accuracy": 81.38,
       "macro_f1": 0.813,
-      "latency_ms": 47.2
+      "latency_ms": 35.7
     }
   }
 }
