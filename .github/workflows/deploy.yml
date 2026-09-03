@@ -1,0 +1,54 @@
+name: Deploy InfraPulse Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync Repository Files to Remote Server
+        run: |
+          rsync -avz \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new" \
+            --exclude=".git" \
+            --exclude=".venv" \
+            --exclude="__pycache__" \
+            ./ \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/infrapulse/ || true
+
+      - name: Install Dependencies on Remote Server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "/opt/infrapulse/.venv/bin/pip install --upgrade pip && /opt/infrapulse/.venv/bin/pip install -r /opt/infrapulse/requirements.txt" || true
+
+      - name: Restart Service and Reload Caddy
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "systemctl restart infrapulse && systemctl reload caddy && systemctl status infrapulse --no-pager" || true
+
+      - name: Verify Health Endpoint
+        run: |
+          RESPONSE=$(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "curl -g -s http://[::1]:8003/health" || true)
+          echo "Health Check Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"status":"ok"'; then
+            echo "Health check succeeded!"
+          else
+            echo "::error::Health check failed! Response: $RESPONSE"
+            exit 1
+          fi
