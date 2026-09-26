@@ -6,7 +6,8 @@ import importlib.util
 from pathlib import Path
 import numpy as np
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+# scripts live in archive/benchmarks/, so the repo root is two levels up
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SHAURYAS_REPO = PROJECT_ROOT / "maratha_model" / "scratch" / "shauryas_repo"
 if not SHAURYAS_REPO.exists():
     SHAURYAS_REPO = Path("/home/bittu/.gemini/antigravity-cli/brain/f1439725-9acf-4d55-abe6-0c8042d0399f/scratch/shauryas_repo")

@@ -5,7 +5,8 @@ import json
 import importlib.util
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+# scripts live in archive/benchmarks/, so the repo root is two levels up
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 MARATHA_BACKEND = PROJECT_ROOT / "maratha_model" / "backend"
 MAIN_TEST_DIR = PROJECT_ROOT / "main_test"
 

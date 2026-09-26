@@ -4,7 +4,8 @@ import time
 from pathlib import Path
 
 # Add project root and maratha_model backend to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent
+# scripts live in archive/benchmarks/, so the repo root is two levels up
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 MARATHA_BACKEND = PROJECT_ROOT / "maratha_model" / "backend"
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(MARATHA_BACKEND))
