@@ -1,0 +1,7 @@
+# Model checkpoints exceed GitHub's 100 MiB per-file limit, so they are
+# stored with Git LFS. The LFS objects themselves live in this repo's
+# LFS storage and are downloaded by GitHub Apps for standard repos.
+app/model/checkpoints/*.pt filter=lfs diff=lfs merge=lfs -text
+
+# Vendor assets are plain files
+app/static/vendor/** -text
