@@ -1,0 +1,97 @@
+{
+  "total_images_evaluated": 120,
+  "total_duration_sec": 82.25,
+  "nawabs_model": {
+    "accuracy": 80.0,
+    "latency_mean": 504.18,
+    "latency_p95": 730.42,
+    "per_class": {
+      "cracked_tiles": {
+        "precision": 68.18,
+        "recall": 100.0,
+        "f1": 81.08,
+        "support": 30
+      },
+      "paint_peeling": {
+        "precision": 73.08,
+        "recall": 63.33,
+        "f1": 67.86,
+        "support": 30
+      },
+      "spalling": {
+        "precision": 90.0,
+        "recall": 90.0,
+        "f1": 90.0,
+        "support": 30
+      },
+      "stagnant_water": {
+        "precision": 100.0,
+        "recall": 66.67,
+        "f1": 80.0,
+        "support": 30
+      }
+    }
+  },
+  "maratha_tta_model": {
+    "accuracy": 50.83,
+    "latency_mean": 126.87,
+    "latency_p95": 187.3,
+    "per_class": {
+      "cracked_tiles": {
+        "precision": 7.14,
+        "recall": 6.67,
+        "f1": 6.9,
+        "support": 30
+      },
+      "paint_peeling": {
+        "precision": 21.62,
+        "recall": 26.67,
+        "f1": 23.88,
+        "support": 30
+      },
+      "spalling": {
+        "precision": 90.32,
+        "recall": 93.33,
+        "f1": 91.8,
+        "support": 30
+      },
+      "stagnant_water": {
+        "precision": 95.83,
+        "recall": 76.67,
+        "f1": 85.19,
+        "support": 30
+      }
+    }
+  },
+  "maratha_single_model": {
+    "accuracy": 50.83,
+    "latency_mean": 38.2,
+    "latency_p95": 74.16,
+    "per_class": {
+      "cracked_tiles": {
+        "precision": 7.69,
+        "recall": 6.67,
+        "f1": 7.14,
+        "support": 30
+      },
+      "paint_peeling": {
+        "precision": 25.64,
+        "recall": 33.33,
+        "f1": 28.99,
+        "support": 30
+      },
+      "spalling": {
+        "precision": 84.38,
+        "recall": 90.0,
+        "f1": 87.1,
+        "support": 30
+      },
+      "stagnant_water": {
+        "precision": 95.65,
+        "recall": 73.33,
+        "f1": 83.02,
+        "support": 30
+      }
+    }
+  }
+}

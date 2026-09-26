@@ -1,0 +1,306 @@
+[
+  {
+    "file": "Untitled.jpg",
+    "expected": "unknown",
+    "nawabs": {
+      "defect": "paint_peeling",
+      "category": "Performance",
+      "confidence": 55.6,
+      "severity": 39.2,
+      "extent": 62.7,
+      "priority_score": 1038.4,
+      "latency_ms": 370.9
+    },
+    "maratha": {
+      "defect": "cracked_tiles",
+      "confidence": 68.8,
+      "severity": 18.8,
+      "latency_ms": 137.9
+    }
+  },
+  {
+    "file": "crack.jpg",
+    "expected": "cracked_tiles",
+    "nawabs": {
+      "defect": "cracked_tiles",
+      "category": "Performance",
+      "confidence": 33.1,
+      "severity": 43.7,
+      "extent": 73.2,
+      "priority_score": 1044.8,
+      "latency_ms": 311.9
+    },
+    "maratha": {
+      "defect": "cracked_tiles",
+      "confidence": 75.5,
+      "severity": 98.0,
+      "latency_ms": 72.7
+    }
+  },
+  {
+    "file": "paint.jpg",
+    "expected": "paint_peeling",
+    "nawabs": {
+      "defect": "paint_peeling",
+      "category": "Performance",
+      "confidence": 32.5,
+      "severity": 36.2,
+      "extent": 82.8,
+      "priority_score": 1042.9,
+      "latency_ms": 276.4
+    },
+    "maratha": {
+      "defect": "paint_peeling",
+      "confidence": 99.1,
+      "severity": 95.6,
+      "latency_ms": 75.7
+    }
+  },
+  {
+    "file": "paint.png",
+    "expected": "paint_peeling",
+    "nawabs": {
+      "defect": "paint_peeling",
+      "category": "Performance",
+      "confidence": 34.2,
+      "severity": 35.2,
+      "extent": 78.7,
+      "priority_score": 1041.2,
+      "latency_ms": 269.9
+    },
+    "maratha": {
+      "defect": "paint_peeling",
+      "confidence": 97.8,
+      "severity": 98.0,
+      "latency_ms": 84.2
+    }
+  },
+  {
+    "file": "paint1.jpg",
+    "expected": "paint_peeling",
+    "nawabs": {
+      "defect": "paint_peeling",
+      "category": "Performance",
+      "confidence": 41.0,
+      "severity": 31.3,
+      "extent": 44.5,
+      "priority_score": 1029.0,
+      "latency_ms": 304.1
+    },
+    "maratha": {
+      "defect": "cracked_tiles",
+      "confidence": 56.8,
+      "severity": 52.5,
+      "latency_ms": 132.0
+    }
+  },
+  {
+    "file": "spalling.jpg",
+    "expected": "spalling",
+    "nawabs": {
+      "defect": "spalling",
+      "category": "Structural",
+      "confidence": 39.3,
+      "severity": 37.5,
+      "extent": 71.4,
+      "priority_score": 3040.2,
+      "latency_ms": 257.2
+    },
+    "maratha": {
+      "defect": "spalling",
+      "confidence": 86.6,
+      "severity": 98.0,
+      "latency_ms": 72.8
+    }
+  },
+  {
+    "file": "train_spalling_0037.jpg",
+    "expected": "spalling",
+    "nawabs": {
+      "defect": "spalling",
+      "category": "Structural",
+      "confidence": 50.9,
+      "severity": 42.0,
+      "extent": 68.1,
+      "priority_score": 3041.4,
+      "latency_ms": 267.8
+    },
+    "maratha": {
+      "defect": "spalling",
+      "confidence": 67.6,
+      "severity": 91.0,
+      "latency_ms": 68.7
+    }
+  },
+  {
+    "file": "train_spalling_0038.jpg",
+    "expected": "spalling",
+    "nawabs": {
+      "defect": "spalling",
+      "category": "Structural",
+      "confidence": 53.5,
+      "severity": 42.2,
+      "extent": 74.2,
+      "priority_score": 3043.4,
+      "latency_ms": 279.4
+    },
+    "maratha": {
+      "defect": "spalling",
+      "confidence": 94.7,
+      "severity": 69.4,
+      "latency_ms": 79.5
+    }
+  },
+  {
+    "file": "train_spalling_0039.jpg",
+    "expected": "spalling",
+    "nawabs": {
+      "defect": "spalling",
+      "category": "Structural",
+      "confidence": 40.0,
+      "severity": 34.6,
+      "extent": 61.9,
+      "priority_score": 3035.9,
+      "latency_ms": 252.5
+    },
+    "maratha": {
+      "defect": "spalling",
+      "confidence": 80.8,
+      "severity": 98.0,
+      "latency_ms": 71.7
+    }
+  },
+  {
+    "file": "train_spalling_0040.jpg",
+    "expected": "spalling",
+    "nawabs": {
+      "defect": "spalling",
+      "category": "Structural",
+      "confidence": 57.3,
+      "severity": 47.9,
+      "extent": 71.1,
+      "priority_score": 3045.3,
+      "latency_ms": 250.1
+    },
+    "maratha": {
+      "defect": "spalling",
+      "confidence": 99.6,
+      "severity": 98.0,
+      "latency_ms": 77.6
+    }
+  },
+  {
+    "file": "train_stagnant_water_0048.jpg",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "stagnant_water",
+      "category": "Functional",
+      "confidence": 28.5,
+      "severity": 39.1,
+      "extent": 64.6,
+      "priority_score": 2039.4,
+      "latency_ms": 262.5
+    },
+    "maratha": {
+      "defect": "stagnant_water",
+      "confidence": 85.3,
+      "severity": 95.0,
+      "latency_ms": 73.2
+    }
+  },
+  {
+    "file": "train_stagnant_water_0049.jpg",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "stagnant_water",
+      "category": "Functional",
+      "confidence": 29.2,
+      "severity": 34.8,
+      "extent": 63.8,
+      "priority_score": 2037.0,
+      "latency_ms": 249.1
+    },
+    "maratha": {
+      "defect": "stagnant_water",
+      "confidence": 47.5,
+      "severity": 95.0,
+      "latency_ms": 72.7
+    }
+  },
+  {
+    "file": "train_stagnant_water_0050.jpg",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "stagnant_water",
+      "category": "Functional",
+      "confidence": 32.8,
+      "severity": 36.6,
+      "extent": 79.2,
+      "priority_score": 2042.6,
+      "latency_ms": 248.0
+    },
+    "maratha": {
+      "defect": "stagnant_water",
+      "confidence": 99.1,
+      "severity": 95.0,
+      "latency_ms": 65.3
+    }
+  },
+  {
+    "file": "water.jpg",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "stagnant_water",
+      "category": "Functional",
+      "confidence": 40.8,
+      "severity": 41.4,
+      "extent": 69.4,
+      "priority_score": 2042.0,
+      "latency_ms": 295.5
+    },
+    "maratha": {
+      "defect": "stagnant_water",
+      "confidence": 80.4,
+      "severity": 72.4,
+      "latency_ms": 124.8
+    }
+  },
+  {
+    "file": "water.webp",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "stagnant_water",
+      "category": "Functional",
+      "confidence": 34.7,
+      "severity": 32.6,
+      "extent": 57.3,
+      "priority_score": 2034.0,
+      "latency_ms": 354.9
+    },
+    "maratha": {
+      "defect": "paint_peeling",
+      "confidence": 78.1,
+      "severity": 68.2,
+      "latency_ms": 165.2
+    }
+  },
+  {
+    "file": "water1.webp",
+    "expected": "stagnant_water",
+    "nawabs": {
+      "defect": "paint_peeling",
+      "category": "Performance",
+      "confidence": 28.5,
+      "severity": 27.4,
+      "extent": 71.2,
+      "priority_score": 1035.1,
+      "latency_ms": 271.7
+    },
+    "maratha": {
+      "defect": "stagnant_water",
+      "confidence": 84.9,
+      "severity": 48.7,
+      "latency_ms": 92.8
+    }
+  }
+]

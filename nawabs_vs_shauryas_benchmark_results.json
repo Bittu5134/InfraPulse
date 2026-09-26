@@ -1,0 +1,324 @@
+{
+  "dataset_eval": {
+    "total_images": 120,
+    "nawabs": {
+      "accuracy": 80.0,
+      "latency_mean": 596.05,
+      "latency_p95": 788.71,
+      "per_class": {
+        "cracked_tiles": {
+          "precision": 68.18,
+          "recall": 100.0,
+          "f1": 81.08,
+          "support": 30
+        },
+        "paint_peeling": {
+          "precision": 73.08,
+          "recall": 63.33,
+          "f1": 67.86,
+          "support": 30
+        },
+        "spalling": {
+          "precision": 90.0,
+          "recall": 90.0,
+          "f1": 90.0,
+          "support": 30
+        },
+        "stagnant_water": {
+          "precision": 100.0,
+          "recall": 66.67,
+          "f1": 80.0,
+          "support": 30
+        }
+      }
+    },
+    "shauryas": {
+      "accuracy": 59.17,
+      "latency_mean": 424.58,
+      "latency_p95": 488.04,
+      "per_class": {
+        "cracked_tiles": {
+          "precision": 5.56,
+          "recall": 3.33,
+          "f1": 4.17,
+          "support": 30
+        },
+        "paint_peeling": {
+          "precision": 31.71,
+          "recall": 43.33,
+          "f1": 36.62,
+          "support": 30
+        },
+        "spalling": {
+          "precision": 93.75,
+          "recall": 100.0,
+          "f1": 96.77,
+          "support": 30
+        },
+        "stagnant_water": {
+          "precision": 93.1,
+          "recall": 90.0,
+          "f1": 91.53,
+          "support": 30
+        }
+      }
+    }
+  },
+  "main_test_eval": [
+    {
+      "file": "Untitled.jpg",
+      "expected": "unknown",
+      "nawabs": {
+        "defect": "paint_peeling",
+        "confidence": 55.6,
+        "severity": 39.2,
+        "extent": 62.7,
+        "priority_score": 1038.4
+      },
+      "shauryas": {
+        "defect": "paint_peeling",
+        "confidence": 96.8,
+        "severity": 14.2,
+        "extent": 44.2
+      }
+    },
+    {
+      "file": "crack.jpg",
+      "expected": "cracked_tiles",
+      "nawabs": {
+        "defect": "cracked_tiles",
+        "confidence": 33.1,
+        "severity": 43.7,
+        "extent": 73.2,
+        "priority_score": 1044.8
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 65.3,
+        "severity": 72.8,
+        "extent": 24.2
+      }
+    },
+    {
+      "file": "paint.jpg",
+      "expected": "paint_peeling",
+      "nawabs": {
+        "defect": "paint_peeling",
+        "confidence": 32.5,
+        "severity": 36.2,
+        "extent": 82.8,
+        "priority_score": 1042.9
+      },
+      "shauryas": {
+        "defect": "stagnant_water",
+        "confidence": 69.1,
+        "severity": 71.8,
+        "extent": 29.4
+      }
+    },
+    {
+      "file": "paint.png",
+      "expected": "paint_peeling",
+      "nawabs": {
+        "defect": "paint_peeling",
+        "confidence": 34.2,
+        "severity": 35.2,
+        "extent": 78.7,
+        "priority_score": 1041.2
+      },
+      "shauryas": {
+        "defect": "stagnant_water",
+        "confidence": 62.1,
+        "severity": 72.5,
+        "extent": 27.9
+      }
+    },
+    {
+      "file": "paint1.jpg",
+      "expected": "paint_peeling",
+      "nawabs": {
+        "defect": "paint_peeling",
+        "confidence": 41.0,
+        "severity": 31.3,
+        "extent": 44.5,
+        "priority_score": 1029.0
+      },
+      "shauryas": {
+        "defect": "paint_peeling",
+        "confidence": 97.0,
+        "severity": 31.1,
+        "extent": 37.2
+      }
+    },
+    {
+      "file": "spalling.jpg",
+      "expected": "spalling",
+      "nawabs": {
+        "defect": "spalling",
+        "confidence": 39.3,
+        "severity": 37.5,
+        "extent": 71.4,
+        "priority_score": 3040.2
+      },
+      "shauryas": {
+        "defect": "cracked_tiles",
+        "confidence": 67.0,
+        "severity": 71.5,
+        "extent": 49.3
+      }
+    },
+    {
+      "file": "train_spalling_0037.jpg",
+      "expected": "spalling",
+      "nawabs": {
+        "defect": "spalling",
+        "confidence": 50.9,
+        "severity": 42.0,
+        "extent": 68.1,
+        "priority_score": 3041.4
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 98.2,
+        "severity": 61.9,
+        "extent": 43.2
+      }
+    },
+    {
+      "file": "train_spalling_0038.jpg",
+      "expected": "spalling",
+      "nawabs": {
+        "defect": "spalling",
+        "confidence": 53.5,
+        "severity": 42.2,
+        "extent": 74.2,
+        "priority_score": 3043.4
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 98.3,
+        "severity": 47.9,
+        "extent": 54.4
+      }
+    },
+    {
+      "file": "train_spalling_0039.jpg",
+      "expected": "spalling",
+      "nawabs": {
+        "defect": "spalling",
+        "confidence": 40.0,
+        "severity": 34.6,
+        "extent": 61.9,
+        "priority_score": 3035.9
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 98.9,
+        "severity": 68.9,
+        "extent": 26.9
+      }
+    },
+    {
+      "file": "train_spalling_0040.jpg",
+      "expected": "spalling",
+      "nawabs": {
+        "defect": "spalling",
+        "confidence": 57.3,
+        "severity": 47.9,
+        "extent": 71.1,
+        "priority_score": 3045.3
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 98.7,
+        "severity": 70.9,
+        "extent": 35.6
+      }
+    },
+    {
+      "file": "train_stagnant_water_0048.jpg",
+      "expected": "stagnant_water",
+      "nawabs": {
+        "defect": "stagnant_water",
+        "confidence": 28.5,
+        "severity": 39.1,
+        "extent": 64.6,
+        "priority_score": 2039.4
+      },
+      "shauryas": {
+        "defect": "stagnant_water",
+        "confidence": 95.7,
+        "severity": 70.4,
+        "extent": 49.2
+      }
+    },
+    {
+      "file": "train_stagnant_water_0049.jpg",
+      "expected": "stagnant_water",
+      "nawabs": {
+        "defect": "stagnant_water",
+        "confidence": 29.2,
+        "severity": 34.8,
+        "extent": 63.8,
+        "priority_score": 2037.0
+      },
+      "shauryas": {
+        "defect": "stagnant_water",
+        "confidence": 95.9,
+        "severity": 57.4,
+        "extent": 50.8
+      }
+    },
+    {
+      "file": "train_stagnant_water_0050.jpg",
+      "expected": "stagnant_water",
+      "nawabs": {
+        "defect": "stagnant_water",
+        "confidence": 32.8,
+        "severity": 36.6,
+        "extent": 79.2,
+        "priority_score": 2042.6
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 63.4,
+        "severity": 74.7,
+        "extent": 34.0
+      }
+    },
+    {
+      "file": "water.jpg",
+      "expected": "stagnant_water",
+      "nawabs": {
+        "defect": "stagnant_water",
+        "confidence": 40.8,
+        "severity": 41.4,
+        "extent": 69.4,
+        "priority_score": 2042.0
+      },
+      "shauryas": {
+        "defect": "stagnant_water",
+        "confidence": 97.0,
+        "severity": 71.7,
+        "extent": 59.5
+      }
+    },
+    {
+      "file": "water.webp",
+      "expected": "stagnant_water",
+      "nawabs": {
+        "defect": "stagnant_water",
+        "confidence": 34.7,
+        "severity": 32.6,
+        "extent": 57.3,
+        "priority_score": 2034.0
+      },
+      "shauryas": {
+        "defect": "spalling",
+        "confidence": 79.5,
+        "severity": 82.6,
+        "extent": 32.3
+      }
+    }
+  ]
+}

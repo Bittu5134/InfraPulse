@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# DB (will be created fresh on startup)
+infrapulse.db
+
+# User uploads (runtime data)
+app/data/uploads/*
+!app/data/uploads/.gitkeep
+
+# Training datasets — model is already trained, weights committed via LFS
+app/data/dataset/
+app/data/dataset_extra/
+app/data/DATASET_NOTES.md
+
+# Training-only scripts (not needed at runtime)
+app/ml/train.py
+app/ml/evaluate.py
+
+# Backup weights
+app/models_weights/*.bak
+
+# OS
+.DS_Store

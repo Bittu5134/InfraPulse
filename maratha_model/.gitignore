@@ -1,0 +1,28 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+backend/infrapulse.db
+backend/app/data/uploads/*
+!backend/app/data/uploads/.gitkeep
+
+# dataset images (large; document source instead of committing raw images if too big)
+# backend/app/data/dataset/**/*.jpg
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# env
+.env
+frontend/.env
+backend/.env
+
+# OS
+.DS_Store
+
+# AI assistant history & logs
+claude_history/
+.claude/
+.cursor/
+

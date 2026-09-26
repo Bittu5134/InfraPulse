@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+*.pyo
+infrapulse.db
+app/data/dataset
+app/data/dataset_extra
+app/data/DATASET_NOTES.md
+app/ml/train.py
+app/ml/evaluate.py
+app/data/uploads/*
+!app/data/uploads/.gitkeep
