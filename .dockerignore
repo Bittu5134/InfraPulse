@@ -1,7 +1,13 @@
+# Version control & local env
 .git
 .gitignore
+.github
 .venv
 venv
+ENV
+env
+
+# Python caches
 __pycache__
 *.pyc
 *.pyo
@@ -9,10 +15,44 @@ __pycache__
 .pytest_cache
 .coverage
 htmlcov
+
+# Local database (mounted as a volume by docker-compose)
 *.db
 *.sqlite3
-docs/temp
+*.sqlite
+
+# Environment files
+.env
+.env.local
+.env.example
+
+# Documentation & reports - not needed at runtime
+archive/
+docs/
+*.md
+!requirements.txt
+*.pdf
+*.tex
 *.zip
 *.tar.gz
-*.pdf
+
+# ML datasets (large, regenerable - see archive/DATASET.md)
+app/model/data/
+data/
+
+# User uploads (created at runtime by the app)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Test scratch
+temp/
+.temp/
+junk/
+main_test/
+
+# OS / editor
 .DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp

@@ -22,6 +22,7 @@
 8. [Live Portals & Staff Workflows](#live-portals--staff-workflows)
 9. [Installation & Deployment Guide](#installation--deployment-guide)
 10. [Verification & Test Results](#verification--test-results)
+11. [Additional Documentation](#additional-documentation)
 
 ---
 
@@ -280,6 +281,31 @@ tests/test_app.py::test_custom_playground_page_and_analysis PASSED       [100%]
 
 ======================== 6 passed in 6.83s =========================
 ```
+
+> **Note on the benchmark numbers above:** the underlying image datasets are no longer
+> committed to this repository. The trained checkpoints that produce these results *are*
+> included and load correctly, so the app and its `/test/playground` route work as-is. The
+> `/test` holdout-split page shows a "No Images Found" card until the dataset is restored —
+> see [`archive/DATASET.md`](archive/DATASET.md) for how to bring the images back.
+
+---
+
+## Additional Documentation
+
+Full reports, comparison scripts and the ML training pipeline live in
+[`archive/`](archive/README.md). None of it is required to run the app.
+
+| Document | Purpose |
+| :--- | :--- |
+| [`archive/docs/DESIGN_DOCUMENT.md`](archive/docs/DESIGN_DOCUMENT.md) | System design, data flow and portal architecture |
+| [`archive/docs/InfraPulse_Technical_Report.pdf`](archive/docs/InfraPulse.pdf) | Rendered technical report (LaTeX source alongside it) |
+| [`archive/docs/PRODUCTION_ARCHITECTURE_REPORT.md`](archive/docs/PRODUCTION_ARCHITECTURE_REPORT.md) | Deployment and infrastructure notes |
+| [`archive/docs/BENCHMARK_AND_CONSENSUS_REPORT.md`](archive/docs/BENCHMARK_AND_CONSENSUS_REPORT.md) | How the consensus weights were derived |
+| [`archive/docs/IN_DEPTH_CODE_AND_ARCHITECTURE_MANUAL.md`](archive/docs/IN_DEPTH_CODE_AND_ARCHITECTURE_MANUAL.md) | Module-by-module code walkthrough |
+| [`archive/docs/TEAM_PRESENTATION_GUIDE.md`](archive/docs/TEAM_PRESENTATION_GUIDE.md) | Presentation walkthrough |
+| [`archive/DATASET.md`](archive/DATASET.md) | Which image datasets were removed and how to restore them |
+| [`archive/ml-training/`](archive/ml-training/README.md) | Training / evaluation pipeline that produced the checkpoints |
+| [`archive/benchmarks/`](archive/benchmarks/README.md) | Cross-project comparison scripts and their results |
 
 ---
 *Built for Takneek '26 — IIT Kanpur Students' Gymkhana.*
