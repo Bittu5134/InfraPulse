@@ -31,15 +31,15 @@ temp/
 .temp/
 
 # ML Training & Evaluation Datasets & Checkpoint Archive
+#
+# Datasets are large (~4.2GB) and regenerable - see archive/DATASET.md.
+# The five ensemble checkpoints are NOT regenerable, so all five must stay
+# tracked: model_service.py loads each one by name, and silently falls back
+# to the EfficientNet baseline if any is missing.
 data/
 app/model/data/
 app/model/checkpoints/archive/
 app/model/checkpoints/checkpoints.zip
-app/model/checkpoints/swin_tiny_infrapulse.pt
-app/model/checkpoints/multitask_mtl_infrapulse.pt
-!app/model/checkpoints/convnext_tiny_infrapulse.pt
-!app/model/checkpoints/infrapulse_int8_quantized.pt
-!app/model/checkpoints/best_infrapulse_v1.pt
 
 # IDE / Editor files
 .vscode/
@@ -50,9 +50,14 @@ app/model/checkpoints/multitask_mtl_infrapulse.pt
 
 # OS generated files
 Thumbs.db
+.DS_Store
 
-# Disposable scratch and junk files
+# Disposable scratch files
 junk/
-# Git LFS tool files (ignore binary and tarball)
+temp/
+.temp/
+main_test/
+
+# Git LFS installer (not a project dependency)
 git-lfs-3.5.1/
 git-lfs.tar.gz

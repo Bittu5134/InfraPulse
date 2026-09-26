@@ -51,7 +51,7 @@ Buildings, hostels, hospitals, and public infrastructure suffer from unreported 
 | **1. Detection & Classification** | **30%** | • Correct visible defect identification (10%)<br>• Correct category mapping (10%)<br>• Automatic queue routing (10%) | **100% Fully Automated**<br>• Calibrated Weighted Consensus AI<br>• Zero user selection required |
 | **2. Priority Queue Logic** | **40%** | • Documented priority methodology (15%)<br>• Correct queue ordering (15%)<br>• Automatic live queue incorporation (10%) | **100% Compliant**<br>• $(\text{Severity} \times 5) + (\text{Extent} \times 3)$ formula<br>• Category Tier Base (3000/2000/1000)<br>• Capped Time Bonus (max 5 pts tie-breaker) |
 | **3. Usability & Integration** | **20%** | • Registering & accessing complaints (5%)<br>• User-Staff portal integration (5%)<br>• Status tracking (5%)<br>• UI/UX Design (5%) | **100% Integrated**<br>• Responsive Tailwind / Bootstrap UI<br>• Real-time SSE live updates<br>• Full state lifecycle: `Submitted` $\rightarrow$ `Assigned` $\rightarrow$ `In Progress` $\rightarrow$ `Resolved` |
-| **4. Documentation** | **10%** | • Approach (2%), Detection Logic (2%)<br>• Priority Ranking (2%), Evaluation (2%)<br>• Limitations (1%), Future Improvements (1%) | **Exhaustive Documentation**<br>• Detailed in `README.md` & [`docs/DESIGN_DOCUMENT.md`](docs/DESIGN_DOCUMENT.md) |
+| **4. Documentation** | **10%** | • Approach (2%), Detection Logic (2%)<br>• Priority Ranking (2%), Evaluation (2%)<br>• Limitations (1%), Future Improvements (1%) | **Exhaustive Documentation**<br>• Detailed in `README.md` & [`archive/docs/DESIGN_DOCUMENT.md`](archive/docs/DESIGN_DOCUMENT.md) |
 
 ---
 
